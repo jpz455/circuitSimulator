@@ -16,3 +16,4 @@ class Geometry:
         self.Dbc = np.sqrt((self.xb - self.xc) ** 2 + (self.yb - self.yc) ** 2)
         self.Dca = np.sqrt((self.xc - self.xa) ** 2 + (self.yc - self.ya) ** 2)
         self.Deq = np.power((self.Dab * self.Dbc * self.Dca),1/3)
+        return self.Deq
