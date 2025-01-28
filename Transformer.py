@@ -16,3 +16,14 @@ class Transformer():
     def calc_y(self):
         self.calc_z()
         self.admittance = 1/self.impedance
+    def calc_x(self):
+        np.imag(self.calc_z())
+    def calc_r(self):
+        np.real(self.calc_z())
+    def calc_g(self):
+        np.real(self.calc_z())
+    def calc_b(self):
+        np.imag(self.calc_z())
+    def calc_yprim(self):
+        ypp = self.y
+        yps = self.
