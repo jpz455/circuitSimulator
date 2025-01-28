@@ -5,6 +5,8 @@ class Bus:
         self.name = name
         self.base_kv = base_kv
         Bus.numBus += 1  # Increment the class variable
+        self.index = Bus.numBus
+
 
 
 
