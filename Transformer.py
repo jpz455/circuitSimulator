@@ -10,6 +10,7 @@ class Transformer():
         self.x_over_r_ratio = x_over_r_ratio
         self.z = self.calc_z()
         self.y = self.calc_y()
+        self.yprim: list[float] = []
 
     def calc_z(self):
         self.impedance_percent = self.impedance_percent * np.exp(1j * np.arctan(self.x_over_r_ratio))
@@ -26,4 +27,12 @@ class Transformer():
         np.imag(self.calc_z())
     def calc_yprim(self):
         ypp = self.y
-        yps = self.
+        yps = -1 * self.y
+        ysp = -1 * self.y
+        yss = self.y
+        self.yprim = [ypp, yps, ysp, yss]
+
+    def print_yprim(self):
+        print(self.yprim)
+
+
