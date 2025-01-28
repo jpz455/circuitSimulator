@@ -8,15 +8,19 @@ class Transformer():
         self.power_rating = power_rating
         self.impedance_percent = impedance_percent
         self.x_over_r_ratio = x_over_r_ratio
-        self.z = self.calc_z()
-        self.y = self.calc_y()
-        self.yprim: list[float] = []
+        self.z: complex = self.impedance_percent * np.exp(1j * np.arctan(self.x_over_r_ratio))
+        self.y: complex = 1/self.z
+        self.g: float
+        self.b: float
+        self.r: float
+        self.x: float
+        self.yprim: list[complex] = []
 
     def calc_z(self):
         self.impedance_percent = self.impedance_percent * np.exp(1j * np.arctan(self.x_over_r_ratio))
     def calc_y(self):
         self.calc_z()
-        self.admittance = 1/self.impedance
+        self.y = 1/self.z
     def calc_x(self):
         np.imag(self.calc_z())
     def calc_r(self):
@@ -36,3 +40,9 @@ class Transformer():
         print(self.yprim)
 
 
+print("test")
+xfmr = Transformer("xfmr", "bus1", "bus2", 100, 0.1, 0.1)
+xfmr.calc_z()
+xfmr.calc_y()
+xfmr.calc_yprim()
+xfmr.print_yprim()
