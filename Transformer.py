@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+from typing import Dict
 
 class Transformer():
     def __init__(self, name: str, bus1: str, bus2: str, power_rating: float, impedance_percent: float, x_over_r_ratio: float):
@@ -14,7 +16,8 @@ class Transformer():
         self.b: float
         self.r: float
         self.x: float
-        self.yprim: list[complex] = []
+        self.yprim: list[float] = []
+        self.matrix: Dict[float, float] = {}
 
     def calc_z(self):
         self.impedance_percent = self.impedance_percent * np.exp(1j * np.arctan(self.x_over_r_ratio))
@@ -35,14 +38,11 @@ class Transformer():
         ysp = -1 * self.y
         yss = self.y
         self.yprim = [ypp, yps, ysp, yss]
+        self.matrix = {
+            "" : [ypp, yps],
+            "" : [ysp, yss]
+        }
 
     def print_yprim(self):
-        print(self.yprim)
-
-
-print("test")
-xfmr = Transformer("xfmr", "bus1", "bus2", 100, 0.1, 0.1)
-xfmr.calc_z()
-xfmr.calc_y()
-xfmr.calc_yprim()
-xfmr.print_yprim()
+        printout = pd.DataFrame(self.matrix)
+        print(printout.to_string(index = False))

@@ -12,11 +12,11 @@ class TransmissionLine:
         self.y_admittance_matrix = self.calculate_y_matrix()
 
 
-    def calculate_series_impedance(self):
+def calculate_series_impedance(self):
 
-    def calculate_shunt_admittance(self):
+def calculate_shunt_admittance(self):
 
-    def calculate_y_matrix(self):
+def calculate_y_matrix(self):
 
 
 
