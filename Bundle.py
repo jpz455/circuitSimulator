@@ -20,6 +20,7 @@ class Bundle:
         self.DSC = self.calculate_DSC()
 
     def calculate_DSL(self):
+
         if self.num_conductors == 1:
             return self.conductor.GMR
         elif self.num_conductors == 2:
@@ -32,6 +33,7 @@ class Bundle:
             raise ValueError("Unexpected number of conductors: greater than 4.")
 
     def calculate_DSC(self):
+
         if self.num_conductors == 1:
             return self.conductor.radius
         elif self.num_conductors == 2:
@@ -42,3 +44,8 @@ class Bundle:
             return 1.0941 * (self.conductor.radius * (self.spacing ** 3)) ** (1 / 4)
         else:
             raise ValueError("Unexpected number of conductors: greater than 4.")
+
+conductor1 = Conductor("Partridge", 0.642, 0.0217,0.385, 460)
+bundle1 = Bundle("Bundle 1", 2, 1.5, conductor1)
+print(bundle1.name, bundle1.num_conductors,bundle1.spacing, bundle1.conductor.name)
+print(bundle1.DSC, bundle1.DSL)
