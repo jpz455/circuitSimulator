@@ -17,7 +17,6 @@ class TransmissionLine:
 
 
     def calculate_series_impedance(self):
-        
         resistance_per_mile = self.bundle.resistance 
         #X = 2pif * (2e-7*ln(Deq/Dsl)*1609
         reactance_per_mile = 2*np.pi*60*2*np.power(10,-7)*np.log(self.geometry.Deq/self.bundle.DSL)*1609
