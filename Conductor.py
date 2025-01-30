@@ -7,6 +7,3 @@ class Conductor:
         self.amp = amp
         self.radius = self.diameter/24 #converting diameter to radius in inches
 
-
-conductor1 = Conductor("Partridge", 0.642, 0.0217,0.385, 460)
-print(conductor1.name, conductor1.diameter,conductor1.GMR, conductor1.resistance, conductor1.amp)

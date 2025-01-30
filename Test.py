@@ -1,11 +1,8 @@
-from setuptools import Require
-
-import Bundle as bundle
-import Bus as bus
-import TransmissionLine as line
-import Transformer as xfmr
-import numpy as np
-
+from Bundle import Bundle as Bundle
+from Conductor import Conductor as Conductor
+from Bus import Bus as Bus
+from Geometry import Geometry as Geometry
+from TransmissionLine import TransmissionLine as TransmissionLine
 from Transformer import Transformer
 
 #validate transformer
@@ -24,3 +21,25 @@ print("y: ", xfmr1.y, "; should be ")
 xfmr1.calc_yprim()
 xfmr1.print_yprim()
 
+#**********CONDUCTOR VALIDATION******************
+conductor1 = Conductor("Partridge", 0.642, 0.0217,0.385, 460)
+print(conductor1.name, conductor1.diameter,conductor1.GMR, conductor1.resistance, conductor1.amp)
+#*********BUS VALIDATION**************************
+bus1 = (Bus("Bus 1", 20))
+bus2 = Bus("Bus 2", 230)
+print(bus1.name, bus1.base_kv, bus1.index)
+print(bus2.name, bus2.base_kv, bus2.index)
+#************BUNDLE VALIDATION**********************
+bundle1 = Bundle("Bundle 1", 2, 1.5, conductor1)
+print(bundle1.name, bundle1.num_conductors,bundle1.spacing, bundle1.conductor.name)
+print(bundle1.DSC, bundle1.DSL)
+#*********GEOMETRY VALIDATION***************
+geometry1 = Geometry("Geometry 1", 0, 0, 18.5, 0,37, 0)
+print(geometry1.name, geometry1.xa, geometry1.ya,geometry1.xb, geometry1.yb, geometry1.xc, geometry1.yc)
+print(geometry1.Deq)
+#*******************TRANSMISSION LINE VALIDATION************
+line1 = TransmissionLine("Line 1", bus1, bus2,bundle1, geometry1, 10)
+print(line1.name, line1.bus1.name, line1.bus2.name,line1.length)
+print(line1.z_base, line1.y_base)
+print(line1.Z, line1.B, line1.Y)
+print(line1.y_matrix)
