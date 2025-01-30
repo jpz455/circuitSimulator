@@ -10,7 +10,7 @@ class Transformer():
         self.power_rating = power_rating
         self.impedance_percent = impedance_percent
         self.x_over_r_ratio = x_over_r_ratio
-        self.z: complex = self.impedance_percent * np.exp(1j * np.arctan(self.x_over_r_ratio))
+        self.z: complex = (self.impedance_percent/100) * np.exp(1j * np.arctan(self.x_over_r_ratio))
         self.y: complex = 1/self.z
         self.g: float
         self.b: float
@@ -20,7 +20,7 @@ class Transformer():
         self.matrix: Dict[float, float] = {}
 
     def calc_z(self):
-        self.impedance_percent = self.impedance_percent * np.exp(1j * np.arctan(self.x_over_r_ratio))
+        self.impedance_percent = (self.impedance_percent/100) * np.exp(1j * np.arctan(self.x_over_r_ratio))
     def calc_y(self):
         self.calc_z()
         self.y = 1/self.z
@@ -39,7 +39,7 @@ class Transformer():
         yss = self.y
         self.yprim = [ypp, yps, ysp, yss]
         self.matrix = {
-            "" : [ypp, yps],
+            "y matrix" : [ypp, yps],
             "" : [ysp, yss]
         }
 
