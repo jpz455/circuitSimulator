@@ -2,6 +2,7 @@ from Bundle import Bundle as Bundle
 from Bus import Bus as Bus
 from Geometry import Geometry as Geometry
 import numpy as np
+import pandas as pd
 
 from Conductor import Conductor
 
@@ -37,11 +38,18 @@ class TransmissionLine:
         y_prim[0,0] = y_prim[1,1] = self.Y + self.B /2
         y_prim[0,1] = y_prim[1,0] = -self.Y
         self.y_matrix = y_prim
+        self.matrix = {
+            "y matrix": [y_prim[0,0], y_prim[0,1]],
+            "": [y_prim[1,0], y_prim[1,1]]
+        }
+
 
     def calculate_base_values(self):
         self.z_base = self.bus1.base_kv**2/100e6   #using 100 MVA as default value for now
         self.y_base = 1/self.z_base
 
-
+    def print_yprim(self):
+        printout = pd.DataFrame(self.matrix)
+        print(printout.to_string(index = False))
 
 
