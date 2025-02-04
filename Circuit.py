@@ -3,8 +3,8 @@ from Transformer import Transformer
 from Geometry import Geometry
 from Conductor import Conductor
 from TransmissionLine import TransmissionLine
-from Settings import current_settings as current_settings
 from typing import Dict, List
+
 class Circuit:
     def __init__(self,name:str):
         self.name = name

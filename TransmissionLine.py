@@ -5,8 +5,6 @@ from Settings import current_settings as current_settings
 import numpy as np
 import pandas as pd
 
-from Conductor import Conductor
-
 
 class TransmissionLine:
 

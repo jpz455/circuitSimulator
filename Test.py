@@ -7,11 +7,13 @@ import numpy as np
 from Transformer import Transformer
 
 #************TRANSFORMER VALIDATION***********************#
-xfmr1 = Transformer("T1", "bus1", "bus2", 124, 8.5, 10)
+bus1 = (Bus("Bus 1", 20))
+bus2 = Bus("Bus 2", 230)
+xfmr1 = Transformer("T1", bus1, bus2, 124, 8.5, 10)
 print("Transformer Validation")
 print("name: ", xfmr1.name, "; should be T1")
-print("bus1: ", xfmr1.bus1, "; should be bus1")
-print("bus2: ", xfmr1.bus2, "; should be bus2")
+print("bus1: ", xfmr1.bus1.name, "; should be Bus 1")
+print("bus2: ", xfmr1.bus2.name, "; should be Bus 2")
 print("power rating: ", xfmr1.power_rating, "; should be 124")
 print("impedance percent: ", xfmr1.impedance_percent, "; should be 8.5")
 print("ratio: ", xfmr1.x_over_r_ratio, "; should be 10")
@@ -44,8 +46,6 @@ print("resistance:", conductor1.resistance, ";should be 0.385")
 print("amperage:", conductor1.amp, ";should be 460")
 print()
 #*********BUS VALIDATION**************************
-bus1 = (Bus("Bus 1", 20))
-bus2 = Bus("Bus 2", 230)
 print("Bus Validation")
 print("bus1 name:", bus1.name, "; should be Bus 1")
 print("bus1 base voltage:", bus1.base_kv, ";should be 20")

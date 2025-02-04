@@ -1,0 +1,129 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+skinparam ClassBackgroundColor #LemonChiffon
+
+class Circuit{
+    +name: str
+    +buses: Dict[str, Bus]
+    +transformers: Dict[str, Transformer]
+    +geometries: Dict[str, Geometry]
+    +conductors: Dict[str, Conductor]
+    +transmissionlines: Dict[str, TransmissionLine]
+
+    +add_bus(Bus)
+    +add_transformer(Transformer)
+    +add_geometry(Geometry)
+    +add_conductor(Conductor)
+    +add_transmissionline(TransmissionLine)
+    }
+
+class Bus {
+    +name: str
+    +v: float
+    +numBus: float
+    +index: float
+    }
+
+class Bundle {
+    +name: str
+    +spacing: float
+    +conductor: Conductor
+    +num_conductors: float
+    +resistance: float
+    +DSL: float
+    +DSC: float
+    +calculate_DSL(): float
+    +calculate_DSC(): float
+    }
+
+class Conductor {
+    +name: str
+    +diameter: float
+    +GMR: float
+    +resistance: float
+    +amp: float
+    +radius: float
+    }
+
+class Geometry{
+    +name: str
+    +xa: float
+    +ya: float
+    +xb: float
+    +yb: float
+    +xc: float
+    +yc: float
+    +Deq: float
+    +calculate_Deq(): float
+    }
+
+class Transformer {
+    +name: str
+    +bus1: Bus
+    +bus2: Bus
+    +power_rating: float
+    +impedance_percent: float
+    +x_over_r_ratio: float
+    +z: complex
+    +y: complex
+    +x: float
+    +r: float
+    +g: float
+    +b: float
+    +yprim: List[float]
+    +matrix: Dict[str, float]
+
+    +calc_z()
+    +calc_r()
+    +calc_x()
+    +calc_b()
+    +calc_g()
+    +calc_y()
+    +calc_in_pu()
+    +print_yprim()
+    }
+
+class TransmissionLine {
+    +name: str
+    +bus1: Bus
+    +bus2: Bus
+    +bundle: Bundle
+    +Geometry: Geometry
+    +length: float
+    +R: float
+    +X: float
+    +Z: float
+    +B: float
+    +Y: float
+    +y_matrix: List[complex]
+    +matrix: Dict[str, float]
+    +calculate_series_impedance()
+    +calculate_admittance()
+    +calculate_y_matrix()
+    +calculate_base_values()
+    +print_yprim()
+    }
+
+Circuit *-- Transformer
+Circuit *-- Bus
+Circuit *-- TransmissionLine
+Circuit *-- Geometry
+Circuit *-- Conductor
+
+TransmissionLine *-- Geometry
+TransmissionLine *-- Bundle
+TransmissionLine *-- Bus
+
+Bundle *-- Conductor
+
+Transformer *-- Bus
+
+
+
+
+
+
+
+
+@enduml
