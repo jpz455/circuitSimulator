@@ -1,7 +1,7 @@
 from Bundle import Bundle as Bundle
 from Bus import Bus as Bus
 from Geometry import Geometry as Geometry
-from Settings import Settings as Settings, current_settings
+from Settings import current_settings as current_settings
 import numpy as np
 import pandas as pd
 
