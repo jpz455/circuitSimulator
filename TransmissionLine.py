@@ -4,7 +4,7 @@ from Geometry import Geometry as Geometry
 import numpy as np
 import pandas as pd
 
-from Conductor import Conductor
+
 
 
 class TransmissionLine:
@@ -47,6 +47,8 @@ class TransmissionLine:
     def calculate_base_values(self):
         self.z_base = self.bus1.base_kv**2/100e6   #using 100 MVA as default value for now
         self.y_base = 1/self.z_base
+
+
 
     def print_yprim(self):
         printout = pd.DataFrame(self.matrix)
