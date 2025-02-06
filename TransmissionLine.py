@@ -7,10 +7,11 @@ import pandas as pd
 
 class TransmissionLine:
 
-    def __init__(self,name:str,bus1:Bus,bus2:Bus,bundle:Bundle,geometry:Geometry,length:float):
+    def __init__(self,name:str,bus1_key: str, bus2_key: str, bus_dict: dict,bundle:Bundle,geometry:Geometry,length:float):
         self.name = name
-        self.bus1 = bus1
-        self.bus2 = bus2
+        self.bus1_key = bus1_key  # Store keys instead of objects
+        self.bus2_key = bus2_key
+        self.bus_dict = bus_dict  # Store the reference to the dictionary
         self.bundle = bundle
         self.geometry = geometry
         self.length = length
@@ -18,6 +19,10 @@ class TransmissionLine:
         self.calculate_series_impedance()
         self.calculate_admittance()
         self.calculate_y_matrix()
+
+    def get_bus(self, key: str):
+        """Retrieve the Bus object from the provided dictionary."""
+        return self.bus_dict[key]
 
     def calculate_series_impedance(self):
         self.R = self.bundle.resistance
@@ -48,8 +53,9 @@ class TransmissionLine:
         }
 
     def calculate_base_values(self):
-        self.z_base = self.bus1.base_kv**2/current_settings.s_base
-        self.y_base = 1/self.z_base
+        bus1 = self.get_bus(self.bus1_key)  # Get Bus object dynamically
+        self.z_base = (bus1.base_kv ** 2) / current_settings.s_base
+        self.y_base = 1 / self.z_base
 
     def print_yprim(self):
         printout = pd.DataFrame(self.matrix)

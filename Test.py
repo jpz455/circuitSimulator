@@ -11,6 +11,7 @@ from Circuit import Circuit as Circuit
 
 
 #************TRANSFORMER VALIDATION***********************#
+"""""
 bus1 = (Bus("Bus 1", 20))
 bus2 = Bus("Bus 2", 230)
 xfmr1 = Transformer("T1", bus1, bus2, 124, 8.5, 10)
@@ -90,7 +91,7 @@ print("Line 1 Y:", line1.Ypu)
 print("Line 1 B:", line1.Bpu)
 line1.print_yprim()
 print()
-
+"""""
 # Create circuit instance
 circuit1 = Circuit("Test Circuit", current_settings)
 
@@ -100,13 +101,13 @@ print(circuit1.buses)  # Expected output: {}
 print(type(circuit1.buses))  # Expected output: <class 'dict'>
 
 # Correct way to add a bus
-bus1 = Bus("Bus1", 230)
-bus2 = Bus("Bus2", 130)
-bus3 = Bus('Bus3', 200)
-bus4 = Bus("Bus4", 150)
+bus1 = Bus("Bus1", 20)
+bus2 = Bus("Bus2", 20)
+bus3 = Bus('Bus3', 20)
+bus4 = Bus("Bus4", 20)
 bus5 = Bus("Bus5", 20)
-bus6 = Bus("Bus6", 2300000)
-bus7 = Bus("Bus7", 2460)
+bus6 = Bus("Bus6", 20)
+bus7 = Bus("Bus7", 20)
 circuit1.add_bus(bus1)
 circuit1.add_bus(bus2)
 circuit1.add_bus(bus3)
@@ -125,12 +126,12 @@ Geometry1 = Geometry('G1',.2,.2,3,0,.9,.1)
 Geometry2 = Geometry('G2',.5,.1,.7,.9,.2,.1)
 Conductor1 = Conductor('C1',.2,.1,3,100)
 Bundle1 = Bundle('B1',3,2,Conductor1)
-transmissionLine1 = TransmissionLine('TL1',bus2,bus4,Bundle1,Geometry1,100)
-transmissionLine2 = TransmissionLine('TL2',bus2,bus3,Bundle1,Geometry1,100)
-transmissionLine3 = TransmissionLine('TL3',bus3,bus5,Bundle1,Geometry1,100)
-transmissionLine4 = TransmissionLine('TL4',bus4,bus5,Bundle1,Geometry1,100)
-transmissionLine5 = TransmissionLine('TL5',bus5,bus6,Bundle1,Geometry1,100)
-transmissionLine6 = TransmissionLine('TL6',bus4,bus5,Bundle1,Geometry1,100)
+transmissionLine1 = TransmissionLine('TL1',bus2.name,bus4.name,circuit1.buses,Bundle1,Geometry1,100)
+transmissionLine2 = TransmissionLine('TL2',bus2.name,bus3.name,circuit1.buses,Bundle1,Geometry1,100)
+transmissionLine3 = TransmissionLine('TL3',bus3.name,bus5.name,circuit1.buses,Bundle1,Geometry1,100)
+transmissionLine4 = TransmissionLine('TL4',bus4.name,bus5.name,circuit1.buses,Bundle1,Geometry1,100)
+transmissionLine5 = TransmissionLine('TL5',bus5.name,bus6.name,circuit1.buses,Bundle1,Geometry1,100)
+transmissionLine6 = TransmissionLine('TL6',bus4.name,bus5.name,circuit1.buses,Bundle1,Geometry1,100)
 circuit1.add_transmissionline(transmissionLine1)
 circuit1.add_transmissionline(transmissionLine2)
 circuit1.add_transmissionline(transmissionLine3)
@@ -140,7 +141,9 @@ circuit1.add_transmissionline(transmissionLine6)
 
 
 
-print(line1.Rpu, line1.Xpu, line1.Bpu)
+print(transmissionLine1.Rpu, transmissionLine1.Xpu, transmissionLine1.Bpu)
 
-line1.calculate_y_matrix()
-line1.print_yprim()
+transmissionLine1.calculate_y_matrix()
+transmissionLine1.print_yprim()
+
+
