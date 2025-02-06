@@ -50,8 +50,8 @@ class Transformer():
         }
 
     def calc_in_pu(self):
-        self.vbase = 230
-        self.zbase = self.vbase*self.vbase/current_settings.sbase
+        self.vbase = self.bus1.base_kv
+        self.zbase = self.vbase**2/current_settings.sbase
         self.ybase = 1/self.zbase
         self.xpu = self.x/self.zbase
         self.rpu = np.real(self.z)/self.zbase
@@ -59,7 +59,6 @@ class Transformer():
         self.gpu = np.real(self.y)/self.ybase
         self.bpu = self.b/self.ybase
         self.ypu = self.gpu + 1j*self.bpu
-
 
     def print_yprim(self):
         printout = pd.DataFrame(self.matrix)
