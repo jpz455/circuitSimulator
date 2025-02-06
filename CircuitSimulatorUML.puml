@@ -73,6 +73,15 @@ class Transformer {
     +b: float
     +yprim: List[float]
     +matrix: Dict[str, float]
+    +vbase: float
+    +zbase: float
+    +ybase: float
+    +xpu: float
+    +rpu: float
+    +zpu: float
+    +gpu: float
+    +bpu: float
+    +ypu: float
 
     +calc_z()
     +calc_r()
@@ -89,15 +98,24 @@ class TransmissionLine {
     +bus1: Bus
     +bus2: Bus
     +bundle: Bundle
-    +Geometry: Geometry
+    +geometry: Geometry
     +length: float
     +R: float
     +X: float
     +Z: float
     +B: float
     +Y: float
+    +Rpu: float
+    +Xpu: float
+    +Zpu: float
+    +Bpu: float
+    +Ypu: float
+    +Ytotal: float
+    +z_base: float
+    +y_base: float
     +y_matrix: List[complex]
     +matrix: Dict[str, float]
+
     +calculate_series_impedance()
     +calculate_admittance()
     +calculate_y_matrix()
