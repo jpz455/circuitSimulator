@@ -4,14 +4,17 @@ from Geometry import Geometry
 from Conductor import Conductor
 from TransmissionLine import TransmissionLine
 from typing import Dict, List
+from Settings import Settings
+
 class Circuit:
-    def __init__(self,name:str):
+    def __init__(self,name:str, settings: Settings):
         self.name = name
         self.buses: Dict[str, Bus] = dict()
         self.transformers: Dict[str, Transformer] = dict()
         self.geometries: Dict[str, Geometry] = dict()
         self.conductors: Dict[str, Conductor] = dict()
         self.transmissionlines: Dict[str, TransmissionLine] = dict()
+        self.settings: Settings = settings
 
     def add_bus(self,bus:Bus):
         # error check if bus already exists in system

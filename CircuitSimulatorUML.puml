@@ -10,6 +10,7 @@ class Circuit{
     +geometries: Dict[str, Geometry]
     +conductors: Dict[str, Conductor]
     +transmissionlines: Dict[str, TransmissionLine]
+    +settings: Settings
 
     +add_bus(Bus)
     +add_transformer(Transformer)
@@ -54,6 +55,9 @@ class Geometry{
     +yb: float
     +xc: float
     +yc: float
+    +Dab: float
+    +Dbc: float
+    +Dca: float
     +Deq: float
     +calculate_Deq(): float
     }
@@ -65,14 +69,23 @@ class Transformer {
     +power_rating: float
     +impedance_percent: float
     +x_over_r_ratio: float
-    +z: complex
-    +y: complex
+    +z: float
+    +y: float
     +x: float
     +r: float
     +g: float
     +b: float
     +yprim: List[float]
     +matrix: Dict[str, float]
+    +v_base: float
+    +z_base: float
+    +y_base: float
+    +xpu: float
+    +rpu: float
+    +zpu: float
+    +gpu: float
+    +bpu: float
+    +ypu: float
 
     +calc_z()
     +calc_r()
@@ -89,15 +102,24 @@ class TransmissionLine {
     +bus1: Bus
     +bus2: Bus
     +bundle: Bundle
-    +Geometry: Geometry
+    +geometry: Geometry
     +length: float
     +R: float
     +X: float
     +Z: float
     +B: float
     +Y: float
+    +Rpu: float
+    +Xpu: float
+    +Zpu: float
+    +Bpu: float
+    +Ypu: float
+    +Ytotal: float
+    +z_base: float
+    +y_base: float
     +y_matrix: List[complex]
     +matrix: Dict[str, float]
+
     +calculate_series_impedance()
     +calculate_admittance()
     +calculate_y_matrix()
@@ -105,11 +127,18 @@ class TransmissionLine {
     +print_yprim()
     }
 
+
+class Settings{
+    +f(float)
+    +s_base(float)
+}
+
 Circuit *-- Transformer
 Circuit *-- Bus
 Circuit *-- TransmissionLine
 Circuit *-- Geometry
 Circuit *-- Conductor
+Circuit *-- Settings
 
 TransmissionLine *-- Geometry
 TransmissionLine *-- Bundle

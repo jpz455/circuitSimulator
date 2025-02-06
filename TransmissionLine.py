@@ -48,7 +48,7 @@ class TransmissionLine:
         }
 
     def calculate_base_values(self):
-        self.z_base = self.bus1.base_kv**2/current_settings.sbase
+        self.z_base = self.bus1.base_kv**2/current_settings.s_base
         self.y_base = 1/self.z_base
 
     def print_yprim(self):
