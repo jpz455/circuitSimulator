@@ -51,7 +51,7 @@ class Transformer():
 
     def calc_in_pu(self):
         self.vbase = self.bus1.base_kv
-        self.zbase = self.vbase**2/current_settings.sbase
+        self.zbase = self.vbase**2/current_settings.s_base
         self.ybase = 1/self.zbase
         self.xpu = self.x/self.zbase
         self.rpu = np.real(self.z)/self.zbase
