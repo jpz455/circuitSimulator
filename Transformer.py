@@ -13,8 +13,8 @@ class Transformer():
         self.power_rating = power_rating
         self.impedance_percent = impedance_percent
         self.x_over_r_ratio = x_over_r_ratio
-        self.z: complex = (self.impedance_percent/100) * np.exp(1j * np.arctan(self.x_over_r_ratio))
-        self.y: complex = 1/self.z
+        self.z: float = (self.impedance_percent/100) * np.exp(1j * np.arctan(self.x_over_r_ratio))
+        self.y: float = 1/self.z
         self.yprim: list[float] = []
         self.matrix: Dict[float, float] = {}
         self.calc_z()

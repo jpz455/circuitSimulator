@@ -65,8 +65,8 @@ class Transformer {
     +power_rating: float
     +impedance_percent: float
     +x_over_r_ratio: float
-    +z: complex
-    +y: complex
+    +z: float
+    +y: float
     +x: float
     +r: float
     +g: float
