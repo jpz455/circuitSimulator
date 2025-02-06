@@ -54,6 +54,9 @@ class Geometry{
     +yb: float
     +xc: float
     +yc: float
+    +Dab: float
+    +Dbc: float
+    +Dca: float
     +Deq: float
     +calculate_Deq(): float
     }
@@ -73,9 +76,9 @@ class Transformer {
     +b: float
     +yprim: List[float]
     +matrix: Dict[str, float]
-    +vbase: float
-    +zbase: float
-    +ybase: float
+    +v_base: float
+    +z_base: float
+    +y_base: float
     +xpu: float
     +rpu: float
     +zpu: float
