@@ -64,8 +64,8 @@ class Geometry{
 
 class Transformer {
     +name: str
-    +bus1: Bus
-    +bus2: Bus
+    +bus1: str
+    +bus2: str
     +power_rating: float
     +impedance_percent: float
     +x_over_r_ratio: float
@@ -93,8 +93,8 @@ class Transformer {
 
 class TransmissionLine {
     +name: str
-    +bus1: Bus
-    +bus2: Bus
+    +bus1: str
+    +bus2: str
     +bundle: Bundle
     +geometry: Geometry
     +length: float
@@ -140,7 +140,6 @@ TransmissionLine *-- Bus
 
 Bundle *-- Conductor
 
-Transformer *-- Bus
 
 
 
