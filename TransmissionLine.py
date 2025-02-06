@@ -47,8 +47,6 @@ class TransmissionLine:
 
     def calculate_y_matrix(self):
         prim_y = np.array([[self.Ytotal, -1 * self.Ypu], [-1 * self.Ypu, self.Ytotal]])
-        y_prim = pd.DataFrame(prim_y, [self.bus1.name, self.bus2.name], [self.bus1.name, self.bus2.name],dtype=complex)
-        self.y_matrix = y_prim
         self.matrix = {
             "y matrix": [prim_y[0,0], prim_y[0,1]],
             "": [prim_y[1,0], prim_y[1,1]]
@@ -56,7 +54,7 @@ class TransmissionLine:
 
 
     def calculate_base_values(self):
-        self.z_base = self.bus1.base_kv**2/current_settings.sbase   #using 100 MVA as default value for now
+        self.z_base = self.bus1.base_kv**2/current_settings.sbase
         self.y_base = 1/self.z_base
 
     def print_yprim(self):
