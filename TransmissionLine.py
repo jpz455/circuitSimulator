@@ -60,5 +60,3 @@ class TransmissionLine:
     def print_yprim(self):
         printout = pd.DataFrame(self.matrix)
         print(printout.to_string(index = False))
-
-

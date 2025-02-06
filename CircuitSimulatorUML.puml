@@ -64,8 +64,8 @@ class Geometry{
 
 class Transformer {
     +name: str
-    +bus1: Bus
-    +bus2: Bus
+    +bus1: str
+    +bus2: str
     +power_rating: float
     +impedance_percent: float
     +x_over_r_ratio: float
@@ -73,8 +73,6 @@ class Transformer {
     +y: float
     +x: float
     +r: float
-    +g: float
-    +b: float
     +yprim: List[float]
     +matrix: Dict[str, float]
     +v_base: float
@@ -83,24 +81,20 @@ class Transformer {
     +xpu: float
     +rpu: float
     +zpu: float
-    +gpu: float
-    +bpu: float
     +ypu: float
 
     +calc_z()
     +calc_r()
     +calc_x()
-    +calc_b()
-    +calc_g()
-    +calc_y()
     +calc_in_pu()
+    +calc_yprim()
     +print_yprim()
     }
 
 class TransmissionLine {
     +name: str
-    +bus1: Bus
-    +bus2: Bus
+    +bus1: str
+    +bus2: str
     +bundle: Bundle
     +geometry: Geometry
     +length: float
@@ -146,7 +140,6 @@ TransmissionLine *-- Bus
 
 Bundle *-- Conductor
 
-Transformer *-- Bus
 
 
 
