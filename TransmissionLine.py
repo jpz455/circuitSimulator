@@ -41,8 +41,7 @@ class TransmissionLine:
         #Y (shunt) = G +jB
         self.Bpu = self.B/self.y_base
         self.Ypu = 1/self.Zpu
-
-        self.Ytotal = self.Ypu +self.Bpu
+        self.Ytotal = self.Ypu +self.Bpu/2
 
 
 
