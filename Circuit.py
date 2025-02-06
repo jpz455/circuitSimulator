@@ -16,12 +16,14 @@ class Circuit:
         self.transmissionlines: Dict[str, TransmissionLine] = dict()
         self.settings: Settings = settings
 
-    def add_bus(self,bus:Bus):
-        # error check if bus already exists in system
+    def add_bus(self, bus: Bus):
+        # Check if bus already exists in system
         if bus.name in self.buses:
             print(f"Bus with name '{bus.name}' already exists. Skipping addition.")
         else:
-            self.buses[bus.name] = bus
+            self.buses[bus.name] = bus  # Add bus to the dictionary using its name as the key
+
+
 
     def add_transformer(self,transformer:Transformer):
         if transformer.name in self.transformers:
@@ -40,11 +42,30 @@ class Circuit:
             print(f"Conductor with name '{conductor.name}' already exists. Skipping addition.")
         else:
             self.conductors[conductor.name] = conductor
-    def add_transmissionline(self,transmissionline:TransmissionLine):
+
+    def add_transmissionline(self, transmissionline: TransmissionLine):
+        # Check if the transmission line already exists
         if transmissionline.name in self.transmissionlines:
             print(f"Transmissionline with name '{transmissionline.name}' already exists. Skipping addition.")
         else:
+            # Retrieve Bus objects using the bus names (or indices) as keys
+            bus1 = self.buses.get(transmissionline.bus1_key)
+            bus2 = self.buses.get(transmissionline.bus2_key)
+
+            # Ensure both buses are found
+            if bus1 is None or bus2 is None:
+                print(
+                    f"ERROR: One or both buses not found. Bus1: {transmissionline.bus1_key}, Bus2: {transmissionline.bus2_key}")
+                exit(-1)
+
+            # Check if the buses have the same base_kv value
+            if bus1.base_kv != bus2.base_kv:
+                print("ERROR: Cannot connect unmatched voltages for transmission lines.")
+                exit(-1)
+
+            # Add the transmission line to the dictionary
             self.transmissionlines[transmissionline.name] = transmissionline
+
 
 
 
