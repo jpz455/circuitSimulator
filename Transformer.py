@@ -15,7 +15,7 @@ class Transformer():
         self.x_over_r_ratio = x_over_r_ratio
         self.z: float = (self.impedance_percent/100) * np.exp(1j * np.arctan(self.x_over_r_ratio))
         self.y: float = 1/self.z
-        self.yprim: list[float]= []
+        self.yprim: list[float] = []
         self.matrix: Dict[float, float] = {}
         self.calc_z()
         self.calc_r()
@@ -46,9 +46,6 @@ class Transformer():
         self.xpu = self.x/self.z_base
         self.rpu = np.real(self.z)/self.z_base
         self.zpu = self.rpu + 1j*self.xpu
-        self.bpu = self.b/self.y_base
-        self.ypu = self.y/self.y_base
-
 
     def print_yprim(self):
         printout = pd.DataFrame(self.matrix)

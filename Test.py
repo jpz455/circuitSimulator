@@ -121,3 +121,10 @@ circuit1.add_transmissionline(transmissionLine3)
 circuit1.add_transmissionline(transmissionLine4)
 circuit1.add_transmissionline(transmissionLine5)
 circuit1.add_transmissionline(transmissionLine6)
+
+
+
+print(line1.Rpu, line1.Xpu, line1.Bpu)
+
+line1.calculate_y_matrix()
+line1.print_yprim()
