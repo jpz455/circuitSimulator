@@ -2,10 +2,13 @@ from Bundle import Bundle as Bundle
 from Conductor import Conductor as Conductor
 from Bus import Bus as Bus
 from Geometry import Geometry as Geometry
+from Settings import current_settings
 from TransmissionLine import TransmissionLine as TransmissionLine
 import numpy as np
 from Transformer import Transformer
 from Circuit import Circuit as Circuit
+
+
 
 #************TRANSFORMER VALIDATION***********************#
 bus1 = (Bus("Bus 1", 20))
@@ -89,7 +92,7 @@ line1.print_yprim()
 print()
 
 # Create circuit instance
-circuit1 = Circuit("Test Circuit")
+circuit1 = Circuit("Test Circuit", current_settings)
 
 print(circuit1.name)  # Expected output: "Test Circuit"
 print(type(circuit1.name))  # Expected output: <class 'str'>
