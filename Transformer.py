@@ -46,6 +46,7 @@ class Transformer():
         self.xpu = self.x/self.z_base
         self.rpu = np.real(self.z)/self.z_base
         self.zpu = self.rpu + 1j*self.xpu
+        self.ypu = self.y/self.y_base
 
     def print_yprim(self):
         printout = pd.DataFrame(self.matrix)
