@@ -10,6 +10,7 @@ class Circuit{
     +geometries: Dict[str, Geometry]
     +conductors: Dict[str, Conductor]
     +transmissionlines: Dict[str, TransmissionLine]
+    +settings: Settings
 
     +add_bus(Bus)
     +add_transformer(Transformer)
@@ -126,11 +127,18 @@ class TransmissionLine {
     +print_yprim()
     }
 
+
+class Settings{
+    +f(float)
+    +s_base(float)
+}
+
 Circuit *-- Transformer
 Circuit *-- Bus
 Circuit *-- TransmissionLine
 Circuit *-- Geometry
 Circuit *-- Conductor
+Circuit *-- Settings
 
 TransmissionLine *-- Geometry
 TransmissionLine *-- Bundle
