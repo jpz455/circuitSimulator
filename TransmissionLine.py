@@ -44,7 +44,6 @@ class TransmissionLine:
         self.Ytotal = self.Ypu +self.Bpu/2
 
 
-
     def calculate_y_matrix(self):
         prim_y = np.array([[self.Ytotal, -1 * self.Ypu], [-1 * self.Ypu, self.Ytotal]])
         self.matrix = {

@@ -23,22 +23,6 @@ print("impedance percent: ", xfmr1.impedance_percent, "; should be 8.5")
 print("ratio: ", xfmr1.x_over_r_ratio, "; should be 10")
 
 xfmr1.calc_z()
-xfmr1.calc_y()
-print("z: ", xfmr1.z, "; should be ", 0.085*np.exp(1.47113*1j))
-print("y: ", xfmr1.y, "; should be ", 1/(0.085*np.exp(1.47113*1j)))
-print()
-
-xfmr1.calc_yprim()
-xfmr1.print_yprim()
-print()
-
-xfmr1.calc_in_pu()
-print("zpu: ", xfmr1.zpu)
-print("xpu: ", xfmr1.xpu)
-print("rpu: ", xfmr1.rpu)
-print("ypu: ", xfmr1.ypu)
-print("gpu: ", xfmr1.gpu)
-print("bpu: ", xfmr1.bpu)
 #**********CONDUCTOR VALIDATION******************
 conductor1 = Conductor("Partridge", 0.642, 0.0217,0.385, 460)
 print()
