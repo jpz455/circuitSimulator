@@ -127,7 +127,7 @@ circuit1.add_transmissionline(transmissionLine6)
 
 print(transmissionLine1.Rpu, transmissionLine1.Xpu, transmissionLine1.Bpu)
 
-transmissionLine1.calculate_y_matrix()
+transmissionLine1.calc_yprim()
 transmissionLine1.print_yprim()
 
 

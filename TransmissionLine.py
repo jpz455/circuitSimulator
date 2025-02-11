@@ -7,10 +7,10 @@ import pandas as pd
 
 class TransmissionLine:
 
-    def __init__(self,name:str,bus1_key: str, bus2_key: str, bus_dict: dict,bundle:Bundle,geometry:Geometry,length:float):
+    def __init__(self,name:str,bus1: str, bus2: str, bus_dict: dict,bundle:Bundle,geometry:Geometry,length:float):
         self.name = name
-        self.bus1_key = bus1_key  
-        self.bus2_key = bus2_key
+        self.bus1 = bus1
+        self.bus2 = bus2
         self.bus_dict = bus_dict 
         self.bundle = bundle
         self.geometry = geometry
@@ -18,7 +18,7 @@ class TransmissionLine:
         self.calculate_base_values()
         self.calculate_series_impedance()
         self.calculate_admittance()
-        self.calculate_y_matrix()
+        self.calc_yprim()
 
     def get_bus(self, key: str):
         return self.bus_dict[key]
@@ -44,26 +44,26 @@ class TransmissionLine:
         self.Ypu = 1/self.Zpu
         self.Ytotal = self.Ypu +self.Bpu/2
 
-    def calculate_y_matrix(self):
-        prim_y = np.array([[self.Ytotal, -1 * self.Ypu], [-1 * self.Ypu, self.Ytotal]])
-        self.matrix = {
-            "y matrix": [prim_y[0,0], prim_y[0,1]],
-            "": [prim_y[1,0], prim_y[1,1]]
+    def calc_yprim(self):
+        yprim_matrix = np.array([[self.Ytotal, -1 * self.Ypu], [-1 * self.Ypu, self.Ytotal]])
+        self.yprim = {
+            "y matrix": [yprim_matrix[0,0], yprim_matrix[0,1]],
+            "": [yprim_matrix[1,0], yprim_matrix[1,1]]
         }
-        
         # Creating a Pandas DataFrame with bus names as labels
-        self.y_matrix_df = pd.DataFrame(prim_y,index=[self.bus1_key, self.bus2_key],columns=[self.bus1_key, self.bus2_key])
+        self.y_matrix_df = pd.DataFrame(yprim_matrix,index=[self.bus1, self.bus2],columns=[self.bus1, self.bus2])
+
 
     def calculate_base_values(self):
-        bus1 = self.get_bus(self.bus1_key)  # Get Bus object dynamically
+        bus1 = self.get_bus(self.bus1)  # Get Bus object dynamically
         self.z_base = (bus1.base_kv ** 2) / current_settings.s_base
         self.y_base = 1 / self.z_base
 
     def print_yprim(self):
-        printout = pd.DataFrame(self.matrix)
+        printout = pd.DataFrame(self.yprim)
         printout2 = pd.DataFrame(self.y_matrix_df)
         print(printout.to_string(index = False))
-        print(printout2.to_string(index = False))
+        print(printout2.to_string())
 
 
 
