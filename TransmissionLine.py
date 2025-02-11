@@ -51,6 +51,9 @@ class TransmissionLine:
             "y matrix": [prim_y[0,0], prim_y[0,1]],
             "": [prim_y[1,0], prim_y[1,1]]
         }
+        # Creating a Pandas DataFrame with bus names as labels
+        self.y_matrix_df = pd.DataFrame(prim_y,index=[self.bus1_key, self.bus2_key],
+                                        columns=[self.bus1_key, self.bus2_key])
 
     def calculate_base_values(self):
         bus1 = self.get_bus(self.bus1_key)  # Get Bus object dynamically
