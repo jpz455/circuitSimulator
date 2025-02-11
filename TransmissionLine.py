@@ -9,9 +9,9 @@ class TransmissionLine:
 
     def __init__(self,name:str,bus1_key: str, bus2_key: str, bus_dict: dict,bundle:Bundle,geometry:Geometry,length:float):
         self.name = name
-        self.bus1_key = bus1_key  # Store keys instead of objects
+        self.bus1_key = bus1_key  
         self.bus2_key = bus2_key
-        self.bus_dict = bus_dict  # Store the reference to the dictionary
+        self.bus_dict = bus_dict 
         self.bundle = bundle
         self.geometry = geometry
         self.length = length
@@ -21,7 +21,6 @@ class TransmissionLine:
         self.calculate_y_matrix()
 
     def get_bus(self, key: str):
-        """Retrieve the Bus object from the provided dictionary."""
         return self.bus_dict[key]
 
     def calculate_series_impedance(self):
@@ -51,9 +50,9 @@ class TransmissionLine:
             "y matrix": [prim_y[0,0], prim_y[0,1]],
             "": [prim_y[1,0], prim_y[1,1]]
         }
+        
         # Creating a Pandas DataFrame with bus names as labels
-        self.y_matrix_df = pd.DataFrame(prim_y,index=[self.bus1_key, self.bus2_key],
-                                        columns=[self.bus1_key, self.bus2_key])
+        self.y_matrix_df = pd.DataFrame(prim_y,index=[self.bus1_key, self.bus2_key],columns=[self.bus1_key, self.bus2_key])
 
     def calculate_base_values(self):
         bus1 = self.get_bus(self.bus1_key)  # Get Bus object dynamically
@@ -62,4 +61,9 @@ class TransmissionLine:
 
     def print_yprim(self):
         printout = pd.DataFrame(self.matrix)
+        printout2 = pd.DataFrame(self.y_matrix_df)
         print(printout.to_string(index = False))
+        print(printout2.to_string(index = False))
+
+
+
