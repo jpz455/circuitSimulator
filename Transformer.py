@@ -17,7 +17,7 @@ class Transformer():
         self.y: float = 1/self.z
         self.yprim: list[float] = []
         self.matrix: Dict[float, float] = {}
-        self.settings = current_settings()
+        self.settings = current_settings
         self.calc_z()
         self.calc_r()
         self.calc_x()
