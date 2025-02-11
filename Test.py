@@ -76,6 +76,7 @@ print("Line 1 B:", line1.Bpu)
 line1.print_yprim()
 print()
 """""
+#************************CIRCUIT VALIDATION****************************#
 # Create circuit instance
 circuit1 = Circuit("Test Circuit", current_settings)
 

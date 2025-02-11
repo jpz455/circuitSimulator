@@ -17,6 +17,7 @@ class Transformer():
         self.y: float = 1/self.z
         self.yprim: list[float] = []
         self.matrix: Dict[float, float] = {}
+        self.settings = current_settings()
         self.calc_z()
         self.calc_r()
         self.calc_x()
@@ -41,7 +42,7 @@ class Transformer():
 
     def calc_in_pu(self):
         self.v_base = 230
-        self.z_base = self.v_base*self.v_base/current_settings.s_base
+        self.z_base = self.v_base*self.v_base/self.settings.s_base
         self.y_base = 1/self.z_base
         self.xpu = self.x/self.z_base
         self.rpu = np.real(self.z)/self.z_base

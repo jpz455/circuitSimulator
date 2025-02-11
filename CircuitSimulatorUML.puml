@@ -69,6 +69,7 @@ class Transformer {
     +power_rating: float
     +impedance_percent: float
     +x_over_r_ratio: float
+    +settings: Settings
     +z: float
     +y: float
     +x: float
@@ -98,6 +99,7 @@ class TransmissionLine {
     +bundle: Bundle
     +geometry: Geometry
     +length: float
+    +settings: Settings
     +R: float
     +X: float
     +Z: float
@@ -137,8 +139,11 @@ Circuit *-- Settings
 TransmissionLine *-- Geometry
 TransmissionLine *-- Bundle
 TransmissionLine *-- Bus
+TransmissionLine *-- Settings
 
 Bundle *-- Conductor
+
+Transformer *-- Settings
 
 
 
