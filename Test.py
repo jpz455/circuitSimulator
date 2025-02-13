@@ -111,12 +111,12 @@ Geometry1 = Geometry('G1',.2,.2,3,0,.9,.1)
 Geometry2 = Geometry('G2',.5,.1,.7,.9,.2,.1)
 Conductor1 = Conductor('C1',.2,.1,3,100)
 Bundle1 = Bundle('B1',3,2,Conductor1)
-transmissionLine1 = TransmissionLine('TL1',bus2.name,bus4.name,circuit1.buses,Bundle1,Geometry1,100)
-transmissionLine2 = TransmissionLine('TL2',bus2.name,bus3.name,circuit1.buses,Bundle1,Geometry1,100)
-transmissionLine3 = TransmissionLine('TL3',bus3.name,bus5.name,circuit1.buses,Bundle1,Geometry1,100)
-transmissionLine4 = TransmissionLine('TL4',bus4.name,bus5.name,circuit1.buses,Bundle1,Geometry1,100)
-transmissionLine5 = TransmissionLine('TL5',bus5.name,bus6.name,circuit1.buses,Bundle1,Geometry1,100)
-transmissionLine6 = TransmissionLine('TL6',bus4.name,bus5.name,circuit1.buses,Bundle1,Geometry1,100)
+transmissionLine1 = TransmissionLine('TL1',bus2,bus4,Bundle1,Geometry1,100)
+transmissionLine2 = TransmissionLine('TL2',bus2,bus3,Bundle1,Geometry1,100)
+transmissionLine3 = TransmissionLine('TL3',bus3,bus5,Bundle1,Geometry1,100)
+transmissionLine4 = TransmissionLine('TL4',bus4,bus5,Bundle1,Geometry1,100)
+transmissionLine5 = TransmissionLine('TL5',bus5,bus6,Bundle1,Geometry1,100)
+transmissionLine6 = TransmissionLine('TL6',bus4,bus5,Bundle1,Geometry1,100)
 circuit1.add_transmissionline(transmissionLine1)
 circuit1.add_transmissionline(transmissionLine2)
 circuit1.add_transmissionline(transmissionLine3)
@@ -126,9 +126,9 @@ circuit1.add_transmissionline(transmissionLine6)
 
 
 
-print(transmissionLine1.Rpu, transmissionLine1.Xpu, transmissionLine1.Bpu)
-
-transmissionLine1.calculate_y_matrix()
+print(transmissionLine1.Rpu, transmissionLine1.Xpu, transmissionLine1.Yshuntpu)
+transformer1.print_yprim()
+transmissionLine1.calc_yprim()
 transmissionLine1.print_yprim()
 
 

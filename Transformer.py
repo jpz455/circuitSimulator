@@ -6,7 +6,7 @@ from Bus import Bus
 from Settings import current_settings
 
 class Transformer():
-    def __init__(self, name: str, bus1: str, bus2: str, power_rating: float, impedance_percent: float, x_over_r_ratio: float):
+    def __init__(self, name: str, bus1: Bus, bus2:Bus, power_rating: float, impedance_percent: float, x_over_r_ratio: float):
         self.name = name
         self.bus1 = bus1
         self.bus2 = bus2
@@ -30,14 +30,11 @@ class Transformer():
         self.r = np.real(self.calc_z())
     def calc_yprim(self):
         self.calc_in_pu()
-        ypp = self.ypu
-        yps = -1 * self.ypu
-        ysp = -1 * self.ypu
-        yss = self.ypu
-        self.yprim = [ypp, yps, ysp, yss]
+        self.Yseries = self.ypu
+        self.yprim = [self.Yseries, -1*self.Yseries, -1*self.Yseries, self.Yseries]
         self.matrix = {
-            "y matrix" : [ypp, yps],
-            "" : [ysp, yss]
+            "y matrix" : [self.yprim[0][0], self.yprim[0][1]],
+            "" : [self.yprim[1][0], self.yprim[1][1]]
         }
 
     def calc_in_pu(self):
@@ -51,4 +48,6 @@ class Transformer():
 
     def print_yprim(self):
         printout = pd.DataFrame(self.matrix)
+        printout2 = pd.DataFrame(self.yprim)
         print(printout.to_string(index = False))
+        print(printout2.to_string())
