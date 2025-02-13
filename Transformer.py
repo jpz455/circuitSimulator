@@ -33,8 +33,8 @@ class Transformer():
         self.Yseries = self.ypu
         self.yprim = [self.Yseries, -1*self.Yseries, -1*self.Yseries, self.Yseries]
         self.matrix = {
-            "y matrix" : [self.yprim[0][0], self.yprim[0][1]],
-            "" : [self.yprim[1][0], self.yprim[1][1]]
+            "y matrix" : [self.yprim[0], self.yprim[1]],
+            "" : [self.yprim[2], self.yprim[3]]
         }
 
     def calc_in_pu(self):

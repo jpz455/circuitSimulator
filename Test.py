@@ -132,5 +132,6 @@ transmissionLine1.calc_yprim()
 transmissionLine1.print_yprim()
 
 
-circuit1.calc_ybus()
+Ybus = circuit1.calc_ybus()
+print(Ybus)
 

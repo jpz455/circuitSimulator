@@ -51,9 +51,8 @@ class Circuit:
             print(f"Transmissionline with name '{transmissionline.name}' already exists. Skipping addition.")
         else:
             # Retrieve Bus objects using the bus names (or indices) as keys
-            bus1 = self.buses.get(transmissionline.bus1)
-            bus2 = self.buses.get(transmissionline.bus2)
-
+            bus1 = transmissionline.bus1
+            bus2 = transmissionline.bus2
             # Check if the buses have the same base_kv value
             if bus1.base_kv != bus2.base_kv:
                 print("ERROR: Cannot connect unmatched voltages for transmission lines.")
@@ -70,10 +69,15 @@ class Circuit:
         # update YBus for a given component's admittance matrix
         def update_ybus(yprim, busA, busB):
             # Ensure that yprim is a 2x2 matrix and update YBus correctly
-            self.YBus.loc[busA.name, busA.name] += yprim[0, 0]  # ypp
-            self.YBus.loc[busB.name, busB.name] += yprim[1, 1]  # yss
-            self.YBus.loc[busA.name, busB.name] += yprim[0, 1]  # yps
-            self.YBus.loc[busB.name, busA.name] += yprim[1, 0]  # ysp
+
+            loc_busA = busA.numBus-1
+            loc_busB = busB.numBus-1
+
+
+            size[loc_busA, loc_busA] += yprim[0]  # ypp
+            size[loc_busB, loc_busB] += yprim[3]  # yss
+            size[loc_busA, loc_busB] += yprim[1]  # yps
+            size[loc_busB, loc_busA] += yprim[2]  # ysp
 
         #  (Transformer or TransmissionLine)
         def process_component(component):
@@ -81,8 +85,8 @@ class Circuit:
             component.calc_yprim()
 
             # Retrieve the buses associated with this component
-            busA = self.buses[component.bus1]  # Accessing the buses dictionary
-            busB = self.buses[component.bus2]  # Accessing the buses dictionary
+            busA = component.bus1
+            busB = component.bus2
 
             # Update YBus with the calculated admittance matrix
             update_ybus(component.yprim, busA, busB)
