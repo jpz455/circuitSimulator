@@ -40,13 +40,13 @@ class TransmissionLine:
         self.Yseriespu = 1/self.Zpu
 
     def calc_yprim(self):
-        yprim_matrix = np.array([[self.Yseriespu+.5*self.Yshuntpu, -1 * self.Yseriespu], [-1 * self.Yseriespu, self.Yseriespu+.5*self.Yshuntpu]])
-        self.yprim = {
-            "y matrix": [yprim_matrix[0,0], yprim_matrix[0,1]],
-            "": [yprim_matrix[1,0], yprim_matrix[1,1]]
+        self.yprim = np.array([[self.Yseriespu+.5*self.Yshuntpu, -1 * self.Yseriespu], [-1 * self.Yseriespu, self.Yseriespu+.5*self.Yshuntpu]])
+        self.matrix = {
+            "y matrix": [self.yprim[0,0], self.yprim[0,1]],
+            "": [self.yprim[1,0], self.yprim[1,1]]
         }
         # Creating a Pandas DataFrame with bus names as labels
-        self.y_matrix_df = pd.DataFrame(yprim_matrix,index=[self.bus1.name, self.bus2.name],columns=[self.bus1.name, self.bus2.name])
+        self.y_matrix_df = pd.DataFrame(self.yprim,index=[self.bus1.name, self.bus2.name],columns=[self.bus1.name, self.bus2.name])
 
 
     def calculate_base_values(self):
@@ -54,7 +54,7 @@ class TransmissionLine:
         self.y_base = 1 / self.z_base
 
     def print_yprim(self):
-        printout = pd.DataFrame(self.yprim)
+        printout = pd.DataFrame(self.matrix)
         printout2 = pd.DataFrame(self.y_matrix_df)
         print(printout.to_string(index = False))
         print(printout2.to_string())
