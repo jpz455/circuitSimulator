@@ -19,6 +19,7 @@ class Circuit:
         self.transmissionlines: Dict[str, TransmissionLine] = dict()
         self.settings: Settings = settings
 
+
     def add_bus(self, bus: Bus):
         # Check if bus already exists in system
         if bus.name in self.buses:
@@ -50,12 +51,9 @@ class Circuit:
         if transmissionline.name in self.transmissionlines:
             print(f"Transmissionline with name '{transmissionline.name}' already exists. Skipping addition.")
         else:
-            # Retrieve Bus objects using the bus names (or indices) as keys
-            bus1 = self.buses.get(transmissionline.bus1)
-            bus2 = self.buses.get(transmissionline.bus2)
 
             # Check if the buses have the same base_kv value
-            if bus1.base_kv != bus2.base_kv:
+            if transmissionline.bus1.base_kv != transmissionline.bus2.base_kv:
                 print("ERROR: Cannot connect unmatched voltages for transmission lines.")
                 exit(-1)
 
@@ -63,38 +61,30 @@ class Circuit:
             self.transmissionlines[transmissionline.name] = transmissionline
 
     def calc_ybus(self):
-        # Initialize the YBus matrix with size based on the number of buses
-        size = np.zeros([len(self.buses), len(self.buses)])
+        size = np.zeros([Bus.numBus, Bus.numBus])
         self.YBus = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
 
-        # update YBus for a given component's admittance matrix
-        def update_ybus(yprim, busA, busB):
-            # Ensure that yprim is a 2x2 matrix and update YBus correctly
-            self.YBus.loc[busA.name, busA.name] += yprim[0, 0]  # ypp
-            self.YBus.loc[busB.name, busB.name] += yprim[1, 1]  # yss
-            self.YBus.loc[busA.name, busB.name] += yprim[0, 1]  # yps
-            self.YBus.loc[busB.name, busA.name] += yprim[1, 0]  # ysp
+        for A in self.transformers.keys():
+            self.YBus.loc[self.transformers[A].bus1.name, self.transformers[A].bus1.name] += self.transformers[A].yprim.loc[self.transformers[A].bus1.name, self.transformers[A].bus1.name]
+            self.YBus.loc[self.transformers[A].bus2.name, self.transformers[A].bus2.name] += self.transformers[A].yprim.loc[self.transformers[A].bus2.name, self.transformers[A].bus2.name]
+            self.YBus.loc[self.transformers[A].bus1.name, self.transformers[A].bus2.name] += self.transformers[A].yprim.loc[self.transformers[A].bus1.name, self.transformers[A].bus2.name]
+            self.YBus.loc[self.transformers[A].bus2.name, self.transformers[A].bus1.name] += self.transformers[A].yprim.loc[self.transformers[A].bus2.name, self.transformers[A].bus1.name]
 
-        #  (Transformer or TransmissionLine)
-        def process_component(component):
-            # Calculate the primitive admittance matrix
-            component.calc_yprim()
-
-            # Retrieve the buses associated with this component
-            busA = self.buses[component.bus1]  # Accessing the buses dictionary
-            busB = self.buses[component.bus2]  # Accessing the buses dictionary
-
-            # Update YBus with the calculated admittance matrix
-            update_ybus(component.yprim, busA, busB)
-
-        # Process Transformers
-        for transformer in self.transformers.values():
-            process_component(transformer)
-
-        # Process Transmission Lines
-        for transmission_line in self.transmissionlines.values():
-            process_component(transmission_line)
+        for A in self.transmissionlines.keys():
+            self.YBus.loc[self.transmissionlines[A].bus1.name, self.transmissionlines[A].bus1.name] += self.transmissionlines[A].yprim.loc[self.transmissionlines[A].bus1.name, self.transmissionlines[A].bus1.name]
+            self.YBus.loc[self.transmissionlines[A].bus2.name, self.transmissionlines[A].bus2.name] += self.transmissionlines[A].yprim.loc[self.transmissionlines[A].bus2.name, self.transmissionlines[A].bus2.name]
+            self.YBus.loc[self.transmissionlines[A].bus1.name, self.transmissionlines[A].bus2.name] += self.transmissionlines[A].yprim.loc[self.transmissionlines[A].bus1.name, self.transmissionlines[A].bus2.name]
+            self.YBus.loc[self.transmissionlines[A].bus2.name, self.transmissionlines[A].bus1.name] += self.transmissionlines[A].yprim.loc[self.transmissionlines[A].bus2.name, self.transmissionlines[A].bus1.name]
 
         return self.YBus
+
+    def print_ybus(self):
+        """Prints the Y-bus matrix."""
+        if self.YBus is None:
+            print("ERROR: Y-bus has not been calculated yet. Run `calc_ybus()` first.")
+        else:
+            print("\nY-Bus Matrix:")
+            print(self.YBus.to_string(float_format=lambda x: f"{x:.5f}"))
+
 
 

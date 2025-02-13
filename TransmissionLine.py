@@ -40,13 +40,22 @@ class TransmissionLine:
         self.Yseriespu = 1/self.Zpu
 
     def calc_yprim(self):
-        self.yprim = np.array([[self.Yseriespu+.5*self.Yshuntpu, -1 * self.Yseriespu], [-1 * self.Yseriespu, self.Yseriespu+.5*self.Yshuntpu]])
+        # Ensure that self.Yseriespu and self.Yshuntpu are calculated before this step
+        # The Yprim matrix is created based on these values
+        # Create the Y-prim matrix as a 2x2 matrix using the Yseries values
+        # Create the Y-prim matrix as a 2x2 matrix using the Yseries values
+        self.yprim = np.array([[self.Yseriespu + 0.5 * self.Yshuntpu, -1 * self.Yseriespu],
+                               [-1 * self.Yseriespu, self.Yseriespu + 0.5 * self.Yshuntpu]])
+
+        self.yprim = pd.DataFrame(self.yprim, index=[self.bus1.name, self.bus2.name],
+                                  columns=[self.bus1.name, self.bus2.name])
+
+        # Create the matrix dictionary with entries from the DataFrame
         self.matrix = {
-            "y matrix": [self.yprim[0,0], self.yprim[0,1]],
-            "": [self.yprim[1,0], self.yprim[1,1]]
+            "y matrix": [self.yprim.iloc[0, 0], self.yprim.iloc[0, 1]],  # Accessing first row values
+            "": [self.yprim.iloc[1, 0], self.yprim.iloc[1, 1]]  # Accessing second row values
         }
-        # Creating a Pandas DataFrame with bus names as labels
-        self.y_matrix_df = pd.DataFrame(self.yprim,index=[self.bus1.name, self.bus2.name],columns=[self.bus1.name, self.bus2.name])
+
 
 
     def calculate_base_values(self):
