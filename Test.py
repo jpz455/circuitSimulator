@@ -132,3 +132,5 @@ transmissionLine1.calculate_y_matrix()
 transmissionLine1.print_yprim()
 
 
+circuit1.calc_ybus()
+
