@@ -57,12 +57,12 @@ circuit.add_transmissionline(tl5)
 circuit.add_transmissionline(tl6)
 
 #now get values for powerworld:
-print("xfmr1 r: ", xfmr1.r)
-print("xfmr1 x: ", xfmr1.x)
+print("xfmr1 r: ", xfmr1.rpu)
+print("xfmr1 x: ", xfmr1.xpu)
 print()
 
-print("xfmr2 r: ", xfmr2.r)
-print("xfmr2 x: ", xfmr2.x)
+print("xfmr2 r: ", xfmr2.rpu)
+print("xfmr2 x: ", xfmr2.xpu)
 print()
 
 print("tl1 r: ", tl1.Rpu)
@@ -94,5 +94,15 @@ print("tl6 r: ", tl6.Rpu)
 print("tl6 x: ", tl6.Xpu)
 print("tl6 b: ", np.imag(tl6.Yshuntpu))
 
+#check y buses
 
+print()
+xfmr1.calc_yprim()
+xfmr1.print_yprim()
+print()
+xfmr2.calc_yprim()
+xfmr2.print_yprim()
+print()
+circuit.calc_ybus()
+circuit.print_ybus()
 

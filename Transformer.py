@@ -47,7 +47,7 @@ class Transformer():
 
 
     def calc_in_pu(self):
-        self.v_base = 230
+        self.v_base = self.bus2.base_kv
         self.z_base = self.v_base*self.v_base/self.settings.s_base
         self.y_base = 1/self.z_base
         self.xpu = self.x/self.z_base
