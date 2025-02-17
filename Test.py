@@ -103,8 +103,8 @@ circuit1.add_bus(bus7)
 print(type(circuit1.buses["Bus1"]))  # Expected output: <class 'Bus'>
 print(circuit1.buses["Bus1"].name, circuit1.buses["Bus1"].base_kv)  # Expected output: "Bus1", 230
 print("Buses in circuit:", list(circuit1.buses.keys())) #
-transformer1 = Transformer('XFMR1', 'Bus1', 'Bus2', 100, 80, 2)
-transformer2 = Transformer('XFMR2', 'Bus6', 'Bus7', 150, 90, 3)
+transformer1 = Transformer('XFMR1', bus1, bus2, 100, 80, 2)
+transformer2 = Transformer('XFMR2', bus6, bus7, 150, 90, 3)
 circuit1.add_transformer(transformer1)
 circuit1.add_transformer(transformer2)
 Geometry1 = Geometry('G1',.2,.2,3,0,.9,.1)
