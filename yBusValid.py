@@ -33,8 +33,8 @@ circuit.add_bus(bus5)
 circuit.add_bus(bus6)
 circuit.add_bus(bus7)
 
-T1=Transformer("T1", bus1, bus2, 125, 0.085, 10)
-T2= Transformer("T2", bus6, bus7, 200, .105, 12)
+T1=Transformer("T1", bus1, bus2, 125, 8.5, 10)
+T2= Transformer("T2", bus6, bus7, 200, 10.5, 12)
 
 circuit.add_transformer(T1)
 circuit.add_transformer(T2)
