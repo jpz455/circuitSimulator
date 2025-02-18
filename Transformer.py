@@ -47,13 +47,10 @@ class Transformer():
 
 
     def calc_in_pu(self):
-        self.v_base = self.bus2.base_kv
-        self.z_base = self.v_base*self.v_base/self.settings.s_base
-        self.y_base = 1/self.z_base
-        self.xpu = self.x/self.z_base
-        self.rpu = np.real(self.z)/self.z_base
-        self.zpu = self.rpu + 1j*self.xpu
-        self.ypu = self.y/self.y_base
+        self.zpu = self.z*(current_settings.s_base/self.power_rating)
+        self.xpu = np.imag(self.zpu)
+        self.rpu = np.real(self.zpu)
+        self.ypu = 1/self.zpu
 
     def print_yprim(self):
         printout = pd.DataFrame(self.matrix)
