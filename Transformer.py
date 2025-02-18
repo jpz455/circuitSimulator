@@ -48,7 +48,7 @@ class Transformer():
 
     def calc_in_pu(self):
         #convert z in pu to system base
-        #get everythinge else in pu
+        #get everything else in pu
         self.zpu = self.z*(current_settings.s_base/self.power_rating)
         self.xpu = np.imag(self.zpu)
         self.rpu = np.real(self.zpu)
