@@ -15,27 +15,25 @@ class Transformer():
         self.x_over_r_ratio = x_over_r_ratio
         self.z: float = (self.impedance_percent/100) * np.exp(1j * np.arctan(self.x_over_r_ratio))
         self.y: float = 1/self.z
+        self.x: float = self.calc_x()
+        self.r: float = self.calc_r()
         self.matrix: Dict[float, float] = {}
         self.settings = current_settings
-        self.calc_z()
-        self.calc_r()
-        self.calc_x()
         self.calc_in_pu()
         self.calc_yprim()
 
-    def calc_z(self):
-        self.z = (self.impedance_percent/100) * np.exp(1j * np.arctan(self.x_over_r_ratio))
     def calc_x(self):
-        self.x = np.imag(self.calc_z())
+        self.x = np.imag(self.z)
+        return self.x
     def calc_r(self):
-        self.r = np.real(self.calc_z())
+        self.r = np.real(self.z)
+        return self.r
     def calc_yprim(self):
         self.calc_in_pu()
-        self.Yseries = self.ypu
 
-        # Create the Y-prim matrix as a 2x2 matrix using the Yseries values
-        self.yprim = np.array([[self.Yseries, -1 * self.Yseries],
-                               [-1 * self.Yseries, self.Yseries]])
+        # Create the Y-prim matrix as a 2x2 matrix using the ypu values
+        self.yprim = np.array([[self.ypu, -1 * self.ypu],
+                               [-1 * self.ypu, self.ypu]])
 
         # Convert the numpy array to a DataFrame
         self.yprim = pd.DataFrame(self.yprim, index=[self.bus1.name, self.bus2.name],
@@ -49,7 +47,7 @@ class Transformer():
 
 
     def calc_in_pu(self):
-        self.v_base = 230
+        self.v_base = self.bus2.base_kv
         self.z_base = self.v_base*self.v_base/self.settings.s_base
         self.y_base = 1/self.z_base
         self.xpu = self.x/self.z_base

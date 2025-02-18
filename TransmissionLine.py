@@ -57,16 +57,15 @@ class TransmissionLine:
         }
 
 
-
     def calculate_base_values(self):
         self.z_base = (self.bus1.base_kv ** 2) / current_settings.s_base
         self.y_base = 1 / self.z_base
 
     def print_yprim(self):
         printout = pd.DataFrame(self.matrix)
-        printout2 = pd.DataFrame(self.y_matrix_df)
+        #printout2 = pd.DataFrame(self.y_matrix_df)
         print(printout.to_string(index = False))
-        print(printout2.to_string())
+        #print(printout2.to_string())
 
 
 
