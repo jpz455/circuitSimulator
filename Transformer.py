@@ -13,14 +13,20 @@ class Transformer():
         self.power_rating = power_rating
         self.impedance_percent = impedance_percent
         self.x_over_r_ratio = x_over_r_ratio
+
+        self.settings = current_settings
+
+
         self.z: float = (self.impedance_percent/100) * np.exp(1j * np.arctan(self.x_over_r_ratio))
         self.y: float = 1/self.z
         self.x: float = self.calc_x()
         self.r: float = self.calc_r()
+        self.z_pu: float = self.z * (current_settings.s_base / self.power_rating)
+        self.y_pu: float = 1 / self.z_pu
+        self.r_pu: float = np.real(self.z_pu)
+        self.x_pu: float = np.imag(self.z_pu)
+        self.y_prim: np.array = self.calc_y_prim()
         self.matrix: Dict[float, float] = {}
-        self.settings = current_settings
-        self.calc_in_pu()
-        self.calc_yprim()
 
     def calc_x(self):
         self.x = np.imag(self.z)
@@ -28,34 +34,23 @@ class Transformer():
     def calc_r(self):
         self.r = np.real(self.z)
         return self.r
-    def calc_yprim(self):
-        self.calc_in_pu()
+    def calc_y_prim(self):
 
         # Create the Y-prim matrix as a 2x2 matrix using the ypu values
-        self.yprim = np.array([[self.ypu, -1 * self.ypu],
-                               [-1 * self.ypu, self.ypu]])
+        self.y_prim = np.array([[self.y_pu, -1 * self.y_pu],
+                                [-1 * self.y_pu, self.y_pu]])
 
         # Convert the numpy array to a DataFrame
-        self.yprim = pd.DataFrame(self.yprim, index=[self.bus1.name, self.bus2.name],
-                                  columns=[self.bus1.name, self.bus2.name])
+        self.y_prim = pd.DataFrame(self.y_prim, index=[self.bus1.name, self.bus2.name],
+                                   columns=[self.bus1.name, self.bus2.name])
 
         # Create the matrix dictionary with entries from the DataFrame
         self.matrix = {
-            "y matrix": [self.yprim.iloc[0, 0], self.yprim.iloc[0, 1]],  # Accessing first row values
-            "": [self.yprim.iloc[1, 0], self.yprim.iloc[1, 1]]  # Accessing second row values
+            "y matrix": [self.y_prim.iloc[0, 0], self.y_prim.iloc[0, 1]],  # Accessing first row values
+            "": [self.y_prim.iloc[1, 0], self.y_prim.iloc[1, 1]]  # Accessing second row values
         }
 
+        return self.y_prim
 
-    def calc_in_pu(self):
-        #convert z in pu to system base
-        #get everything else in pu
-        self.zpu = self.z*(current_settings.s_base/self.power_rating)
-        self.xpu = np.imag(self.zpu)
-        self.rpu = np.real(self.zpu)
-        self.ypu = 1/self.zpu
-
-    def print_yprim(self):
-        printout = pd.DataFrame(self.matrix)
-        printout2 = pd.DataFrame(self.yprim)
-        print(printout.to_string(index = False))
-        print(printout2.to_string())
+    def print_y_prim(self):
+        print(self.y_prim)

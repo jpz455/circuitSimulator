@@ -10,14 +10,16 @@ import pandas as pd
 
 class Circuit:
     def __init__(self,name:str, settings: Settings):
+        self.y_bus: pd.DataFrame
         self.name = name
         self.buses: Dict[str, Bus] = dict()
         self.busRef :List[str] = list()
         self.transformers: Dict[str, Transformer] = dict()
         self.geometries: Dict[str, Geometry] = dict()
         self.conductors: Dict[str, Conductor] = dict()
-        self.transmissionlines: Dict[str, TransmissionLine] = dict()
+        self.transmission_lines: Dict[str, TransmissionLine] = dict()
         self.settings: Settings = settings
+        self.y_bus: pd.DataFrame = pd.DataFrame()
 
 
     def add_bus(self, bus: Bus):
@@ -46,10 +48,10 @@ class Circuit:
         else:
             self.conductors[conductor.name] = conductor
 
-    def add_transmissionline(self, transmissionline: TransmissionLine):
+    def add_transmission_line(self, transmissionline: TransmissionLine):
         # Check if the transmission line already exists
-        if transmissionline.name in self.transmissionlines:
-            print(f"Transmissionline with name '{transmissionline.name}' already exists. Skipping addition.")
+        if transmissionline.name in self.transmission_lines:
+            print(f"Transmission Line with name '{transmissionline.name}' already exists. Skipping addition.")
         else:
 
             # Check if the buses have the same base_kv value
@@ -58,33 +60,33 @@ class Circuit:
                 exit(-1)
 
             # Add the transmission line to the dictionary
-            self.transmissionlines[transmissionline.name] = transmissionline
+            self.transmission_lines[transmissionline.name] = transmissionline
 
-    def calc_ybus(self):
+    def calc_y_bus(self):
         size = np.zeros([Bus.numBus, Bus.numBus])
-        self.YBus = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
+        self.y_bus = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
 
         for yprim in self.transformers.keys():
-            self.YBus.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus1.name] += self.transformers[yprim].yprim.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus1.name]
-            self.YBus.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus2.name] += self.transformers[yprim].yprim.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus2.name]
-            self.YBus.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus2.name] += self.transformers[yprim].yprim.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus2.name]
-            self.YBus.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus1.name] += self.transformers[yprim].yprim.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus1.name]
+            self.y_bus.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus1.name] += self.transformers[yprim].y_prim.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus1.name]
+            self.y_bus.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus2.name] += self.transformers[yprim].y_prim.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus2.name]
+            self.y_bus.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus2.name] += self.transformers[yprim].y_prim.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus2.name]
+            self.y_bus.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus1.name] += self.transformers[yprim].y_prim.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus1.name]
 
-        for yprim in self.transmissionlines.keys():
-            self.YBus.loc[self.transmissionlines[yprim].bus1.name, self.transmissionlines[yprim].bus1.name] += self.transmissionlines[yprim].yprim.loc[self.transmissionlines[yprim].bus1.name, self.transmissionlines[yprim].bus1.name]
-            self.YBus.loc[self.transmissionlines[yprim].bus2.name, self.transmissionlines[yprim].bus2.name] += self.transmissionlines[yprim].yprim.loc[self.transmissionlines[yprim].bus2.name, self.transmissionlines[yprim].bus2.name]
-            self.YBus.loc[self.transmissionlines[yprim].bus1.name, self.transmissionlines[yprim].bus2.name] += self.transmissionlines[yprim].yprim.loc[self.transmissionlines[yprim].bus1.name, self.transmissionlines[yprim].bus2.name]
-            self.YBus.loc[self.transmissionlines[yprim].bus2.name, self.transmissionlines[yprim].bus1.name] += self.transmissionlines[yprim].yprim.loc[self.transmissionlines[yprim].bus2.name, self.transmissionlines[yprim].bus1.name]
+        for yprim in self.transmission_lines.keys():
+            self.y_bus.loc[self.transmission_lines[yprim].bus1.name, self.transmission_lines[yprim].bus1.name] += self.transmission_lines[yprim].y_prim.loc[self.transmission_lines[yprim].bus1.name, self.transmission_lines[yprim].bus1.name]
+            self.y_bus.loc[self.transmission_lines[yprim].bus2.name, self.transmission_lines[yprim].bus2.name] += self.transmission_lines[yprim].y_prim.loc[self.transmission_lines[yprim].bus2.name, self.transmission_lines[yprim].bus2.name]
+            self.y_bus.loc[self.transmission_lines[yprim].bus1.name, self.transmission_lines[yprim].bus2.name] += self.transmission_lines[yprim].y_prim.loc[self.transmission_lines[yprim].bus1.name, self.transmission_lines[yprim].bus2.name]
+            self.y_bus.loc[self.transmission_lines[yprim].bus2.name, self.transmission_lines[yprim].bus1.name] += self.transmission_lines[yprim].y_prim.loc[self.transmission_lines[yprim].bus2.name, self.transmission_lines[yprim].bus1.name]
 
-        return self.YBus
+        return self.y_bus
 
-    def print_ybus(self):
+    def print_y_bus(self):
         """Prints the Y-bus matrix."""
-        if self.YBus is None:
+        if self.y_bus is None:
             print("ERROR: Y-bus has not been calculated yet. Run `calc_ybus()` first.")
         else:
             print("\nY-Bus Matrix:")
-            print(self.YBus.to_string(float_format=lambda x: f"{x:.5f}"))
+            print(self.y_bus.to_string(float_format=lambda x: f"{x:.5f}"))
 
 
 
