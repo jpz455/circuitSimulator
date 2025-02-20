@@ -13,27 +13,18 @@ class Transformer():
         self.power_rating = power_rating
         self.impedance_percent = impedance_percent
         self.x_over_r_ratio = x_over_r_ratio
-
         self.settings = current_settings
-
-
-        self.z: float = (self.impedance_percent/100) * np.exp(1j * np.arctan(self.x_over_r_ratio))
-        self.y: float = 1/self.z
-        self.x: float = self.calc_x()
-        self.r: float = self.calc_r()
-        self.z_pu: float = self.z * (current_settings.s_base / self.power_rating)
-        self.y_pu: float = 1 / self.z_pu
-        self.r_pu: float = np.real(self.z_pu)
-        self.x_pu: float = np.imag(self.z_pu)
-        self.y_prim: np.array = self.calc_y_prim()
-        self.matrix: Dict[float, float] = {}
-
-    def calc_x(self):
+        self.z = (self.impedance_percent/100) * np.exp(1j * np.arctan(self.x_over_r_ratio))
+        self.y = 1/self.z
         self.x = np.imag(self.z)
-        return self.x
-    def calc_r(self):
         self.r = np.real(self.z)
-        return self.r
+        self.z_pu = self.z * (current_settings.s_base / self.power_rating)
+        self.y_pu = 1 / self.z_pu
+        self.r_pu = np.real(self.z_pu)
+        self.x_pu = np.imag(self.z_pu)
+        self.y_prim = self.calc_y_prim()
+        self.matrix: Dict[str, complex] = {}
+
     def calc_y_prim(self):
 
         # Create the Y-prim matrix as a 2x2 matrix using the ypu values

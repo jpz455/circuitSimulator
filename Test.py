@@ -43,7 +43,7 @@ print("bus1 name:", bus1.name, "; should be Bus 1")
 print("bus1 base voltage:", bus1.base_kv, ";should be 20")
 print("bus1 index:", bus1.index, "; should be 1")
 print("bus1 type:", bus1.bus_type, "; should be Slack")
-print("bus1 vpu:", bus1.vpu, "; should be 1.0")
+print("bus1 vpu:", bus1.v_pu, "; should be 1.0")
 print("bus1 delta:", bus1.delta, "; should be 0.0")
 
 
@@ -51,7 +51,7 @@ print("bus2 name:", bus2.name, "; should be Bus 2")
 print("bus 2 base voltage:", bus2.base_kv, ";should be 230")
 print("bus 2 index: ", bus2.index, "; should be 2")
 print("bus2 type:", bus2.bus_type, "; should be PQ")
-print("bus2 vpu:", bus2.vpu, "; should be 1.0")
+print("bus2 vpu:", bus2.v_pu, "; should be 1.0")
 print("bus2 delta:", bus2.delta, "; should be 0.0")
 print()
 

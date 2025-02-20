@@ -9,21 +9,33 @@ class Circuit{
     +transformers: Dict[str, Transformer]
     +geometries: Dict[str, Geometry]
     +conductors: Dict[str, Conductor]
-    +transmissionlines: Dict[str, TransmissionLine]
+    +transmission_lines: Dict[str, TransmissionLine]
+    +loads: Dict[str, Load]
+    +generators: Dict[str, Generator]
     +settings: Settings
+    +y_bus: DataFrame
 
     +add_bus(Bus)
     +add_transformer(Transformer)
     +add_geometry(Geometry)
     +add_conductor(Conductor)
-    +add_transmissionline(TransmissionLine)
+    +add_transmission_line(TransmissionLine)
+    +add_load(Load)
+    +add_generator(Generator)
+    +calc_y_bus(): DataFrame
+    +print_y_bus()
     }
 
 class Bus {
     +name: str
-    +v: float
+    +base_kv: float
     +numBus: float
     +index: float
+    +bus_type: str
+    +v_pu: float = 1.0
+    +delta: float = 0.0
+
+    +set_bus_type()
     }
 
 class Bundle {
@@ -34,11 +46,21 @@ class Bundle {
     +resistance: float
     +DSL: float
     +DSC: float
+
     +calculate_DSL(): float
     +calculate_DSC(): float
     }
 
 class Conductor {
+    +name: str
+    +diameter: float
+    +GMR: float
+    +resistance: float
+    +amp: float
+    +radius: float
+    }
+
+class Generator {
     +name: str
     +diameter: float
     +GMR: float
@@ -59,8 +81,22 @@ class Geometry{
     +Dbc: float
     +Dca: float
     +Deq: float
+
     +calculate_Deq(): float
     }
+
+class Load{
+    +name: str
+    +bus: Bus
+    +settings: Settings
+    +reactive_pwr: float
+    +real_pwr: float
+    }
+
+class Settings{
+    +f(float) = 60
+    +s_base(float) = 100
+}
 
 class Transformer {
     +name: str
@@ -70,26 +106,19 @@ class Transformer {
     +impedance_percent: float
     +x_over_r_ratio: float
     +settings: Settings
-    +z: float
-    +y: float
+    +z: complex
+    +y: complex
     +x: float
     +r: float
-    +yprim: List[float]
-    +matrix: Dict[str, float]
-    +v_base: float
-    +z_base: float
-    +y_base: float
-    +xpu: float
-    +rpu: float
-    +zpu: float
-    +ypu: float
+    +z_pu: complex
+    +y_pu: complex
+    +r_pu: float
+    +x_pu: float
+    +y_prim: List[complex]
+    +matrix: Dict[str, complex]
 
-    +calc_z()
-    +calc_r()
-    +calc_x()
-    +calc_in_pu()
-    +calc_yprim()
-    +print_yprim()
+    +calc_y_prim(): List[complex]
+    +print_y_prim()
     }
 
 class TransmissionLine {
@@ -100,34 +129,25 @@ class TransmissionLine {
     +geometry: Geometry
     +length: float
     +settings: Settings
-    +R: float
-    +X: float
-    +Z: float
-    +B: float
-    +Y: float
-    +Rpu: float
-    +Xpu: float
-    +Zpu: float
-    +Bpu: float
-    +Ypu: float
-    +Ytotal: float
     +z_base: float
     +y_base: float
-    +y_matrix: List[complex]
-    +matrix: Dict[str, float]
+    +z: complex
+    +r: float
+    +x: float
+    +r_pu: float
+    +x_pu: float
+    +y_pu: complex
+    +y_shunt: complex
+    +y_series: complex
+    +y_series_pu: complex
+    +y_shunt_pu: complex
+    +y_prim: List[complex]
+    +matrix: Dict[str, complex]
 
-    +calculate_series_impedance()
-    +calculate_admittance()
-    +calculate_y_matrix()
-    +calculate_base_values()
-    +print_yprim()
+    +calc_y_prim(): List[complex]
+    +print_y_prim()
     }
 
-
-class Settings{
-    +f(float)
-    +s_base(float)
-}
 
 Circuit *-- Transformer
 Circuit *-- Bus
@@ -135,6 +155,8 @@ Circuit *-- TransmissionLine
 Circuit *-- Geometry
 Circuit *-- Conductor
 Circuit *-- Settings
+Circuit *-- Load
+Circuit *-- Generator
 
 TransmissionLine *-- Geometry
 TransmissionLine *-- Bundle

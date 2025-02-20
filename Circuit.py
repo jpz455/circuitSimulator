@@ -1,16 +1,18 @@
 from Bus import Bus
+from Load import Load
 from Transformer import Transformer
 from Geometry import Geometry
 from Conductor import Conductor
 from TransmissionLine import TransmissionLine
 from typing import Dict, List
 from Settings import Settings
+from Generator import Generator
+from Load import Load
 import numpy as np
 import pandas as pd
 
 class Circuit:
     def __init__(self,name:str, settings: Settings):
-        self.y_bus: pd.DataFrame
         self.name = name
         self.buses: Dict[str, Bus] = dict()
         self.busRef :List[str] = list()
@@ -18,8 +20,11 @@ class Circuit:
         self.geometries: Dict[str, Geometry] = dict()
         self.conductors: Dict[str, Conductor] = dict()
         self.transmission_lines: Dict[str, TransmissionLine] = dict()
+        self.loads: Dict[str, Load] = dict()
+        self.generators: Dict[str, Generator] = dict()
         self.settings: Settings = settings
         self.y_bus: pd.DataFrame = pd.DataFrame()
+
 
 
     def add_bus(self, bus: Bus):
@@ -48,19 +53,31 @@ class Circuit:
         else:
             self.conductors[conductor.name] = conductor
 
-    def add_transmission_line(self, transmissionline: TransmissionLine):
+    def add_transmission_line(self, transmission_line: TransmissionLine):
         # Check if the transmission line already exists
-        if transmissionline.name in self.transmission_lines:
-            print(f"Transmission Line with name '{transmissionline.name}' already exists. Skipping addition.")
+        if transmission_line.name in self.transmission_lines:
+            print(f"Transmission Line with name '{transmission_line.name}' already exists. Skipping addition.")
         else:
 
             # Check if the buses have the same base_kv value
-            if transmissionline.bus1.base_kv != transmissionline.bus2.base_kv:
+            if transmission_line.bus1.base_kv != transmission_line.bus2.base_kv:
                 print("ERROR: Cannot connect unmatched voltages for transmission lines.")
                 exit(-1)
 
             # Add the transmission line to the dictionary
-            self.transmission_lines[transmissionline.name] = transmissionline
+            self.transmission_lines[transmission_line.name] = transmission_line
+
+    def add_load(self, load: Load):
+        if load.name in self.loads:
+            print(f"Load with name '{load.name}' already exists. Skipping addition.")
+        else:
+            self.loads[load.name] = load
+
+    def add_generator(self, generator: Generator):
+            if generator.name in self.generators:
+                print(f"Generator with name '{generator.name}' already exists. Skipping addition.")
+            else:
+                self.generators[generator.name] = generator
 
     def calc_y_bus(self):
         size = np.zeros([Bus.numBus, Bus.numBus])
