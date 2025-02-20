@@ -11,38 +11,51 @@ from Circuit import Circuit as Circuit
 
 
 #************TRANSFORMER VALIDATION***********************#
-"""""
-bus1 = (Bus("Bus 1", 20))
-bus2 = Bus("Bus 2", 230)
-xfmr1 = Transformer("T1", "bus1", "bus2", 124, 8.5, 10)
-print("Transformer Validation")
-print("name: ", xfmr1.name, "; should be T1")
-print("bus1: ", xfmr1.bus1, "; should be Bus 1")
-print("bus2: ", xfmr1.bus2, "; should be Bus 2")
-print("power rating: ", xfmr1.power_rating, "; should be 124")
-print("impedance percent: ", xfmr1.impedance_percent, "; should be 8.5")
-print("ratio: ", xfmr1.x_over_r_ratio, "; should be 10")
+#
+# bus1 = Bus("Bus 1", 20, "Slack")
+# bus2 = Bus("Bus 2", 230, "PQ")
+# xfmr1 = Transformer("T1", bus1, bus2, 124, 8.5, 10)
+# print("Transformer Validation")
+# print("name: ", xfmr1.name, "; should be T1")
+# print("bus1: ", xfmr1.bus1, "; should be Bus 1")
+# print("bus2: ", xfmr1.bus2, "; should be Bus 2")
+# print("power rating: ", xfmr1.power_rating, "; should be 124")
+# print("impedance percent: ", xfmr1.impedance_percent, "; should be 8.5")
+# print("ratio: ", xfmr1.x_over_r_ratio, "; should be 10")
+# #**********CONDUCTOR VALIDATION******************
+# conductor1 = Conductor("Partridge", 0.642, 0.0217,0.385, 460)
+# print()
+# print("Conductor Validation")
+# print("name:", conductor1.name, ";should be Partridge")
+# print("diameter:", conductor1.diameter, ";should be 0.642")
+# print("GMR:", conductor1.GMR, ";should be 0.0217")
+# print("resistance:", conductor1.resistance, ";should be 0.385")
+# print("amperage:", conductor1.amp, ";should be 460")
+# print()
 
-xfmr1.calc_z()
-#**********CONDUCTOR VALIDATION******************
-conductor1 = Conductor("Partridge", 0.642, 0.0217,0.385, 460)
-print()
-print("Conductor Validation")
-print("name:", conductor1.name, ";should be Partridge")
-print("diameter:", conductor1.diameter, ";should be 0.642")
-print("GMR:", conductor1.GMR, ";should be 0.0217")
-print("resistance:", conductor1.resistance, ";should be 0.385")
-print("amperage:", conductor1.amp, ";should be 460")
-print()
+
 #*********BUS VALIDATION**************************
+
 print("Bus Validation")
+bus1 = Bus("Bus 1", 20, "Slack")
+bus2 = Bus("Bus 2", 230, "PQ")
 print("bus1 name:", bus1.name, "; should be Bus 1")
 print("bus1 base voltage:", bus1.base_kv, ";should be 20")
-print("bus1 index:", bus1.index, "; should be 0")
+print("bus1 index:", bus1.index, "; should be 1")
+print("bus1 type:", bus1.bus_type, "; should be Slack")
+print("bus1 vpu:", bus1.vpu, "; should be 1.0")
+print("bus1 delta:", bus1.delta, "; should be 0.0")
+
+
 print("bus2 name:", bus2.name, "; should be Bus 2")
 print("bus 2 base voltage:", bus2.base_kv, ";should be 230")
-print("bus 2 index: ", bus2.index, "; should be 1")
+print("bus 2 index: ", bus2.index, "; should be 2")
+print("bus2 type:", bus2.bus_type, "; should be PQ")
+print("bus2 vpu:", bus2.vpu, "; should be 1.0")
+print("bus2 delta:", bus2.delta, "; should be 0.0")
 print()
+
+"""""
 #************BUNDLE VALIDATION**********************
 print("Bundle Validation")
 bundle1 = Bundle("Bundle 1", 2, 1.5, conductor1)
@@ -86,13 +99,13 @@ print(circuit1.buses)  # Expected output: {}
 print(type(circuit1.buses))  # Expected output: <class 'dict'>
 
 # Correct way to add a bus
-bus1 = Bus("Bus1", 20)
-bus2 = Bus("Bus2", 20)
-bus3 = Bus('Bus3', 20)
-bus4 = Bus("Bus4", 20)
-bus5 = Bus("Bus5", 20)
-bus6 = Bus("Bus6", 20)
-bus7 = Bus("Bus7", 20)
+bus1 = Bus("Bus1", 20, "Slack")
+bus2 = Bus("Bus2", 20, "PQ")
+bus3 = Bus('Bus3', 20, "PQ")
+bus4 = Bus("Bus4", 20, "PQ")
+bus5 = Bus("Bus5", 20, "PQ")
+bus6 = Bus("Bus6", 20, "PQ")
+bus7 = Bus("Bus7", 20, "PV")
 circuit1.add_bus(bus1)
 circuit1.add_bus(bus2)
 circuit1.add_bus(bus3)
@@ -124,14 +137,4 @@ circuit1.add_transmissionline(transmissionLine4)
 circuit1.add_transmissionline(transmissionLine5)
 circuit1.add_transmissionline(transmissionLine6)
 
-
-
-print(transmissionLine1.Rpu, transmissionLine1.Xpu, transmissionLine1.Yshuntpu)
-transformer1.print_yprim()
-transmissionLine1.calc_yprim()
-transmissionLine1.print_yprim()
-
-
-Ybus = circuit1.calc_ybus()
-print(Ybus)
 

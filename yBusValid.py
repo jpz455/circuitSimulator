@@ -16,13 +16,13 @@ circuit = Circuit("Power Flow Test Circuit", settings)
 
 # Define buses
 
-bus1= Bus("bus1", 20)
-bus2= Bus("bus2", 230)
-bus3= Bus("bus3", 230)
-bus4=Bus("bus4", 230)
-bus5=Bus("bus5", 230)
-bus6=Bus("bus6", 230)
-bus7=Bus("bus7", 18)
+bus1= Bus("bus1", 20, "Slack")
+bus2= Bus("bus2", 230, "PQ")
+bus3= Bus("bus3", 230, "PQ")
+bus4=Bus("bus4", 230, "PQ")
+bus5=Bus("bus5", 230, "PQ")
+bus6=Bus("bus6", 230, "PQ")
+bus7=Bus("bus7", 18, "PQ")
 
 # Add buses to circuit
 circuit.add_bus(bus1)
