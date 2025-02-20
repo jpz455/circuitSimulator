@@ -34,7 +34,7 @@ circuit.add_bus(bus6)
 circuit.add_bus(bus7)
 
 T1=Transformer("T1", bus1, bus2, 125, 8.5, 10)
-T2= Transformer("T2", bus6, bus7, 200, 10.5, 12)
+T2=Transformer("T2", bus6, bus7, 200, 10.5, 12)
 
 circuit.add_transformer(T1)
 circuit.add_transformer(T2)
@@ -69,3 +69,41 @@ circuit.calc_ybus()
 
 # Print the Y-Bus Matrix
 circuit.print_ybus()
+
+#print values for powerworld
+print("xfmr1 r: ", T1.rpu)
+print("xfmr1 x: ", T1.xpu)
+print()
+
+print("xfmr2 r: ", T2.rpu)
+print("xfmr2 x: ", T2.xpu)
+print()
+
+print("tl1 r: ", tLine1.Rpu)
+print("tl1 x: ", tLine1.Xpu)
+print("tl1 b: ", np.imag(tLine1.Yshuntpu))
+print()
+
+print("tl2 r: ", tLine2.Rpu)
+print("tl2 x: ", tLine2.Xpu)
+print("tl2 b: ", np.imag(tLine2.Yshuntpu))
+print()
+
+print("tl3 r: ", tLine3.Rpu)
+print("tl3 x: ", tLine3.Xpu)
+print("tl3 b: ", np.imag(tLine3.Yshuntpu))
+print()
+
+print("tl4 r: ", tLine4.Rpu)
+print("tl4 x: ", tLine4.Xpu)
+print("tl4 b: ", np.imag(tLine4.Yshuntpu))
+print()
+
+print("tl5 r: ", tLine5.Rpu)
+print("tl5 x: ", tLine5.Xpu)
+print("tl5 b: ", np.imag(tLine5.Yshuntpu))
+print()
+
+print("tl6 r: ", tLine6.Rpu)
+print("tl6 x: ", tLine6.Xpu)
+print("tl6 b: ", np.imag(tLine6.Yshuntpu))

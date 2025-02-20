@@ -24,9 +24,9 @@ xfmr1 = xfmr("Transformer1", bus1, bus2, 125, 8.5, 10)
 xfmr2 = xfmr("Transformer2", bus6, bus7, 200, 10.5, 12)
 
 #transmission lines
-geom1 = geom('geom1',0,0,19.5,0,9.75, 7.75) #i think this is right based on line diagram?
+geom1 = geom('geom1',0,0,19.5,0,9.75, 0) #i think this is right based on line diagram?
 cond1 = cond('cond1',.642/12,.0217,.385,460) #from ascr sheet, partridge
-bundle1 = bundle('bundle1',3,1.5, cond1) #from diagram
+bundle1 = bundle('bundle1',2,1.5, cond1) #from diagram
 
 tl1 = tl('TL1',bus2,bus4,bundle1,geom1,10)
 tl2= tl('TL2',bus2,bus3,bundle1,geom1,25)
