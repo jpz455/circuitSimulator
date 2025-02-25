@@ -15,24 +15,27 @@ class TransmissionLine:
         self.geometry = geometry
         self.length = length
 
-        self.z_base = (self.bus1.base_kv * self.bus1.base_kv) / current_settings.s_base
+        self.z_base = (self.bus1.base_kv ** 2) / current_settings.s_base
         self.y_base = 1 / self.z_base
 
         self.r = self.bundle.resistance * self.length
         # X = 2pif * (2e-7*ln(Deq/Dsl)*1609
-        self.x = (2 * np.pi * current_settings.f) * 2 * 10e-7 * np.log(self.geometry.Deq / self.bundle.DSL) * 1609.34 * self.length
-        self.z = self.r + 1j * self.x
-        self.r_pu = self.r / self.z_base
-        self.x_pu = self.x / self.z_base
-        self.z_pu = self.z / self.z_base
+        self.x = 2 * np.pi * current_settings.f * 2e-7 * np.log(self.geometry.Deq / self.bundle.DSL) * 1609 * self.length
+        self.z = self.r + 1j * (self.x)
+        self.r_pu: float = self.r / self.z_base
+        self.x_pu: float = self.x / self.z_base
+        self.z_pu: float = self.z / self.z_base
+
+
 
         # Y = 2pif*(2pi*eps*/ln(Deq/Dsc)*1609)
-        # Y (shunt) = G +jB; G = 0
-        self.y_shunt =  1j * ((current_settings.f * 2 * np.pi) * ((2 * np.pi * np.power(8.85, -12)) / (np.log(self.geometry.Deq / self.bundle.DSC))) * 1609.34 * self.length)
+        # Y (shunt) = G +jB
+        self.y_shunt =  1j * 2 * np.pi * current_settings.f * (2 * np.pi * np.power(8.85, -12) / (np.log(self.geometry.Deq / self.bundle.DSC)) * 1609) * self.length
         # Y (series) = 1/Z (series)
         self.y_series =  1 / self.z
         self.y_series_pu = 1 / self.z_pu
         self.y_shunt_pu = self.y_shunt / self.y_base
+
 
 
         self.matrix: {}

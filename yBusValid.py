@@ -40,11 +40,11 @@ circuit.add_transformer(T1)
 circuit.add_transformer(T2)
 
 # Define conductor
-conductor1 = Conductor("Partridge",.1013,.0217,.385,460)
+conductor1 = Conductor("Partridge",.642,.0217,.385,460)
 circuit.add_conductor(conductor1)
 
 # Define geometry
-geometry1 = Geometry("G1",0,0,9.75,0,19.5,0)
+geometry1 = Geometry("G1",0,0,19.5,0,39,0)
 circuit.add_geometry(geometry1)
 
 bundle1 = Bundle('B1',2,1.5, conductor1)
