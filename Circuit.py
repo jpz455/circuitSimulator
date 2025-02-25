@@ -105,14 +105,5 @@ class Circuit:
             print("\nY-Bus Matrix:")
             print(self.y_bus.to_string(float_format=lambda x: f"{x:.5f}"))
 
-    def compute_power_injection(self, bus: Bus, ybus: List, voltages: List):
-        power = 0
-        reactive = 0
-        for voltage in voltages:
-            for bus in ybus:
-                #this is possibly very wrong but summing up: voltage at a bus k * admittance at intersection kn * voltage at bus n * cos (diff of deltas)
-                power = power + voltage * bus * voltages[bus] * np.cos(self.buses[voltage].delta - self.buses[bus].delta)
-                reactive = reactive + voltage * bus * voltages[bus] * np.sin(self.buses[voltage].delta - self.buses[bus].delta)
 
-        return power, reactive
 
