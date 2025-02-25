@@ -30,7 +30,7 @@ class TransmissionLine:
 
         # Y = 2pif*(2pi*eps*/ln(Deq/Dsc)*1609)
         # Y (shunt) = G +jB
-        self.y_shunt =  1j * 2 * np.pi * current_settings.f * (2 * np.pi * np.power(8.85, -12) / (np.log(self.geometry.Deq / self.bundle.DSC)) * 1609) * self.length
+        self.y_shunt =  1j * 2 * np.pi * current_settings.f * (2 * np.pi * 8.854e-12 / (np.log(self.geometry.Deq / self.bundle.DSC)) * 1609) * self.length
         # Y (series) = 1/Z (series)
         self.y_series =  1 / self.z
         self.y_series_pu = 1 / self.z_pu
