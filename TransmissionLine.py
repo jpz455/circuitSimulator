@@ -21,7 +21,7 @@ class TransmissionLine:
         self.r = self.bundle.resistance * self.length
         # X = 2pif * (2e-7*ln(Deq/Dsl)*1609
         self.x = (2 * np.pi * current_settings.f) * 2 * 10e-7 * np.log(self.geometry.Deq / self.bundle.DSL) * 1609.34 * self.length
-        self.z = self.r + 1j * (self.x)
+        self.z = self.r + 1j * self.x
         self.r_pu: float = self.r / self.z_base
         self.x_pu: float = self.x / self.z_base
         self.z_pu: float = self.z / self.z_base
