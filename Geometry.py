@@ -15,7 +15,7 @@ class Geometry:
 
     def calculate_Deq(self):
         #cube root(Dab*Dbc*Dca)
-        self.Deq = np.power((self.Dab * self.Dbc * self.Dca),1/3)
+        self.Deq = np.power((self.Dab * self.Dbc * self.Dca), 1/3)
         return self.Deq
 
 

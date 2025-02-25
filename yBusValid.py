@@ -47,7 +47,7 @@ circuit.add_conductor(conductor1)
 geometry1 = Geometry("G1",0,0,9.75,0,19.5,0)
 circuit.add_geometry(geometry1)
 
-bundle1 = Bundle('B1',2,1.5,conductor1)
+bundle1 = Bundle('B1',2,1.5, conductor1)
 # Define transmission lines
 
 tLine1 = TransmissionLine("tline1",bus2, bus4,bundle1,geometry1,10)
