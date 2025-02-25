@@ -137,7 +137,3 @@ circuit1.add_transmission_line(transmissionLine4)
 circuit1.add_transmission_line(transmissionLine5)
 circuit1.add_transmission_line(transmissionLine6)
 
-
-
-voltages = [20, 230, 230, 230, 230, 230, 20]
-circuit1.calc_y_bus()
