@@ -148,6 +148,12 @@ class TransmissionLine {
     +print_y_prim()
     }
 
+class Solution {
+    +circuit: Circuit
+
+    +compute_power_injection(Bus, array, array): array, array
+}
+
 
 Circuit *-- Transformer
 Circuit *-- Bus
@@ -168,6 +174,7 @@ Bundle *-- Conductor
 Transformer *-- Settings
 Transformer *-- Bus
 
+Solution *-- Circuit
 
 
 
