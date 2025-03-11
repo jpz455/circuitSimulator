@@ -21,7 +21,7 @@ circuit = Circuit("Power Flow Test Circuit", settings)
 # Create and add buses
 bus1= Bus("bus1", 20, "slack")
 bus2= Bus("bus2", 230, "pq")
-bus3= Bus("bus3", 18, "pq")
+bus3= Bus("bus3", 230, "pq")
 
 circuit.add_bus(bus1)
 circuit.add_bus(bus2)
@@ -41,18 +41,30 @@ circuit.add_geometry(geometry1)
 bundle1 = Bundle('B1',2,1.5, conductor1)
 
 # Create & add transmission lines
-tLine1 = TransmissionLine("tline1",bus1, bus2, bundle1, geometry1,10)
 tLine2 = TransmissionLine("tline2",bus2, bus3, bundle1, geometry1,10)
+circuit.add_transmission_line(tLine2)
 
 # Calculate & print Y-Bus matrix
 y_bus = circuit.calc_y_bus()
 circuit.print_y_bus()
 
+print("xfmr1 r: ", T1.r_pu)
+print("xfmr1 x: ", T1.x_pu)
+print()
+
+
+print("tl2 r: ", tLine2.r_pu)
+print("tl2 x: ", tLine2.x_pu)
+print("tl2 b: ", np.imag(tLine2.y_shunt_pu))
+print()
+
+
+
 # Calculate power mismatch
 buses = np.array([bus1, bus2, bus3])
-v1 = bus1.v_pu*bus1.base_kv*np.exp(1j*bus1.delta)
-v2 = bus2.v_pu*bus2.base_kv*np.exp(1j*bus2.delta)
-v3 = bus3.v_pu*bus3.base_kv*np.exp(1j*bus3.delta)
+v1 = bus1.v_pu*np.exp(1j*bus1.delta)
+v2 = bus2.v_pu*np.exp(1j*bus2.delta)
+v3 = bus3.v_pu*np.exp(1j*bus3.delta)
 voltages = np.array([v1, v2, v3])
 solution = Solution(circuit)
 
