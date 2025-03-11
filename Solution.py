@@ -15,13 +15,18 @@ class Solution:
         P_k = np.zeros([N,1])
         Q_k = np.zeros([N,1])
 
+        # get buses as list
+        bus_list = list(self.circuit.buses.items())
+        bus_values = [value for key, value in bus_list]
 
         for n in range(N):
-            if n != bus.name:
+            #get bus name for column index in y_bus
+            bus_n = bus_values[n]
+            if bus_n.name != bus.name:
                 # Get the admittance element Y_kn
-                Y_kn = y_bus[bus.name, n]
+                Y_kn = y_bus.loc[bus.name, bus_n.name]
                 # Get the voltage at bus n
-                V_n = voltages[n]
+                V_n = voltages[n-1]
                 delta_N = np.angle(V_n)  # Extract angle from complex voltage
 
                 # Compute active and reactive power injections
@@ -32,34 +37,39 @@ class Solution:
 
 
     def compute_power_mismatch(self, buses: np.array, y_bus: np.array, voltages: np.array):
-        N = buses.numBus
+        size = 0
+        for bus in buses:
+           size += 1
+
+        N = size
       #empty array to start
 
         #calculated power
-        calc_real = np.zeros([N-1, 1])
-        calc_reactive = np.zeros([N-1, 1])
+        calc_real = np.zeros([N, 1])
+        calc_reactive = np.zeros([N, 1])
 
         #known power
-        y_real = np.zeros([N - 1, 1])
-        y_reactive = np.zeros([N - 1, 1])
+        y_real = np.zeros([N, 1])
+        y_reactive = np.zeros([N, 1])
 
         #angle and voltage
-        y_ang = np.zeros([N - 1, 1])
-        y_v = np.zeros([N - 1, 1])
+        y_ang = np.zeros([N, 1])
+        y_v = np.zeros([N, 1])
 
+        # set index for array at 0 to start
+        index = 0
         for n in buses:
-            #calculate power & reactive for all
-            calc_real[n, 1], calc_reactive[n, 1] = self.compute_power_injection(buses[n], y_bus[n], voltages)
+            calc_real[index, 1], calc_reactive[index, 1] = self.compute_power_injection(buses[index], y_bus, voltages)
 
             #add known values to vectors
-            if buses[n].bus_type == "pv":
+            if buses[index].bus_type == "pv":
                 #if pv we know power and voltage and angle
-                y_ang[n, 1] = self.circuit.buses[n].delta
-                y_v[n, 1] = self.circuit.buses[n].v_pu
+                y_ang[index, 1] = self.circuit.buses[n].delta
+                y_v[index, 1] = self.circuit.buses[n].v_pu
 
 
                 # get powers
-                y_real[n, 1] = self.circuit.generators[n].mw_setpoint
+                y_real[index, 1] = self.circuit.generators[n].mw_setpoint
                 # get power factor
                 pf = np.cos(self.circuit.buses[n].delta * np.pi / 180)
                 # get reactive power
@@ -67,19 +77,19 @@ class Solution:
                 y_reactive[n, 1] = s * np.sin(self.circuit.buses[n].delta * np.pi / 180)
 
 
-            elif buses[n].bus_type == "pq":
+            elif buses[index].bus_type == "pq":
                 # if pq then we know real and reactive
-                y_real[n,1] = self.circuit.generators[n].mw_setpoint
+                y_real[index, 1] = self.circuit.generators[n].mw_setpoint
                 # get power factor
                 pf = np.cos(self.circuit.buses[n].delta*np.pi/180)
                 #get reactive power
-                s = y_real[n,1]/pf
-                y_reactive[n,1]= s*np.sin(self.circuit.buses[n].delta*np.pi/180)
+                s = y_real[index, 1]/pf
+                y_reactive[index, 1]= s*np.sin(self.circuit.buses[n].delta*np.pi/180)
 
-            elif buses[n].bus_type == "slack":
+            elif buses[index].bus_type == "slack":
                 # if slack we know voltage and angle
-                y_ang[n, 1] = self.circuit.buses[n].delta
-                y_v[n, 1] = self.circuit.buses[n].v_pu
+                y_ang[index, 1] = self.circuit.buses[n].delta
+                y_v[index, 1] = self.circuit.buses[n].v_pu
 
                 # calculate powers
                 real_added = 0
@@ -111,10 +121,12 @@ class Solution:
                 y_real[n, 1] = p_slack
                 y_reactive[n, 1] = q_slack
 
+            #increment index
+            index += 1
+
         #now stack vectors
         calc_powers = np.vstack((calc_real, calc_reactive))
         y_powers = np.vstack((y_real, y_reactive))
-
         #subtract
         vec = calc_powers - y_powers
 
