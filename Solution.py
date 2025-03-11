@@ -1,3 +1,5 @@
+from typing import Dict
+
 from Circuit import Circuit
 from Bus import Bus
 import numpy as np
@@ -34,32 +36,87 @@ class Solution:
       #empty array to start
 
         #calculated power
-        fxn_real = np.zeros([N-1, 1])
-        fxn_reactive = np.zeros([N-1, 1])
+        calc_real = np.zeros([N-1, 1])
+        calc_reactive = np.zeros([N-1, 1])
 
         #known power
         y_real = np.zeros([N - 1, 1])
         y_reactive = np.zeros([N - 1, 1])
 
-        for n in buses:
-            #calculate power & reactive for all but slack bus
-            if buses[n].bus_type != "slack":
-                fxn_real[n, 1], fxn_reactive[n, 1] = self.compute_power_injection(buses[n], y_bus[n], voltages)
+        #angle and voltage
+        y_ang = np.zeros([N - 1, 1])
+        y_v = np.zeros([N - 1, 1])
 
-            #add known values
+        for n in buses:
+            #calculate power & reactive for all
+            calc_real[n, 1], calc_reactive[n, 1] = self.compute_power_injection(buses[n], y_bus[n], voltages)
+
+            #add known values to vectors
             if buses[n].bus_type == "pv":
-                y_real = self.circuit.generators[n].mw_setpoint
-                y_reactive = 0 #tbd
-            if buses[n].bus_type == "slack":
-                y_real = self.circuit.generators[n].mw_setpoint
-                y_reactive = 0 #tbd
+                #if pv we know power and voltage and angle
+                y_ang[n, 1] = self.circuit.buses[n].delta
+                y_v[n, 1] = self.circuit.buses[n].v_pu
+
+
+                # get powers
+                y_real[n, 1] = self.circuit.generators[n].mw_setpoint
+                # get power factor
+                pf = np.cos(self.circuit.buses[n].delta * np.pi / 180)
+                # get reactive power
+                s = y_real[n, 1] / pf
+                y_reactive[n, 1] = s * np.sin(self.circuit.buses[n].delta * np.pi / 180)
+
+
+            elif buses[n].bus_type == "pq":
+                # if pq then we know real and reactive
+                y_real[n,1] = self.circuit.generators[n].mw_setpoint
+                # get power factor
+                pf = np.cos(self.circuit.buses[n].delta*np.pi/180)
+                #get reactive power
+                s = y_real[n,1]/pf
+                y_reactive[n,1]= s*np.sin(self.circuit.buses[n].delta*np.pi/180)
+
+            elif buses[n].bus_type == "slack":
+                # if slack we know voltage and angle
+                y_ang[n, 1] = self.circuit.buses[n].delta
+                y_v[n, 1] = self.circuit.buses[n].v_pu
+
+                # calculate powers
+                real_added = 0
+                reactive_added = 0
+                real_lost = 0
+                reactive_lost = 0
+
+                # get all power added to circuit from generators
+                for gen in self.circuit.generators:
+                    # get real & reactive power associated with generators
+                    real_added += self.circuit.generators[gen].mw_setpoint
+                    pf = np.cos(self.circuit.generators[gen].bus.delta * np.pi / 180)  # power factor
+                    s = self.circuit.generators[gen].mw_setpoint/pf #complex power
+                    q = s*np.sin(self.circuit.generators[gen].bus.delta*np.pi/180)
+                    reactive_added += q
+
+                # get all power lost in loads
+                for load in self.circuit.loads:
+                    real_lost += self.circuit.loads[load].real_pwr
+                    reactive_lost += self.circuit.loads[load].reactive_pwr
+
+
+                # sum
+                #this is def wrong bc I'm not calculating loss in the power lines
+                p_slack = real_added - real_lost
+                q_slack = reactive_added - reactive_lost
+
+
+                y_real[n, 1] = p_slack
+                y_reactive[n, 1] = q_slack
 
         #now stack vectors
-        fxn_powers = np.vstack((fxn_real, fxn_reactive))
+        calc_powers = np.vstack((calc_real, calc_reactive))
         y_powers = np.vstack((y_real, y_reactive))
 
         #subtract
-        vec = fxn_powers - y_powers
+        vec = calc_powers - y_powers
 
         return vec
 
