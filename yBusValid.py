@@ -7,6 +7,7 @@ from TransmissionLine import TransmissionLine
 from Settings import Settings
 from Circuit import Circuit
 import numpy as np
+from Solution import Solution
 
 # Initialize settings
 settings = Settings()
@@ -65,7 +66,7 @@ circuit.add_transmission_line(tLine5)
 circuit.add_transmission_line(tLine6)
 
 # Calculate Y-Bus Matrix
-circuit.calc_y_bus()
+y_bus = circuit.calc_y_bus()
 
 # Print the Y-Bus Matrix
 circuit.print_y_bus()
@@ -107,3 +108,10 @@ print()
 print("tl6 r: ", tLine6.r_pu)
 print("tl6 x: ", tLine6.x_pu)
 print("tl6 b: ", np.imag(tLine6.y_shunt_pu))
+
+solve = Solution(circuit)
+buses = [bus1, bus2, bus3, bus4, bus5, bus6]
+voltages = [20, 230, 230, 230, 230, 230, 18]
+
+p1, q1 = solve.compute_power_injection(bus1, y_bus, voltages)
+vec = solve.compute_power_mismatch(buses, y_bus, voltages)
