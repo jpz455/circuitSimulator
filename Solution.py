@@ -12,8 +12,8 @@ class Solution:
         N = bus.numBus
         V_k = voltages[N-1]  # Complex voltage at bus k
         delta_K = np.angle(V_k)   # Extract angle from complex voltage
-        P_k = np.zeros([N,1])
-        Q_k = np.zeros([N,1])
+        P_k = 0 #np.zeros([N,1])
+        Q_k = 0 #p.zeros([N,1])
 
         # get buses as list
         bus_list = list(self.circuit.buses.items())
@@ -43,11 +43,8 @@ class Solution:
 
         N = size
       #empty array to start
-
-        #calculated power
-        calc_real = np.zeros([N, 1])
-        calc_reactive = np.zeros([N, 1])
-
+        calc_real = np.array([])
+        calc_reactive =np.array([])
         #known power
         y_real = np.zeros([N, 1])
         y_reactive = np.zeros([N, 1])
@@ -57,10 +54,19 @@ class Solution:
         y_v = np.zeros([N, 1])
 
         # set index for array at 0 to start
+        i = 0
+        for n in range(N):
+            real, reactive = self.compute_power_injection(buses[i], y_bus, voltages)
+            calc_real = np.append(calc_real, real)
+            calc_reactive = np.append(calc_reactive, reactive)
+            i +=1
+
+        #rotate array
+        calc_real = calc_real.reshape(-1, 1)
+        calc_reactive = calc_reactive.reshape(-1, 1)
+
         index = 0
         for n in buses:
-            calc_real[index, 1], calc_reactive[index, 1] = self.compute_power_injection(buses[index], y_bus, voltages)
-
             #add known values to vectors
             if buses[index].bus_type == "pv":
                 #if pv we know power and voltage and angle

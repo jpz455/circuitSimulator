@@ -56,9 +56,7 @@ v3 = bus3.v_pu*bus3.base_kv*np.exp(1j*bus3.delta)
 voltages = np.array([v1, v2, v3])
 solution = Solution(circuit)
 
-p1, q1 = solution.compute_power_injection(bus1, y_bus, voltages)
-print("pq:", p1)
-print("q1:", q1)
-vector = solution.compute_power_mismatch(buses, voltages, y_bus)
-#print(vector)
+print()
+vector = solution.compute_power_mismatch(buses, y_bus, voltages)
+print(vector)
 
