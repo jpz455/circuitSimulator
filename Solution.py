@@ -37,65 +37,72 @@ class Solution:
 
 
     def compute_power_mismatch(self, buses: np.array, y_bus: np.array, voltages: np.array):
+        #figure out size of arrays
         size = 0
         for bus in buses:
            size += 1
-
-        N = size
-      #empty array to start
+      #empty arrays
+        #calculated power
         calc_real = np.array([])
         calc_reactive =np.array([])
         #known power
-        y_real = np.zeros([N, 1])
-        y_reactive = np.zeros([N, 1])
+        y_real = np.zeros([size, 1])
+        y_reactive = np.zeros([size, 1])
+        #generators
+        bus_with_gen = {}
 
         #angle and voltage
-        y_ang = np.zeros([N, 1])
-        y_v = np.zeros([N, 1])
+        y_ang = np.zeros([size, 1])
+        y_v = np.zeros([size, 1])
 
-        # set index for array at 0 to start
-        i = 0
-        for n in range(N):
-            real, reactive = self.compute_power_injection(buses[i], y_bus, voltages)
+
+        for n in range(size):
+            #calculate all buses' power injections
+            real, reactive = self.compute_power_injection(buses[n], y_bus, voltages)
             calc_real = np.append(calc_real, real)
             calc_reactive = np.append(calc_reactive, reactive)
-            i +=1
 
         #rotate array
         calc_real = calc_real.reshape(-1, 1)
         calc_reactive = calc_reactive.reshape(-1, 1)
 
-        index = 0
-        for n in buses:
-            #add known values to vectors
+        for bus in buses:
+            #get index for bus
+            bus_num = bus.numBus
+            index = bus_num - 1
+
+            # add known values to vectors
             if buses[index].bus_type == "pv":
                 #if pv we know power and voltage and angle
-                y_ang[index, 1] = self.circuit.buses[n].delta
-                y_v[index, 1] = self.circuit.buses[n].v_pu
-
+                y_ang[index, 1] = bus.delta
+                y_v[index, 1] = bus.v_pu
 
                 # get powers
-                y_real[index, 1] = self.circuit.generators[n].mw_setpoint
+                for key, generator in self.circuit.generators.items():
+                    if generator.bus == bus:
+                        y_real[index, 1] = generator.mw_setpoint/self.circuit.settings.s_base
                 # get power factor
-                pf = np.cos(self.circuit.buses[n].delta * np.pi / 180)
+                pf = np.cos(bus.delta * np.pi / 180)
                 # get reactive power
-                s = y_real[n, 1] / pf
-                y_reactive[n, 1] = s * np.sin(self.circuit.buses[n].delta * np.pi / 180)
+                s = y_real[index, 1] / pf
+                y_reactive[index, 1] = s * np.sin(bus.delta * np.pi / 180)
 
 
             elif buses[index].bus_type == "pq":
                 # if pq then we know real and reactive
-                y_real[index, 1] = self.circuit.generators[n].mw_setpoint
+                for key, generator in self.circuit.generators.items():
+                    if generator.bus == bus:
+                        y_real[index, 1] = generator.mw_setpoint/self.circuit.settings.s_base
                 # get power factor
-                pf = np.cos(self.circuit.buses[n].delta*np.pi/180)
+                pf = np.cos(bus.delta*np.pi/180)
                 #get reactive power
                 s = y_real[index, 1]/pf
-                y_reactive[index, 1]= s*np.sin(self.circuit.buses[n].delta*np.pi/180)
+                y_reactive[index, 1]= s*np.sin(bus.delta*np.pi/180)
 
             elif buses[index].bus_type == "slack":
                 # if slack we know voltage and angle
-                y_ang[index, 1] = self.circuit.buses[n].delta
-                y_v[index, 1] = self.circuit.buses[n].v_pu
+                y_ang[index, 1] = bus.delta
+                y_v[index, 1] = bus.v_pu
 
                 # calculate powers
                 real_added = 0
@@ -104,12 +111,12 @@ class Solution:
                 reactive_lost = 0
 
                 # get all power added to circuit from generators
-                for gen in self.circuit.generators:
+                for key, gen in self.circuit.generators.items():
                     # get real & reactive power associated with generators
-                    real_added += self.circuit.generators[gen].mw_setpoint
-                    pf = np.cos(self.circuit.generators[gen].bus.delta * np.pi / 180)  # power factor
-                    s = self.circuit.generators[gen].mw_setpoint/pf #complex power
-                    q = s*np.sin(self.circuit.generators[gen].bus.delta*np.pi/180)
+                    real_added += gen.mw_setpoint/self.circuit.settings.s_base
+                    pf = np.cos(gen.bus.delta * np.pi / 180)  # power factor
+                    s = gen.mw_setpoint/self.circuit.settings.s_base/pf #complex power
+                    q = s*np.sin(gen.bus.delta*np.pi/180)
                     reactive_added += q
 
                 # get all power lost in loads
@@ -120,15 +127,13 @@ class Solution:
 
                 # sum
                 #this is def wrong bc I'm not calculating loss in the power lines
-                p_slack = real_added - real_lost
-                q_slack = reactive_added - reactive_lost
+                p_slack = 0
+                q_slack = 0
 
 
-                y_real[n, 1] = p_slack
-                y_reactive[n, 1] = q_slack
+                y_real[index, 1] = p_slack
+                y_reactive[index, 1] = q_slack
 
-            #increment index
-            index += 1
 
         #now stack vectors
         calc_powers = np.vstack((calc_real, calc_reactive))

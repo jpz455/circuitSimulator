@@ -9,6 +9,7 @@ from Settings import Settings
 from Circuit import Circuit
 import numpy as np
 from Solution import Solution
+from Load import Load
 
 #test case for power mismatch
 
@@ -44,21 +45,27 @@ bundle1 = Bundle('B1',2,1.5, conductor1)
 tLine2 = TransmissionLine("tline2",bus2, bus3, bundle1, geometry1,10)
 circuit.add_transmission_line(tLine2)
 
+# Create & add loads
+load = Load("load", bus1, 100, 20, settings)
+circuit.add_load(load)
+
+
+
+
 # Calculate & print Y-Bus matrix
 y_bus = circuit.calc_y_bus()
 circuit.print_y_bus()
-
-print("xfmr1 r: ", T1.r_pu)
-print("xfmr1 x: ", T1.x_pu)
 print()
 
+#print out parameters for powerworld
+#print("xfmr1 r: ", T1.r_pu)
+#print("xfmr1 x: ", T1.x_pu)
+#print()
 
-print("tl2 r: ", tLine2.r_pu)
-print("tl2 x: ", tLine2.x_pu)
-print("tl2 b: ", np.imag(tLine2.y_shunt_pu))
-print()
-
-
+#print("tl2 r: ", tLine2.r_pu)
+#print("tl2 x: ", tLine2.x_pu)
+#print("tl2 b: ", np.imag(tLine2.y_shunt_pu))
+#print()
 
 # Calculate power mismatch
 buses = np.array([bus1, bus2, bus3])
