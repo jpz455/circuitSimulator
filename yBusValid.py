@@ -6,6 +6,9 @@ from Conductor import Conductor
 from TransmissionLine import TransmissionLine
 from Settings import Settings
 from Circuit import Circuit
+from Load import Load
+from Generator import Generator
+from Solution import Solution
 import numpy as np
 from Solution import Solution
 
@@ -17,13 +20,13 @@ circuit = Circuit("Power Flow Test Circuit", settings)
 
 # Define buses
 
-bus1= Bus("bus1", 20, "Slack")
-bus2= Bus("bus2", 230, "PQ")
-bus3= Bus("bus3", 230, "PQ")
-bus4=Bus("bus4", 230, "PQ")
-bus5=Bus("bus5", 230, "PQ")
-bus6=Bus("bus6", 230, "PQ")
-bus7=Bus("bus7", 18, "PQ")
+bus1= Bus("bus1", 20, "slack")
+bus2= Bus("bus2", 230, "pq")
+bus3= Bus("bus3", 230, "pq")
+bus4=Bus("bus4", 230, "pq")
+bus5=Bus("bus5", 230, "pq")
+bus6=Bus("bus6", 230, "pq")
+bus7=Bus("bus7", 18, "pv")
 
 # Add buses to circuit
 circuit.add_bus(bus1)
@@ -33,6 +36,9 @@ circuit.add_bus(bus4)
 circuit.add_bus(bus5)
 circuit.add_bus(bus6)
 circuit.add_bus(bus7)
+
+
+
 
 T1=Transformer("T1", bus1, bus2, 125, 8.5, 10)
 T2=Transformer("T2", bus6, bus7, 200, 10.5, 12)
@@ -67,9 +73,26 @@ circuit.add_transmission_line(tLine6)
 
 # Calculate Y-Bus Matrix
 y_bus = circuit.calc_y_bus()
-
+load2 = Load("load2",bus2,0,0,settings)
+circuit.add_load(load2)
+load3 = Load("load3",bus3,-110,-50,settings)
+circuit.add_load(load3)
+load4 = Load("load4",bus4,-100,-70,settings)
+circuit.add_load(load4)
+load5 = Load("load5",bus5,-100,-65,settings)
+circuit.add_load(load5)
+load6 = Load("load6",bus6,0,0,settings)
+circuit.add_load(load6)
+load7 = Load("load7",bus7,0,0,settings)
+circuit.add_load(load7)
+gen1 = Generator("Gen 1",bus1,0,100, settings)
+circuit.add_generator(gen1)
+gen2 = Generator("Gen 2",bus7,0,200, settings)
+circuit.add_generator(gen2)
 # Print the Y-Bus Matrix
 circuit.print_y_bus()
+
+# Check existing load names
 
 #print values for PowerWorld
 print("xfmr1 r: ", T1.r_pu)
@@ -109,9 +132,16 @@ print("tl6 r: ", tLine6.r_pu)
 print("tl6 x: ", tLine6.x_pu)
 print("tl6 b: ", np.imag(tLine6.y_shunt_pu))
 
-solve = Solution(circuit)
-buses = [bus1, bus2, bus3, bus4, bus5, bus6]
-voltages = [20, 230, 230, 230, 230, 230, 18]
 
-p1, q1 = solve.compute_power_injection(bus1, y_bus, voltages)
-vec = solve.compute_power_mismatch(buses, y_bus, voltages)
+solution = Solution(circuit)
+vector = solution.calcKnownPower()
+mismatch = solution.calcMismatch()
+
+# Displaying the mismatch array in a readable format
+#assuming bus 1 is slack for printing formatting
+
+print(f"       MW   Mvar")
+print(f"Bus 1: |0.00|  |0.00|")
+for i, row in enumerate(mismatch):
+    print(f"Bus {i+2}: |{100*row[0]:.2f}|  |{100*row[1]:.2f}|")
+

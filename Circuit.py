@@ -1,5 +1,4 @@
 from Bus import Bus
-from Load import Load
 from Transformer import Transformer
 from Geometry import Geometry
 from Conductor import Conductor
@@ -34,6 +33,7 @@ class Circuit:
         else:
             self.buses[bus.name] = bus  # Add bus to the dictionary using its name as the key
             self.busRef.append(bus.name)
+
 
     def add_transformer(self,transformer:Transformer):
         if transformer.name in self.transformers:
@@ -71,13 +71,13 @@ class Circuit:
         if load.name in self.loads:
             print(f"Load with name '{load.name}' already exists. Skipping addition.")
         else:
-            self.loads[load.name] = load
+            self.loads[load.bus.name] = load
 
     def add_generator(self, generator: Generator):
             if generator.name in self.generators:
                 print(f"Generator with name '{generator.name}' already exists. Skipping addition.")
             else:
-                self.generators[generator.name] = generator
+                self.generators[generator.bus.name] = generator
 
     def calc_y_bus(self):
         size = np.zeros([Bus.numBus, Bus.numBus])
@@ -104,6 +104,12 @@ class Circuit:
         else:
             print("\nY-Bus Matrix:")
             print(self.y_bus.to_string(float_format=lambda x: f"{x:.5f}"))
+
+
+
+
+
+
 
 
 
