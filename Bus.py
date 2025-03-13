@@ -16,10 +16,9 @@ class Bus:
 
 
     def set_bus_type(self):
-        self.bus_type_check = self.bus_type.lower()
-        if self.bus_type_check != "slack" or self.bus_type_check != "pq" or self.bus_type_check != "pv":
+        if self.bus_type not in ["slack", "pq", "pv","Slack","PV","PQ"]:
             print("Bus type must be slack, pq or pv. Defaulting to PQ.")
-            self.bus_type = "PQ"
+            self.bus_type = "pq"
 
 
 
