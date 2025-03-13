@@ -94,3 +94,4 @@ class Solution:
         self.mismatch = np.array(mismatch_filtered)
 
         return self.mismatch
+
