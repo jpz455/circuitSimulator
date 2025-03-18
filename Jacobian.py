@@ -9,19 +9,35 @@ class Jacobian:
         self.solution = solution
         self.circuit = solution.circuit
         self.y_bus = np.array(self.solution.circuit.y_bus) #convert y_bus to array
+        self.slack_index: int
+        self.pv: int
+        self.j_matrix: np.ndarray
+        self.j_df: pd.DataFrame
+
+        self.find_buses()
+
+
+    def find_buses(self):
+        #helper method to sort out buses
+        for index, bus in enumerate(self.circuit.buses.values()):
+            if bus.bus_type == "slack":
+                self.slack = index
+            elif bus.bus_type == "pv":
+                self.pv= index
 
     def calc_jacobian(self):
        #call helper methods to calculate each submatrix
-        j1 = self.calc_j1
-        j2 = self.calc_j2
-        j3 = self.calc_j3
-        j4 = self.calc_j4
-       #remove unnecessary rows
-            #TO DO
-        #concatenate into one big matrix
-        j_top = np.hstack((j1, j2))
-        j_bottom = np.vstack((j3, j4))
-        return j_top, j_bottom
+        j1 = self.calc_j1() #6x6 (exclude slack r/c)
+        j2 = self.calc_j2() #6x5 (exclude slack r/c, pv c)
+        j3 = self.calc_j3() #5x6 (exclude slack r/c, pv r)
+        j4 = self.calc_j4() #5x5 (exclude slack r/c, pv r/c)
+        self.j_matrix = np.block([[
+            [j1, j2],
+            [j3, j4]
+        ]])
+
+        self.j_matrix = self.j_matrix.reshape(11,11)
+        return self.j_matrix
 
     def calc_j1(self):
 
@@ -59,8 +75,9 @@ class Jacobian:
                         j1[k, k] = -1 * v_k * sum
 
 
-        j1 = np.delete(j1, 0, axis = 0) #get rid of slack bus row
-        j1 = np.delete(j1, 0, axis = 1)  # get rid of slack bus column
+
+        j1 = np.delete(j1, self.slack , axis = 0) #get rid of slack bus row
+        j1 = np.delete(j1, self.slack, axis = 1) #get rid of slack bus column
 
         return j1
 
@@ -95,9 +112,10 @@ class Jacobian:
 
                     j2[k, k] = v_k * y_kk  * np.cos(theta_kk) + sum
 
-        j2 = np.delete(j2, 0, axis=0)  # get rid of slack bus row
-        j2 = np.delete(j2, 0, axis=1)  # get rid of slack bus col
-        j2 = np.delete(j2, 5, axis=1)  # get rid of pv column
+        j2 = np.delete(j2, self.slack , axis=0)  # get rid of slack bus row
+        j2 = np.delete(j2, self.slack , axis=1)  # get rid of slack bus col
+        j2 = np.delete(j2, self.pv-1, axis=1)  # get rid of pv column
+
         return j2
 
     def calc_j3(self):
@@ -129,9 +147,9 @@ class Jacobian:
                     v_k = bus_k.v_pu
                     j3[k, k] = -1 * v_k * sum
 
-        j3 = np.delete(j3, 0, axis=0)  # get rid of slack bus row
-        j3 = np.delete(j3, 0, axis=1)  # get rid of slack bus col
-        j3 = np.delete(j3, 5, axis=0)  # get rid of pv row
+        j3 = np.delete(j3, self.slack , axis=0)  # get rid of slack bus row
+        j3 = np.delete(j3, self.slack , axis=1)  # get rid of slack bus col
+        j3 = np.delete(j3, self.pv-1, axis=0)  # get rid of pv row
 
         return j3
 
@@ -166,11 +184,15 @@ class Jacobian:
 
                     j4[k, k] = -1 * v_k * y_kk * np.sin(theta_kk) + sum
 
-            j4 = np.delete(j4, 0, axis=0)  # get rid of slack bus row
-            j4 = np.delete(j4, 0, axis=1)  # get rid of slack bus column
-
+        j4 = np.delete(j4, self.slack , axis=0)  # get rid of slack bus row
+        j4 = np.delete(j4, self.slack , axis=1)  # get rid of slack bus column
+        j4 = np.delete(j4, self.pv-1, axis=0)   #get rid of pv row
+        j4 = np.delete(j4, self.pv -1 , axis = 1)    # get rid of pv column
         return j4
 
 
-
+    def print_jacobian(self):
+        self.j_df = pd.DataFrame(self.j_matrix, index = ['P Bus 2', 'P Bus 3', 'P Bus 4', 'P Bus 5', 'P Bus 6', 'Q Bus 2', 'Q Bus 3', 'Q Bus 4', 'Q Bus 5', 'Q Bus 6', 'Q Bus 7'], columns = ['Ang Bus 2', 'Ang Bus 3', 'Ang Bus 4', ' Ang Bus 5', ' Ang Bus 6', 'Ang Bus 7', 'Volt Bus 2', 'Volt Bus 3', 'Volt Bus 4', 'Volt Bus 5', 'Volt Bus 6'])
+        print("\nJacobian Matrix:")
+        print(self.j_df.to_string(float_format=lambda x: f"{x:.5f}"))
 
