@@ -11,6 +11,7 @@ from Generator import Generator
 from Solution import Solution
 import numpy as np
 from Solution import Solution
+from Jacobian import Jacobian
 
 # Initialize settings
 settings = Settings()
@@ -145,3 +146,20 @@ print(f"Bus 1: |0.00|  |0.00|")
 for i, row in enumerate(mismatch):
     print(f"Bus {i+2}: |{100*row[0]:.2f}|  |{100*row[1]:.2f}|")
 
+# try to print out j1, j2, j3, j4
+
+jacobian = Jacobian(solution)
+j1 = jacobian.calc_j1()
+j2 = jacobian.calc_j2()
+j3 = jacobian.calc_j3()
+j4 = jacobian.calc_j4()
+
+
+print("j1:")
+print(j1)
+print("j2:")
+print(j2)
+print("j3:")
+print(j3)
+print("j4:")
+print(j4)
