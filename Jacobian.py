@@ -123,14 +123,13 @@ class Jacobian:
             for n, bus_n in enumerate(self.circuit.buses.values()):
                 if(k != n):
                     v_k = bus_k.v_pu  # get Vk
-                    v_n = bus_n.v_pu  # get Vn
                     y_kn = np.abs(self.y_bus[k, n])  # get Ykn
                     delta_k = bus_k.delta * np.pi / 180  # get delta angle for bus k
                     delta_n = bus_n.delta * np.pi / 180  # get delta angle for bus n
                     theta_kn = np.angle(self.y_bus[k, n])  # get theta for kn from Y_bus
 
                     # add to matrix using partial derivative equation
-                    j3[k, n] = -1 * v_k * y_kn * v_n * np.cos(delta_k - delta_n - theta_kn)  # solve equation for partial derivative and add
+                    j3[k, n] = -1 * v_k * y_kn * np.cos(delta_k - delta_n - theta_kn)  # solve equation for partial derivative and add
 
                 else:
                     sum = 0
