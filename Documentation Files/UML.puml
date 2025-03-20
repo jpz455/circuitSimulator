@@ -150,9 +150,41 @@ class TransmissionLine {
 
 class Solution {
     +circuit: Circuit
+    +known_power: array
+    +power: array
+    +mismatch: array
+    +jacob: Jacobian
+    +j_matrix: array
 
     +compute_power_injection(Bus, array, array): array, array
-}
+    +calc_known_power(): array
+    +get_voltages(): array
+    +calc_injection(array, array, array): complex, complex
+    +calc_mismatch(): array
+    +calc_jacobian(): array
+    +print_jacobian()
+    }
+
+class Jacobian {
+    +circuit: Circuit
+    +y_bus: array
+    +slack: int
+    +pv: int
+    +j1: array
+    +j2: array
+    +j3: array
+    +j4: array
+    +j_matrix: array
+    +j_df: DataFrame
+
+    +find_buses()
+    +calc_j1(): array
+    +calc_j2(): array
+    +calc_j3(): array
+    +calc_j4(): array
+    +calc_jacobian(): array
+    +print_jacobian()
+    }
 
 
 Circuit *-- Transformer
@@ -175,6 +207,9 @@ Transformer *-- Settings
 Transformer *-- Bus
 
 Solution *-- Circuit
+Solution *-- Jacobian
+
+Jacobian *-- Circuit
 
 
 

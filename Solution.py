@@ -1,12 +1,19 @@
 import numpy as np
 import Circuit as Circuit
+import Jacobian as Jacobian
 
 class Solution:
 
     def __init__(self, circuit: Circuit):
         self.circuit = circuit
+        self.known_power: np.array
+        self.power: np.array
+        self.mismatch: np.array
+        self.jacob = Jacobian.Jacobian(self.circuit)
+        self.j_matrix: np.array
 
-    def calcKnownPower(self):
+
+    def calc_known_power(self):
 
         n = len(self.circuit.buses)
         P = np.zeros((n, 1))
@@ -28,14 +35,14 @@ class Solution:
                 Q[i] = load.reactive_pwr
 
         # Stack real and reactive power vectors and convert to per-unit
-        self.knownPower = np.vstack((P, Q)) / self.circuit.settings.s_base
-        return self.knownPower
+        self.known_power = np.vstack((P, Q)) / self.circuit.settings.s_base
+        return self.known_power
 
     def get_voltages(self):
         # Extract all per-unit voltages directly from buses
         return np.array([bus.v_pu for bus in self.circuit.buses.values()])
 
-    def calcInjection(self, bus, y_bus, voltages):
+    def calc_injection(self, bus, y_bus, voltages):
 
         bus_index = self.circuit.buses[bus]  # Access the bus object
         N = bus_index.numBus - 1  # Ensure correct index
@@ -61,7 +68,7 @@ class Solution:
 
         return P_k, Q_k
 
-    def calcMismatch(self):
+    def calc_mismatch(self):
         numBuses = len(self.circuit.buses)
         P = np.zeros((numBuses, 1))
         Q = np.zeros((numBuses, 1))
@@ -70,13 +77,13 @@ class Solution:
         voltages = self.get_voltages()
         for index in range(numBuses):
             busI = f"bus{index + 1}"
-            P_k, Q_k = self.calcInjection(busI, self.circuit.y_bus, voltages)
+            P_k, Q_k = self.calc_injection(busI, self.circuit.y_bus, voltages)
             P[index] = P_k
             Q[index] = Q_k
 
         # Stack real and reactive power vectors
         self.power = np.vstack((P, Q))
-        self.mismatch = self.knownPower - self.power
+        self.mismatch = self.known_power - self.power
 
         # Create a list to hold the filtered mismatches
         mismatch_filtered = []
@@ -94,4 +101,10 @@ class Solution:
         self.mismatch = np.array(mismatch_filtered)
 
         return self.mismatch
+
+    def calc_jacobian(self):
+        self.j_matrix = self.jacob.calc_jacobian()
+
+    def print_jacobian(self):
+           self.jacob.print_jacobian()
 
