@@ -56,7 +56,8 @@ class Jacobian:
                         theta_kn = np.angle(self.y_bus[k, n]) #get theta for kn from Y_bus
 
                         #add to matrix using partial derivative equation
-                        self.j1[k, n] = v_k*y_kn*v_n*np.sin(delta_k - delta_n - theta_kn) #solve equation for partial derivative and add
+                        self.j1[k, n] = v_k * y_kn * v_n * np.sin(delta_k - delta_n - theta_kn) #solve equation for partial derivative and add
+
                     elif (k == n):
                         sum = 0
                         v_k = bus_k.v_pu #get voltage for bus k
@@ -71,15 +72,12 @@ class Jacobian:
 
                         self.j1[k, k] = -1 * v_k * sum
 
-
-
         self.j1 = np.delete(self.j1, self.slack , axis = 0) #get rid of slack bus row
         self.j1 = np.delete(self.j1, self.slack, axis = 1) #get rid of slack bus column
 
         return self.j1
 
     def calc_j2(self):
-        sum = 0
         # now extract Vk, Vkn, Vn
         for k, bus_k in enumerate(self.circuit.buses.values()):
             for n, bus_n in enumerate(self.circuit.buses.values()):
@@ -91,7 +89,7 @@ class Jacobian:
                     theta_kn = np.angle(self.y_bus[k, n])  # get theta for kn from Y_bus
 
                     # add to matrix using partial derivative equation
-                    self.j2[k, n] = v_k * y_kn* np.cos(delta_k - delta_n - theta_kn)  # solve equation for partial derivative and add
+                    self.j2[k, n] = v_k * y_kn * np.cos(delta_k - delta_n - theta_kn)  # solve equation for partial derivative and add
 
                 else:
                     sum = 0
@@ -102,12 +100,12 @@ class Jacobian:
 
                     for x, bus_x in enumerate(self.circuit.buses.values()):
                         v_n = bus_x.v_pu  # get Vn
-                        y_kn = np.abs(self.y_bus[k, n])  # get Ykn
+                        y_kn = np.abs(self.y_bus[k, x])  # get Ykn
                         delta_n = bus_x.delta * np.pi / 180  # get delta angle for bus n
                         theta_kn = np.angle(self.y_bus[k, x])  # get theta for kn from Y_bus
                         sum += y_kn * v_n * np.cos(delta_k - delta_n - theta_kn)
 
-                    self.j2[k, k] = v_k * y_kk  * np.cos(theta_kk) + sum
+                    self.j2[k, k] = v_k * y_kk * np.cos(theta_kk) + sum
 
         self.j2 = np.delete(self.j2, self.slack , axis=0)  # get rid of slack bus row
         self.j2 = np.delete(self.j2, self.slack , axis=1)  # get rid of slack bus col
@@ -116,19 +114,19 @@ class Jacobian:
         return self.j2
 
     def calc_j3(self):
-        sum = 0
         # now extract Vk, Vkn, Vn
         for k, bus_k in enumerate(self.circuit.buses.values()):
             for n, bus_n in enumerate(self.circuit.buses.values()):
                 if(k != n):
                     v_k = bus_k.v_pu  # get Vk
                     y_kn = np.abs(self.y_bus[k, n])  # get Ykn
+                    v_n = bus_n.v_pu #get Vn
                     delta_k = bus_k.delta * np.pi / 180  # get delta angle for bus k
                     delta_n = bus_n.delta * np.pi / 180  # get delta angle for bus n
                     theta_kn = np.angle(self.y_bus[k, n])  # get theta for kn from Y_bus
 
                     # add to matrix using partial derivative equation
-                    self.j3[k, n] = -1 * v_k * y_kn * np.cos(delta_k - delta_n - theta_kn)  # solve equation for partial derivative and add
+                    self.j3[k, n] = -1 * v_k * y_kn * v_n * np.cos(delta_k - delta_n - theta_kn)  # solve equation for partial derivative and add
 
                 else:
                     sum = 0
@@ -151,7 +149,6 @@ class Jacobian:
         return self.j3
 
     def calc_j4(self):
-        sum = 0
         # now extract Vk, Vkn, Vn
         for k, bus_k in enumerate(self.circuit.buses.values()):
             for n, bus_n in enumerate(self.circuit.buses.values()):
@@ -174,7 +171,7 @@ class Jacobian:
 
                     for x, bus_x in enumerate(self.circuit.buses.values()):
                         v_n = bus_x.v_pu  # get Vn
-                        y_kn = np.abs(self.y_bus[k, n])  # get Ykn
+                        y_kn = np.abs(self.y_bus[k, x])  # get Ykn
                         delta_n = bus_x.delta * np.pi / 180  # get delta angle for bus n
                         theta_kn = np.angle(self.y_bus[k, x])  # get theta for kn from Y_bus
                         sum += y_kn * v_n * np.sin(delta_k - delta_n - theta_kn)
