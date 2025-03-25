@@ -45,8 +45,6 @@ circuit.add_bus(bus6)
 circuit.add_bus(bus7)
 
 
-
-
 T1=Transformer("T1", bus1, bus2, 125, 8.5, 10)
 T2=Transformer("T2", bus6, bus7, 200, 10.5, 12)
 
@@ -154,7 +152,5 @@ print("--------")
 solution.calc_jacobian()
 
 solution.print_jacobian()
-print(solution.calc_solution())
-
-
+solution.calc_solution(0.001)
 

@@ -99,8 +99,6 @@ class Solution:
                     [self.mismatch[iteration][0], self.mismatch[iteration + numBuses][0]])  # Separate real and reactive
 
         # Convert the filtered list to a numpy array with consistent shape
-
-        # Convert the filtered list to a numpy array with consistent shape
         temp = np.array(mismatch_filtered)
 
         # Extract the first and second columns and stack them vertically
@@ -133,13 +131,19 @@ class Solution:
     def print_jacobian(self):
            self.jacob.print_jacobian()
 
-    def calc_solution(self):
-        # Solve for delta x
+    def calc_solution(self, tolerance: float):
+
+        # start by getting current j_matrix and mismatch arrays (already filtered to exclude slack/pv as needed)
+
+
+        # Solve for delta x & delta v
         delt_x = np.linalg.solve(self.j_matrix, self.mismatch)
 
         # Separate bus indices based on bus type
         slack_positions = [i for i, bus in self.circuit.buses.items() if bus.bus_type == "slack"]
         pv_positions = [i for i, bus in self.circuit.buses.items() if bus.bus_type == "pv"]
+
+        # big iterative loop
 
         # Initialize counter and array for new voltage magnitudes
         i = 0
@@ -150,12 +154,29 @@ class Solution:
             if bus.bus_type != "slack":
                 if bus.bus_type != "pv":  # Update voltage for non-slack, non-PV buses
                     bus.set_bus_V(bus.v_pu + delt_x[i])
-                bus.set_bus_delta(bus.delta + delt_x[i])
-                i += 1
+                bus.set_bus_delta(bus.delta + delt_x[i]) #if pv bus then just have to update delta, not v
+                #if slack then do nothing (excluded)
+                i += 1 #iterate
 
+        # once all done updating delta and v check if difference below tolerance
         # Calculate new voltage magnitudes and phases
         for idx, bus in enumerate(self.circuit.buses.values()):  # Use enumerate here
             # Apply magnitude and phase adjustments using delta
             new_V[idx] = bus.v_pu * np.exp(1j * bus.delta)
 
-        return new_V
+        #check if difference below tolerance
+        max = self.mismatch[0]
+        for index, value in enumerate(self.mismatch):
+            if index < self.mismatch.__len__() - 1:
+                if value >= self.mismatch[index + 1]:
+                    max = value
+
+        if max < tolerance:
+            print("solved")
+            i = 1
+            for index, bus in enumerate(new_V):
+                print("Bus", i, "V: ", np.round(np.real(bus), 5), "  delta: ", np.round(np.imag(bus)* 180/np.pi, 2) )
+                i = i+1
+            return new_V
+        else:
+            self.calc_solution(tolerance)
