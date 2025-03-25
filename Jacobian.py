@@ -120,37 +120,38 @@ class Jacobian:
         return j2
 
     def calc_j3(self):
-        sum = 0
-        # now extract Vk, Vkn, Vn
+        # Iterate over each bus pair
         for k, bus_k in enumerate(self.circuit.buses.values()):
-            for n, bus_n in enumerate(self.circuit.buses.values()):
-                if(k != n):
-                    v_k = bus_k.v_pu  # get Vk
-                    y_kn = np.abs(self.y_bus[k, n])  # get Ykn
-                    delta_k = bus_k.delta * np.pi / 180  # get delta angle for bus k
-                    delta_n = bus_n.delta * np.pi / 180  # get delta angle for bus n
-                    theta_kn = np.angle(self.y_bus[k, n])  # get theta for kn from Y_bus
+            delta_k = bus_k.delta * np.pi / 180  # Convert degrees to radians once
+            v_k = bus_k.v_pu  # Per-unit voltage
 
-                    # add to matrix using partial derivative equation
-                    self.j3[k, n] = -1 * v_k * y_kn * np.cos(delta_k - delta_n - theta_kn)  # solve equation for partial derivative and add
+            for n, bus_n in enumerate(self.circuit.buses.values()):
+                if k != n:
+                    # Extract necessary values
+                    y_kn = np.abs(self.y_bus[k, n])  # Admittance magnitude
+                    delta_n = bus_n.delta * np.pi / 180
+                    theta_kn = np.angle(self.y_bus[k, n])  # Phase angle
+
+                    # Compute the off-diagonal elements
+                    self.j3[k, n] = -v_k * y_kn * np.cos(delta_k - delta_n - theta_kn)
 
                 else:
-                    sum = 0
-                    v_k = bus_k.v_pu  # get voltage for bus k
-                    delta_k = bus_k.delta * np.pi / 180  # get angle for bus k
+                    # Compute diagonal elements (sum over all other buses)
+                    sum_val = 0
                     for x, bus_x in enumerate(self.circuit.buses.values()):
-                        if (x != k):  # skip if x = k
-                            v_n = bus_x.v_pu  # get Vn
-                            y_kn = np.abs(self.y_bus[k, x])  # get Ykn
-                            delta_n = bus_x.delta * np.pi / 180  # get delta angle for bus n
-                            theta_kn = np.angle(self.y_bus[k, x])  # get theta for kn from Y_bus
-                            sum += y_kn * v_n * np.cos(delta_k - delta_n - theta_kn)
+                        if x != k:
+                            v_n = bus_x.v_pu
+                            y_kn = np.abs(self.y_bus[k, x])
+                            delta_n = bus_x.delta * np.pi / 180
+                            theta_kn = np.angle(self.y_bus[k, x])
+                            sum_val += y_kn * v_n * np.cos(delta_k - delta_n - theta_kn)
 
-                    self.j3[k, k] = v_k * sum
+                    self.j3[k, k] = v_k * sum_val
 
-        self.j3 = np.delete(self.j3, self.slack , axis=0)  # get rid of slack bus row
-        self.j3 = np.delete(self.j3, self.slack , axis=1)  # get rid of slack bus col
-        self.j3 = np.delete(self.j3, self.pv-1, axis=0)  # get rid of pv row
+        # Remove slack and PV bus rows/columns
+        self.j3 = np.delete(self.j3, self.slack, axis=0)
+        self.j3 = np.delete(self.j3, self.slack, axis=1)
+        self.j3 = np.delete(self.j3, self.pv - 1, axis=0)
 
         return self.j3
 
@@ -195,7 +196,10 @@ class Jacobian:
 
         return j4
 
+
+
     def print_jacobian(self):
         self.j_df = pd.DataFrame(self.j_matrix, index = ['P Bus 2', 'P Bus 3', 'P Bus 4', 'P Bus 5', 'P Bus 6', 'Q Bus 2', 'Q Bus 3', 'Q Bus 4', 'Q Bus 5', 'Q Bus 6', 'Q Bus 7'], columns = ['Ang Bus 2', 'Ang Bus 3', 'Ang Bus 4', ' Ang Bus 5', ' Ang Bus 6', 'Ang Bus 7', 'Volt Bus 2', 'Volt Bus 3', 'Volt Bus 4', 'Volt Bus 5', 'Volt Bus 6'])
         print("\nJacobian Matrix:")
         print(self.j_df.to_string(float_format=lambda x: f"{x:.5f}"))
+
