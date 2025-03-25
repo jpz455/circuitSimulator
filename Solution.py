@@ -1,7 +1,8 @@
 import numpy as np
+import pandas as pd
 import Circuit as Circuit
 import Jacobian as Jacobian
-
+from typing import Dict, List, Optional
 class Solution:
 
     def __init__(self, circuit: Circuit):
@@ -98,8 +99,32 @@ class Solution:
                     [self.mismatch[iteration][0], self.mismatch[iteration + numBuses][0]])  # Separate real and reactive
 
         # Convert the filtered list to a numpy array with consistent shape
-        self.mismatch = np.array(mismatch_filtered)
 
+        # Convert the filtered list to a numpy array with consistent shape
+        temp = np.array(mismatch_filtered)
+
+        # Extract the first and second columns and stack them vertically
+        first_column = temp[:, 0]  # First column (index 0)
+        second_column = temp[:, 1]  # Second column (index 1)
+
+        # Stack the columns vertically (one on top of the other)
+        stacked_array = np.concatenate((first_column, second_column), axis=0)
+
+        # Find the correct index to delete based on the PV bus index.
+        # Since slack bus is excluded, adjust the pvIndex to match the correct column in transposed
+        for index, bus in enumerate(self.circuit.buses.values()):
+            if bus.bus_type == "slack":
+                slackIndex = index
+            elif bus.bus_type == "pv":
+                pvIndex = index
+
+        # Now remove the reactive power mismatch for the PV bus
+        # Note: We're dealing with the second row in the transposed array (reactive power)
+        index_to_delete = len(self.circuit.buses)-2+pvIndex  # Just delete the reactive power mismatch for the PV bus
+        stacked_array = np.delete(stacked_array, index_to_delete)
+
+        # Update self.mismatch to the new transposed array
+        self.mismatch = stacked_array
         return self.mismatch
 
     def calc_jacobian(self):
@@ -108,3 +133,29 @@ class Solution:
     def print_jacobian(self):
            self.jacob.print_jacobian()
 
+    def calc_solution(self):
+        # Solve for delta x
+        delt_x = np.linalg.solve(self.j_matrix, self.mismatch)
+
+        # Separate bus indices based on bus type
+        slack_positions = [i for i, bus in self.circuit.buses.items() if bus.bus_type == "slack"]
+        pv_positions = [i for i, bus in self.circuit.buses.items() if bus.bus_type == "pv"]
+
+        # Initialize counter and array for new voltage magnitudes
+        i = 0
+        new_V = np.zeros(len(self.circuit.buses), dtype=complex)
+
+        # Update deltas and voltages for non-slack, non-PV buses
+        for idx, bus in self.circuit.buses.items():
+            if bus.bus_type != "slack":
+                if bus.bus_type != "pv":  # Update voltage for non-slack, non-PV buses
+                    bus.set_bus_V(bus.v_pu + delt_x[i])
+                bus.set_bus_delta(bus.delta + delt_x[i])
+                i += 1
+
+        # Calculate new voltage magnitudes and phases
+        for idx, bus in enumerate(self.circuit.buses.values()):  # Use enumerate here
+            # Apply magnitude and phase adjustments using delta
+            new_V[idx] = bus.v_pu * np.exp(1j * bus.delta)
+
+        return new_V

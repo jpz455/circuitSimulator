@@ -22,7 +22,7 @@ circuit = Circuit("Power Flow Test Circuit", settings)
 # Define buses
 
 bus1= Bus("bus1", 20, "slack")
-'''
+#'''
 bus2= Bus("bus2", 230, "pq",)
 bus3= Bus("bus3", 230, "pq")
 bus4=Bus("bus4", 230, "pq")
@@ -145,17 +145,18 @@ print("tl6 b: ", np.imag(tLine6.y_shunt_pu))
 solution = Solution(circuit)
 vector = solution.calc_known_power()
 mismatch = solution.calc_mismatch()
-
+print(mismatch)
 # Displaying the mismatch array in a readable format
 #assuming bus 1 is slack for printing formatting
+print("--------")
 
-print(f"       MW   Mvar")
-print(f"Bus 1: |0.00|  |0.00|")
-for i, row in enumerate(mismatch):
-    print(f"Bus {i+2}: |{100*row[0]:.2f}|  |{100*row[1]:.2f}|")
+
 
 # try to print out jacobian
 solution.calc_jacobian()
+
 solution.print_jacobian()
+print(solution.calc_solution())
+
 
 

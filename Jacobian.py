@@ -23,9 +23,11 @@ class Jacobian:
         #helper method to sort out buses
         for index, bus in enumerate(self.circuit.buses.values()):
             if bus.bus_type == "slack":
-                self.slack = index
+                self.slackI = index
             elif bus.bus_type == "pv":
-                self.pv= index
+                self.pvI= index
+        print("slack found at: ", self.slackI)
+        print("pv found at: ", self.pvI)
 
     def calc_jacobian(self):
        #call helper methods to calculate each submatrix
@@ -73,8 +75,8 @@ class Jacobian:
 
 
 
-        self.j1 = np.delete(self.j1, self.slack , axis = 0) #get rid of slack bus row
-        self.j1 = np.delete(self.j1, self.slack, axis = 1) #get rid of slack bus column
+        self.j1 = np.delete(self.j1, self.slackI , axis = 0) #get rid of slack bus row
+        self.j1 = np.delete(self.j1, self.slackI, axis = 1) #get rid of slack bus column
 
         return self.j1
 
@@ -111,11 +113,14 @@ class Jacobian:
                     j2[k, k] = v_k * y_kk * np.cos(theta_kk) + sum_terms
 
         # Remove slack bus row/column
-        j2 = np.delete(j2, self.slack, axis=0)
-        j2 = np.delete(j2, self.slack, axis=1)
+        j2 = np.delete(j2, self.slackI, axis=0)
+        j2 = np.delete(j2, self.slackI, axis=1)
 
         # Remove PV bus column
-        j2 = np.delete(j2, self.pv - 1, axis=1)
+        if self.slackI>self.pvI:
+            j2 = np.delete(j2, self.pvI, axis=1)
+        else:
+            j2 = np.delete(j2, self.pvI - 1, axis=1)
 
         return j2
 
@@ -149,9 +154,14 @@ class Jacobian:
                     self.j3[k, k] = v_k * sum_val
 
         # Remove slack and PV bus rows/columns
-        self.j3 = np.delete(self.j3, self.slack, axis=0)
-        self.j3 = np.delete(self.j3, self.slack, axis=1)
-        self.j3 = np.delete(self.j3, self.pv - 1, axis=0)
+        self.j3 = np.delete(self.j3, self.slackI, axis=0)
+        self.j3 = np.delete(self.j3, self.slackI, axis=1)
+        # Remove PV bus column
+        if self.slackI > self.pvI:
+            self.j3 = np.delete(self.j3, self.pvI, axis=0)
+        else:
+            self.j3 = np.delete(self.j3, self.pvI - 1, axis=0)
+
 
         return self.j3
 
@@ -187,12 +197,17 @@ class Jacobian:
                     j4[k, k] = -1 * v_k * y_kk * np.sin(theta_kk) + sum_terms
 
         # Remove slack bus row/column
-        j4 = np.delete(j4, self.slack, axis=0)
-        j4 = np.delete(j4, self.slack, axis=1)
+        j4 = np.delete(j4, self.slackI, axis=0)
+        j4 = np.delete(j4, self.slackI, axis=1)
 
-        # Remove PV bus row/column
-        j4 = np.delete(j4, self.pv - 1, axis=0)
-        j4 = np.delete(j4, self.pv - 1, axis=1)
+        # Remove PV bus column
+        if self.slackI > self.pvI:
+            j4 = np.delete(j4, self.pvI, axis=0)
+            j4 = np.delete(j4, self.pvI, axis=1)
+        else:
+            # Remove PV bus row/column
+            j4 = np.delete(j4, self.pvI - 1, axis=0)
+            j4 = np.delete(j4, self.pvI - 1, axis=1)
 
         return j4
 
