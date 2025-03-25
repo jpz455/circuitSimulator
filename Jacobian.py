@@ -7,14 +7,15 @@ class Jacobian:
     def __init__(self, circuit: Circuit):
         self.circuit = circuit
         self.y_bus = np.array(self.circuit.y_bus) #convert y_bus to array
-        self.slack: int
-        self.pv: int
+        self.slackI: int
+        self.pvI: int
         self.j_matrix: np.array
         self.j_df: pd.DataFrame
-        self.j1 = np.zeros([7, 7])
-        self.j2 = np.zeros([7, 7])
-        self.j3 = np.zeros([7, 7])
-        self.j4 = np.zeros([7, 7])
+        self.size = circuit.buses.__len__() #number of buses in system
+        self.j1 = np.zeros([self.size, self.size])
+        self.j2 = np.zeros([self.size, self.size])
+        self.j3 = np.zeros([self.size, self.size])
+        self.j4 = np.zeros([self.size, self.size])
 
         self.find_buses()
 
@@ -25,7 +26,7 @@ class Jacobian:
             if bus.bus_type == "slack":
                 self.slackI = index
             elif bus.bus_type == "pv":
-                self.pvI= index
+                self.pvI = index
         print("slack found at: ", self.slackI)
         print("pv found at: ", self.pvI)
 
