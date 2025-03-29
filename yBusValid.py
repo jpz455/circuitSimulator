@@ -8,10 +8,8 @@ from Settings import Settings
 from Circuit import Circuit
 from Load import Load
 from Generator import Generator
-from Solution import Solution
 import numpy as np
 from Solution import Solution
-from Jacobian import Jacobian
 
 # Initialize settings
 settings = Settings()
