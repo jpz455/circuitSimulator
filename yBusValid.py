@@ -102,7 +102,7 @@ circuit.add_generator(gen2)
 circuit.print_y_bus()
 
 # Check existing load names
-
+'''
 #print values for PowerWorld
 print("xfmr1 r: ", T1.r_pu)
 print("xfmr1 x: ", T1.x_pu)
@@ -140,23 +140,23 @@ print()
 print("tl6 r: ", tLine6.r_pu)
 print("tl6 x: ", tLine6.x_pu)
 print("tl6 b: ", np.imag(tLine6.y_shunt_pu))
-
+'''
 
 solution = Solution(circuit)
 vector = solution.calc_known_power()
+print("------------Mismatch Vector----------------")
 mismatch = solution.calc_mismatch()
+print("size of mismatch:",len(mismatch))
+
 print(mismatch)
 # Displaying the mismatch array in a readable format
 #assuming bus 1 is slack for printing formatting
-print("--------")
-
-
-
+print("---------------Jacobian Matrix-------------")
 # try to print out jacobian
 solution.calc_jacobian()
-
 solution.print_jacobian()
-print(solution.calc_solution())
+solution.make_solution_vector()
+solution.calc_solution()
 
 
 

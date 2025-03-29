@@ -12,6 +12,7 @@ class Solution:
         self.mismatch: np.array
         self.jacob = Jacobian.Jacobian(self.circuit)
         self.j_matrix: np.array
+        self.find_buses()
 
 
     def calc_known_power(self):
@@ -133,29 +134,85 @@ class Solution:
     def print_jacobian(self):
            self.jacob.print_jacobian()
 
+    def find_buses(self):
+        #helper method to sort out buses
+        for index, bus in enumerate(self.circuit.buses.values()):
+            if bus.bus_type == "slack":
+                self.slackIndex = index
+            elif bus.bus_type == "pv":
+                self.pvIndex = index
+
+    def make_solution_vector(self):
+        # Initialize delta and V with appropriate sizes
+        delta = np.zeros(len(self.circuit.buses) - 1)  # Exclude slack bus from delta
+        V = np.ones(len(self.circuit.buses) - 2)  # Exclude slack and PV bus from V
+
+        # Set voltage magnitudes for each bus (excluding slack and PV bus)
+        voltageIndex = 0
+        for bus_k in self.circuit.buses.values():
+            if bus_k == self.circuit.buses[f"bus"+str(self.slackIndex+1)] or bus_k == self.circuit.buses[f"bus"+str(self.pvIndex+1)]:
+                # Skip the slack bus and PV bus (don't set voltage)
+                continue
+            else:
+                # Set the voltage magnitude
+                V[voltageIndex] = bus_k.v_pu
+                voltageIndex += 1  # Increment the index for V
+
+        # Set voltage angles for each bus (excluding slack bus only)
+        deltaIndex = 0
+        for bus_j in self.circuit.buses.values():
+            if bus_j == self.circuit.buses[f"bus"+str(self.slackIndex+1)]:
+                # Skip the slack bus (no angle here, as it's the reference)
+                continue
+            else:
+                # Set the voltage angle
+                delta[deltaIndex] = bus_j.delta
+                deltaIndex += 1  # Increment the index for delta
+        # Combine the delta and V vectors into a single solution vector
+        self.finalVector = np.hstack((delta, V))  # Stack delta and V horizontally
+        # Solve for the correction using the mismatch
+        deltaX = np.linalg.solve(self.j_matrix, self.mismatch)  # Solve for the correction vector
+        # Update the solution vector with the correction
+        self.finalVector += deltaX  # Add the correction to the current solution
+        return self.finalVector  # Return the updated solution vector
+
     def calc_solution(self):
-        # Solve for delta x
-        delt_x = np.linalg.solve(self.j_matrix, self.mismatch)
+        # Tolerance for convergence
+        tolerance = 0.001
+        for f in range(50):  # Maximum number of iterations
+            counter = 0  # To count how many mismatch values are within tolerance
 
-        # Separate bus indices based on bus type
-        slack_positions = [i for i, bus in self.circuit.buses.items() if bus.bus_type == "slack"]
-        pv_positions = [i for i, bus in self.circuit.buses.items() if bus.bus_type == "pv"]
+            for mismatchIndex in range(len(self.mismatch)):
+                # Check if mismatch for the current bus is within tolerance
+                if np.abs(self.mismatch[mismatchIndex]) <= tolerance:
+                    counter += 1
 
-        # Initialize counter and array for new voltage magnitudes
-        i = 0
-        new_V = np.zeros(len(self.circuit.buses), dtype=complex)
+            # If all mismatches are within tolerance, we've converged
+            if counter == len(self.mismatch):
+                # Create a solution vector to store the voltage angles and magnitudes
+                solutionVect = np.zeros(len(self.circuit.buses) * 2)  # 2 entries per bus: delta and v_pu
+                a = 0
 
-        # Update deltas and voltages for non-slack, non-PV buses
-        for idx, bus in self.circuit.buses.items():
-            if bus.bus_type != "slack":
-                if bus.bus_type != "pv":  # Update voltage for non-slack, non-PV buses
-                    bus.set_bus_V(bus.v_pu + delt_x[i])
-                bus.set_bus_delta(bus.delta + delt_x[i])
-                i += 1
+                # Populate the solution vector with delta and v_pu for each bus
+                for bus_k in self.circuit.buses.values():
+                    if bus_k != self.circuit.buses[f"bus{self.slackIndex + 1}"]:  # Skip slack bus
+                        solutionVect[a] = bus_k.delta  # Set delta (voltage angle)
+                        solutionVect[a + len(self.circuit.buses)] = bus_k.v_pu  # Set v_pu (voltage magnitude)
+                        a += 1
 
-        # Calculate new voltage magnitudes and phases
-        for idx, bus in enumerate(self.circuit.buses.values()):  # Use enumerate here
-            # Apply magnitude and phase adjustments using delta
-            new_V[idx] = bus.v_pu * np.exp(1j * bus.delta)
+                # Print the converged solution
+                print("Converged solution:", solutionVect)
+                return solutionVect  # Return the solution vector
 
-        return new_V
+            # If not converged, update Jacobian and mismatch for the next iteration
+            self.calc_jacobian()
+            self.calc_mismatch()
+            self.make_solution_vector()
+
+
+
+
+
+
+
+
