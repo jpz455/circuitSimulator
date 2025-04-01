@@ -3,6 +3,7 @@ import pandas as pd
 import Circuit as Circuit
 import Jacobian as Jacobian
 from typing import Dict, List, Optional
+import matplotlib.pyplot as plt
 class Solution:
 
     def __init__(self, circuit: Circuit):
@@ -182,10 +183,41 @@ class Solution:
         self.j_inv = np.linalg.inv(self.j_matrix) #invert jacobian
         self.delta_vec = np.linalg.matmul(self.j_inv, self.mismatch)  # Solve for the correction vector
         # Update the solution vector with the correction
-        self.finalVector += self.delta_vec  # Add the correction to the current solution
+        self.finalVector += 0.2*self.delta_vec  # Add the correction to the current solution
+
+        # Convert finalVector to 2 arrays for easier indexing
+        voltages = np.ones((self.circuit.buses.__len__(), 1))  # array with size of all buses, will skip slack and pv
+        deltas = np.zeros((self.circuit.buses.__len__(), 1))  # array with size of all buses, will skip slack
+        # set up indices
+        v_ind = 0
+        d_ind = 0
+
+        # Copy over voltages
+        while (v_ind < len(voltages)):
+            if (v_ind != self.slackIndex and v_ind != self.slackIndex):
+                voltages[v_ind] = self.finalVector[v_ind]
+            v_ind += 1
+        # Copy over deltas
+        while (d_ind < len(deltas)):
+            if (d_ind != self.slackIndex):
+                deltas[d_ind] = self.finalVector[d_ind]
+            d_ind += 1
+
+        # Now update buses in Circuit
+        for k, bus_k in enumerate(self.circuit.buses.values()):
+            if (k == self.slackIndex):  # if slack bus don't update anything
+                continue
+            elif (k == self.pvIndex):  # if pv bus update delta only
+                bus_k.delta = float(deltas[k])
+                continue
+            else:
+                bus_k.v_pu = float(voltages[k])
+                bus_k.delta = float(deltas[k])
+
         return self.finalVector  # Return the updated solution vector
 
     def calc_solution(self, tolerance = 0.001):
+        data = np.zeros(50) #empty array to hold mismatches to start
         # Tolerance for convergence
         tolerance = tolerance # Update tolerance if user provided otherwise default = 0.001
         for f in range(50):  # Maximum number of iterations
@@ -210,44 +242,21 @@ class Solution:
                 print("Converged solution:", self.solutionVect)
                 return self.solutionVect  # Return the solution vector
             else:
-                # If not converged, update all buses
-                # Convert solutionVect to 2 arrays for easier indexing
-                voltages = np.ones((self.circuit.buses.__len__(), 1)) # array with size of all buses, will skip slack and pv
-                deltas = np.zeros((self.circuit.buses.__len__(), 1)) # array with size of all buses, will skip slack
-                # set up indices
-                v_ind = 0
-                d_ind = 0
-                # Copy over voltages
-                while (v_ind < len(voltages)):
-                    if (v_ind != self.slackIndex and v_ind != self.slackIndex):
-                        voltages[v_ind] = self.finalVector[v_ind]
-                    v_ind += 1
-                # Copy over deltas
-                while (d_ind < len(deltas)):
-                    if (d_ind != self.slackIndex):
-                        deltas[d_ind] = self.finalVector[d_ind]
-                    d_ind += 1
-
-               # Now update buses in Circuit
-                for k, bus_k in enumerate(self.circuit.buses.values()):
-                    if(k == self.slackIndex): # if slack bus don't update anything
-                        continue
-                    elif(k == self.pvIndex): # if pv bus update delta only
-                        bus_k.delta = deltas[k]
-                        continue
-                    else:
-                        bus_k.v_pu = voltages[k]
-                        bus_k.delta = deltas[k]
-
+                # Did not converge
                 print("iteration", f, "Mismatches: ", self.mismatch)
                 # ~Recursion~
                 self.make_solution_vector()
-
+                data[f] = self.mismatch[7]
                 if(f == 49):
                     print("did not converge. number of mismatches within tolerance: ", counter)
-
-
-
+                    iterations = np.arange(1, 51)
+                    plt.figure(figsize=(8, 5))
+                    plt.plot(iterations, data, marker='o', color='blue')
+                    plt.xlabel('Iteration')
+                    plt.ylabel('Mismatch')
+                    plt.title('Mismatch vs. Iteration')
+                    plt.grid(True)
+                    plt.show()
 
 
 

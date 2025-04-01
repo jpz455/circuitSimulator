@@ -158,7 +158,6 @@ solution.print_jacobian()
 
 print("-----------------Solution--------------------")
 
-
 solution.make_solution_vector()
 solution.calc_solution()
 
