@@ -148,11 +148,13 @@ print("size of mismatch:",len(mismatch))
 
 #print(mismatch)
 # Displaying the mismatch array in a readable format
-#assuming bus 1 is slack for printing formatting
-#print("---------------Jacobian Matrix-------------")
+# assuming bus 1 is slack for printing formatting
+print("---------------Jacobian Matrix-------------")
+# Get voltages as array
+voltages = solution.get_voltages()
 # try to print out jacobian
-#solution.calc_jacobian()
-#solution.print_jacobian()
+solution.calc_jacobian()
+solution.print_jacobian()
 
 print("-----------------Solution--------------------")
 

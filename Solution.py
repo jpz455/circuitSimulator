@@ -124,7 +124,7 @@ class Solution:
 
         # Now remove the reactive power mismatch for the PV bus
         # Note: We're dealing with the second row in the transposed array (reactive power)
-        index_to_delete = len(self.circuit.buses)-2+pvIndex  # Just delete the reactive power mismatch for the PV bus
+        index_to_delete = len(self.circuit.buses)-2 + pvIndex  # Just delete the reactive power mismatch for the PV bus
         stacked_array = np.delete(stacked_array, index_to_delete)
 
         # Update self.mismatch to the new transposed array
@@ -179,7 +179,7 @@ class Solution:
         self.finalVector = np.hstack((delta, V))  # Stack delta and V horizontally
 
         # Solve for the correction using the mismatch
-        self.j_inv = np.linalg.pinv(self.j_matrix) #invert jacobian
+        self.j_inv = np.linalg.inv(self.j_matrix) #invert jacobian
         self.delta_vec = np.linalg.matmul(self.j_inv, self.mismatch)  # Solve for the correction vector
         # Update the solution vector with the correction
         self.finalVector += self.delta_vec  # Add the correction to the current solution
@@ -210,10 +210,41 @@ class Solution:
                 print("Converged solution:", self.solutionVect)
                 return self.solutionVect  # Return the solution vector
             else:
-                print("did not converge, iteration:", f+1, "in tolerance:", counter)
-                print("delta_v", self.delta_vec, "final vec:", self.finalVector)
-                # If not converged, update Jacobian and mismatch for the next iteration
+                # If not converged, update all buses
+                # Convert solutionVect to 2 arrays for easier indexing
+                voltages = np.ones((self.circuit.buses.__len__(), 1)) # array with size of all buses, will skip slack and pv
+                deltas = np.zeros((self.circuit.buses.__len__(), 1)) # array with size of all buses, will skip slack
+                # set up indices
+                v_ind = 0
+                d_ind = 0
+                # Copy over voltages
+                while (v_ind < len(voltages)):
+                    if (v_ind != self.slackIndex and v_ind != self.slackIndex):
+                        voltages[v_ind] = self.finalVector[v_ind]
+                    v_ind += 1
+                # Copy over deltas
+                while (d_ind < len(deltas)):
+                    if (d_ind != self.slackIndex):
+                        deltas[d_ind] = self.finalVector[d_ind]
+                    d_ind += 1
+
+               # Now update buses in Circuit
+                for k, bus_k in enumerate(self.circuit.buses.values()):
+                    if(k == self.slackIndex): # if slack bus don't update anything
+                        continue
+                    elif(k == self.pvIndex): # if pv bus update delta only
+                        bus_k.delta = deltas[k]
+                        continue
+                    else:
+                        bus_k.v_pu = voltages[k]
+                        bus_k.delta = deltas[k]
+
+                print("iteration", f, "Mismatches: ", self.mismatch)
+                # ~Recursion~
                 self.make_solution_vector()
+
+                if(f == 49):
+                    print("did not converge. number of mismatches within tolerance: ", counter)
 
 
 
