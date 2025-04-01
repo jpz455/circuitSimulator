@@ -146,13 +146,17 @@ print("------------Mismatch Vector----------------")
 mismatch = solution.calc_mismatch()
 print("size of mismatch:",len(mismatch))
 
-print(mismatch)
+#print(mismatch)
 # Displaying the mismatch array in a readable format
 #assuming bus 1 is slack for printing formatting
-print("---------------Jacobian Matrix-------------")
+#print("---------------Jacobian Matrix-------------")
 # try to print out jacobian
-solution.calc_jacobian()
-solution.print_jacobian()
+#solution.calc_jacobian()
+#solution.print_jacobian()
+
+print("-----------------Solution--------------------")
+
+
 solution.make_solution_vector()
 solution.calc_solution()
 
