@@ -191,8 +191,8 @@ class Solution:
         voltages = np.ones((self.circuit.buses.__len__(), 1))  # array with size of all buses , will skip slack and pv
         deltas = np.zeros((self.circuit.buses.__len__(), 1))  # array with size of all buses , will skip slack
         # set up indices
-        v_ind = 1
-        d_ind = 1
+        v_ind = 0
+        d_ind = 0
 
         # Delta Vector has voltages 1-6 (exc slack and pv) in indices 0-5
         # Copy voltages and data from buses into arrays
@@ -231,7 +231,7 @@ class Solution:
         data = [] #empty array to hold mismatches to start
         # Tolerance for convergence
         tolerance = tolerance # Update tolerance if user provided otherwise default = 0.001
-        for f in range(100):  # Maximum number of iterations
+        for f in range(200):  # Maximum number of iterations
             counter = 0  # To count how many mismatch values are within tolerance
 
             for mismatchIndex in range(len(self.mismatch)):
@@ -254,24 +254,17 @@ class Solution:
                 return self.solutionVect  # Return the solution vector
             else:
                 # Did not converge
-                print("iteration", f, "Mismatches: ", self.mismatch)
                 # ~Recursion~
                 self.make_solution_vector()
-
+                # Add mismatches to data for plotting
                 data.append(self.mismatch)
-
-                self.j_matrix = self.calc_jacobian()
-                self.mismatch = self.calc_mismatch()
-
-                if(f == 99):
+                if(f == 199):
                     print("did not converge. number of mismatches within tolerance: ", counter)
                     self.graph_mismatch(data)
 
 
     def graph_mismatch(self, data):
             data_array = np.array([np.array(row) for row in data])
-            print(type(data_array))
-            print(data_array.shape)
             iterations = np.arange(len(data))
             colors = plt.cm.viridis(np.linspace(0, 1, data_array.shape[1]))
 
