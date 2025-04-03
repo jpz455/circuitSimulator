@@ -6,6 +6,7 @@ skinparam ClassBackgroundColor #PaleTurquoise
 class Circuit{
     +name: str
     +buses: Dict[str, Bus]
+    +busRef: List[str]
     +transformers: Dict[str, Transformer]
     +geometries: Dict[str, Geometry]
     +conductors: Dict[str, Conductor]
@@ -13,7 +14,7 @@ class Circuit{
     +loads: Dict[str, Load]
     +generators: Dict[str, Generator]
     +settings: Settings
-    +y_bus: DataFrame
+    +y_bus: Pandas DataFrame
 
     +add_bus(Bus)
     +add_transformer(Transformer)
@@ -29,13 +30,15 @@ class Circuit{
 class Bus {
     +name: str
     +base_kv: float
-    +numBus: float
-    +index: float
+    +numBus: int
+    +index: int
     +bus_type: str
     +v_pu: float = 1.0
     +delta: float = 0.0
 
     +set_bus_type()
+    +set_bus_V(bus_v: float)
+    +set_bus_delta(bus_angle: float)
     }
 
 class Bundle {
@@ -62,11 +65,10 @@ class Conductor {
 
 class Generator {
     +name: str
-    +diameter: float
-    +GMR: float
-    +resistance: float
-    +amp: float
-    +radius: float
+    +voltage_setpoint: float
+    +mw_setpoint: float
+    +bus: Bus
+    +settings: Settings
     }
 
 class Geometry{
@@ -114,10 +116,10 @@ class Transformer {
     +y_pu: complex
     +r_pu: float
     +x_pu: float
-    +y_prim: List[complex]
+    +y_prim: Pandas DataFrame
     +matrix: Dict[str, complex]
 
-    +calc_y_prim(): List[complex]
+    +calc_y_prim(): Pandas DataFrame
     +print_y_prim()
     }
 
@@ -128,20 +130,19 @@ class TransmissionLine {
     +bundle: Bundle
     +geometry: Geometry
     +length: float
-    +settings: Settings
     +z_base: float
     +y_base: float
     +z: complex
     +r: float
-    +x: float
+    +x: complex
     +r_pu: float
-    +x_pu: float
+    +x_pu: complex
     +y_pu: complex
     +y_shunt: complex
     +y_series: complex
     +y_series_pu: complex
     +y_shunt_pu: complex
-    +y_prim: List[complex]
+    +y_prim: Pandas DataFrame
     +matrix: Dict[str, complex]
 
     +calc_y_prim(): List[complex]
@@ -150,42 +151,42 @@ class TransmissionLine {
 
 class Solution {
     +circuit: Circuit
-    +known_power: array
-    +power: array
-    +mismatch: array
+    +known_power: NumPy array
+    +power: NumPy array
+    +mismatch: NumPy array
     +jacob: Jacobian
-    +j_matrix: array
-    +solutionVect: array
-    +calcPQ: array
-    +knownPQ: array
-    +initSol: array
+    +j_matrix: NumPy array
+    +solutionVect: NumPy array
+    +calcPQ: NumPy array
+    +knownPQ: NumPy array
+    +initSol: NumPy array
 
-    +calc_known_power(): array
-    +make_power_mismatch(): array
-    +make_solution_vector(): array
-    +calc_solution()
-    +calc_jacobian(): array
+    +calc_known_power():
+    +make_power_mismatch(): NumPy array
+    +make_solution_vector(): NumPy array
+    +calc_solution(): NumPy array
+    +calc_jacobian(): NumPy array
     +print_jacobian()
     }
 
 class Jacobian {
     +circuit: Circuit
-    +y_bus: array
-    +slack: int
-    +pv: int
-    +j1: array
-    +j2: array
-    +j3: array
-    +j4: array
-    +j_matrix: array
-    +j_df: DataFrame
+    +y_bus: NumPy array
+    +slackI: int
+    +pvI: int
+    +j1: NumPy array
+    +j2: NumPy array
+    +j3: aNumPy array
+    +j4: NumPy array
+    +j_matrix: NumPy array
+    +j_df: Pandas DataFrame
 
     +find_buses()
-    +calc_j1(): array
-    +calc_j2(): array
-    +calc_j3(): array
-    +calc_j4(): array
-    +calc_jacobian(): array
+    +calc_j1(): NumPy array
+    +calc_j2(): NumPy array
+    +calc_j3(): NumPy array
+    +calc_j4(): NumPy array
+    +calc_jacobian(): NumPy array
     +print_jacobian()
     }
 
@@ -214,7 +215,11 @@ Solution *-- Jacobian
 
 Jacobian *-- Circuit
 
+Generator *-- Bus
+Generator *-- Settings
 
+Load *-- Bus
+Load *-- Settings
 
 
 

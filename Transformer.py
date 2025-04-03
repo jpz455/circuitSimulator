@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from typing import Dict
 from Bus import Bus
-
 from Settings import current_settings
 
 class Transformer():
