@@ -155,12 +155,15 @@ class Solution {
     +mismatch: array
     +jacob: Jacobian
     +j_matrix: array
+    +solutionVect: array
+    +calcPQ: array
+    +knownPQ: array
+    +initSol: array
 
-    +compute_power_injection(Bus, array, array): array, array
     +calc_known_power(): array
-    +get_voltages(): array
-    +calc_injection(array, array, array): complex, complex
-    +calc_mismatch(): array
+    +make_power_mismatch(): array
+    +make_solution_vector(): array
+    +calc_solution()
     +calc_jacobian(): array
     +print_jacobian()
     }

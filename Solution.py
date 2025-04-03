@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 class Solution:
 
     def __init__(self, circuit: Circuit):
+
         self.circuit = circuit
         self.known_power: np.array
         self.power: np.array
@@ -15,9 +16,9 @@ class Solution:
         self.jacob = Jacobian.Jacobian(self.circuit)
         self.j_matrix: np.array
         self.solutionVect = np.zeros(len(self.circuit.buses) * 2)
-        self.j_inv: np.array
-        self.slackIndex = self.jacob.slackI
-        self.pvIndex = self.jacob.pvI
+        self.calcPQ = np.array
+        self.knownPQ = np.array
+        self.initSol = np.array
 
     def calc_known_power(self):
         P = np.zeros([len(self.circuit.buses), 1])
@@ -146,17 +147,11 @@ class Solution:
             self.make_solution_vector()
 
 
-    '''
+
     def print_jacobian(self):
            self.jacob.print_jacobian()
 
-    def find_buses(self):
-        #helper method to sort out buses
-        for index, bus in enumerate(self.circuit.buses.values()):
-            if bus.bus_type == "slack":
-                self.slackIndex = index
-            elif bus.bus_type == "pv":
-                self.pvIndex = index
+    '''
 
     def make_solution_vector(self):
         #get j_matrix and mismatch

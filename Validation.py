@@ -1,4 +1,3 @@
-
 from Bundle import Bundle
 from Bus import Bus
 from Transformer import Transformer
@@ -81,14 +80,18 @@ circuit.add_transmission_line(tLine6)
 
 # Calculate Y-Bus Matrix
 y_bus = circuit.calc_y_bus()
-
+load2 = Load("load2",bus2,0,0,settings)
+circuit.add_load(load2)
 load3 = Load("load3",bus3,-110,-50,settings)
 circuit.add_load(load3)
 load4 = Load("load4",bus4,-100,-70,settings)
 circuit.add_load(load4)
 load5 = Load("load5",bus5,-100,-65,settings)
 circuit.add_load(load5)
-
+load6 = Load("load6",bus6,0,0,settings)
+circuit.add_load(load6)
+load7 = Load("load7",bus7,0,0,settings)
+circuit.add_load(load7)
 gen1 = Generator("Gen 1",bus1,0,100, settings)
 circuit.add_generator(gen1)
 gen2 = Generator("Gen 2",bus7,0,200, settings)
@@ -135,37 +138,26 @@ print()
 print("tl6 r: ", tLine6.r_pu)
 print("tl6 x: ", tLine6.x_pu)
 print("tl6 b: ", np.imag(tLine6.y_shunt_pu))
+'''
 
-
-
+solution = Solution(circuit)
 vector = solution.calc_known_power()
 print("------------Mismatch Vector----------------")
-mismatch = solution.calc_mismatch()
+mismatch = solution.make_power_mismatch()
 print("size of mismatch:",len(mismatch))
 
 #print(mismatch)
 # Displaying the mismatch array in a readable format
 # assuming bus 1 is slack for printing formatting
 print("---------------Jacobian Matrix-------------")
-# Get voltages as array
-voltages = solution.get_voltages()
 # try to print out jacobian
 solution.calc_jacobian()
 solution.print_jacobian()
-'''
-print("-----------------Solution--------------------")
-solution = Solution(circuit)
-solution.calc_jacobian()
-solution.calc_known_power()
-solution.make_power_mismatch()
 
+print("-----------------Solution--------------------")
 
 solution.make_solution_vector()
-done = solution.calc_solution()
-print("Vpu          Angle")
-for i in done:
-
-    print(i)
+solution.calc_solution()
 
 
 
