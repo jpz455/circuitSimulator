@@ -71,13 +71,13 @@ class Circuit:
         if load.name in self.loads:
             print(f"Load with name '{load.name}' already exists. Skipping addition.")
         else:
-            self.loads[load.bus.name] = load
+            self.loads[load.name] = load
 
     def add_generator(self, generator: Generator):
             if generator.name in self.generators:
                 print(f"Generator with name '{generator.name}' already exists. Skipping addition.")
             else:
-                self.generators[generator.bus.name] = generator
+                self.generators[generator.name] = generator
 
     def calc_y_bus(self):
         size = np.zeros([Bus.numBus, Bus.numBus])

@@ -4,6 +4,7 @@ import Circuit as Circuit
 import Jacobian as Jacobian
 from typing import Dict, List, Optional
 import matplotlib.pyplot as plt
+
 class Solution:
 
     def __init__(self, circuit: Circuit):
@@ -13,130 +14,139 @@ class Solution:
         self.mismatch: np.array
         self.jacob = Jacobian.Jacobian(self.circuit)
         self.j_matrix: np.array
-        self.find_buses()
         self.solutionVect = np.zeros(len(self.circuit.buses) * 2)
         self.j_inv: np.array
         self.slackIndex = self.jacob.slackI
         self.pvIndex = self.jacob.pvI
 
     def calc_known_power(self):
+        P = np.zeros([len(self.circuit.buses), 1])
+        Q = np.zeros([len(self.circuit.buses), 1])
+        self.knownPQ = np.vstack((P, Q))
+        for index, bus in enumerate(self.circuit.buses):
+            mismatchKey = "load" + str(index + 1)
+            genKey = "Gen " + str(index + 1)
+            if mismatchKey in self.circuit.loads:
+                print(f"Found {mismatchKey} at bus {bus}")
+                self.knownPQ[index] = self.circuit.loads[mismatchKey].real_pwr
+                self.knownPQ[index + len(self.circuit.buses)] = self.circuit.loads[mismatchKey].reactive_pwr
+            elif genKey in self.circuit.generators and self.circuit.buses["bus" + str(index + 1)].bus_type != "slack":
+                print(f"Found {genKey} at bus {self.circuit.generators[genKey].bus.name}")
+                bus_name = self.circuit.generators[genKey].bus.name
+                bus_index = int(bus_name[3:])
+                self.knownPQ[bus_index - 1] = self.circuit.generators[genKey].mw_setpoint
+            else:
+                print(f"{mismatchKey} does not exist at bus {bus}")
+        self.knownPQ = self.knownPQ/self.circuit.settings.s_base
+        print("------ known power --------")
+        print(self.knownPQ)
 
-        n = len(self.circuit.buses)
-        P = np.zeros((n, 1))
-        Q = np.zeros((n, 1))
-
-        # Loop through all buses and assign real/reactive power
-        for i, bus in enumerate(self.circuit.buses):
-            # Real Power (P)
-            load = self.circuit.loads.get(bus)
-            generator = self.circuit.generators.get(bus)
-
-            if load:
-                P[i] = load.real_pwr
-            if generator:
-                P[i] += generator.mw_setpoint  # Add generator contribution
-
-            # Reactive Power (Q)
-            if load:
-                Q[i] = load.reactive_pwr
-
-        # Stack real and reactive power vectors and convert to per-unit
-        self.known_power = np.vstack((P, Q)) / self.circuit.settings.s_base
-        return self.known_power
-
-    def get_voltages(self):
-        # Extract all per-unit voltages directly from buses
-        return np.array([bus.v_pu for bus in self.circuit.buses.values()])
-
-    def calc_injection(self, bus, y_bus, voltages):
-
-        bus_index = self.circuit.buses[bus]  # Access the bus object
-        N = bus_index.numBus - 1  # Ensure correct index
-
-        V_k = voltages[N]  # Complex voltage at bus k
-        delta_K = np.angle(V_k)
-        P_k, Q_k = 0, 0
-
-        # Precompute absolute value of V_k for reuse in the loop
-        abs_V_k = np.abs(V_k)
-
-        for n, bus_n in enumerate(self.circuit.buses.values()):
-            Y_kn = y_bus.loc[bus_index.name, bus_n.name]
-            V_n = voltages[n]
-            delta_N = np.angle(V_n)
-            abs_V_n = np.abs(V_n)
-            abs_Y_kn = np.abs(Y_kn)
-
-            # Compute active and reactive power
-            delta_diff = delta_K - delta_N - np.angle(Y_kn)
-            P_k += abs_V_k * abs_Y_kn * abs_V_n * np.cos(delta_diff)
-            Q_k += abs_V_k * abs_Y_kn * abs_V_n * np.sin(delta_diff)
-
-        return P_k, Q_k
-
-    def calc_mismatch(self):
-        numBuses = len(self.circuit.buses)
-        P = np.zeros((numBuses, 1))
-        Q = np.zeros((numBuses, 1))
-
-        # Loop through each bus to calculate power injections
-        voltages = self.get_voltages()
-        for index in range(numBuses):
-            busI = f"bus{index + 1}"
-            P_k, Q_k = self.calc_injection(busI, self.circuit.y_bus, voltages)
-            P[index] = P_k
-            Q[index] = Q_k
-
-        # Stack real and reactive power vectors
-        self.power = np.vstack((P, Q))
-        self.mismatch = self.known_power - self.power
-
-        # Create a list to hold the filtered mismatches
-        mismatch_filtered = []
-
-        for iteration, bus in enumerate(self.circuit.buses.values()):
-            if bus.bus_type == "pv":
-                # Exclude only the reactive power mismatch for PV buses, keep real power mismatch
-                mismatch_filtered.append([self.mismatch[iteration][0], 0])  # Set Q mismatch to 0 for PV buses
-            elif bus.bus_type != "slack":
-                # Include real and reactive power mismatches for non-PV, non-slack buses
-                mismatch_filtered.append(
-                    [self.mismatch[iteration][0], self.mismatch[iteration + numBuses][0]])  # Separate real and reactive
-
-        # Convert the filtered list to a numpy array with consistent shape
-
-        # Convert the filtered list to a numpy array with consistent shape
-        temp = np.array(mismatch_filtered)
-
-        # Extract the first and second columns and stack them vertically
-        first_column = temp[:, 0]  # First column (index 0)
-        second_column = temp[:, 1]  # Second column (index 1)
-
-        # Stack the columns vertically (one on top of the other)
-        stacked_array = np.concatenate((first_column, second_column), axis=0)
-
-        # Find the correct index to delete based on the PV bus index.
-        # Since slack bus is excluded, adjust the pvIndex to match the correct column in transposed
-        for index, bus in enumerate(self.circuit.buses.values()):
-            if bus.bus_type == "slack":
-                slackIndex = index
-            elif bus.bus_type == "pv":
-                pvIndex = index
-
-        # Now remove the reactive power mismatch for the PV bus
-        # Note: We're dealing with the second row in the transposed array (reactive power)
-        index_to_delete = len(self.circuit.buses)-2 + pvIndex  # Just delete the reactive power mismatch for the PV bus
-        stacked_array = np.delete(stacked_array, index_to_delete)
-
-        # Update self.mismatch to the new transposed array
-        self.mismatch = stacked_array
+    def make_power_mismatch(self):
+        calcrealP = np.zeros([len(self.circuit.buses), 1])
+        calcreacP = np.zeros([len(self.circuit.buses), 1])
+        for tempBus1, bus1 in enumerate(self.circuit.buses.values()):
+            tempP = 0
+            bus1_vpu = bus1.v_pu
+            bus1_delta = bus1.delta
+            for tempBus2, bus2 in enumerate(self.circuit.buses.values()):
+                y_bus_value = self.circuit.y_bus.loc[f"bus{tempBus1 + 1}", f"bus{tempBus2 + 1}"]
+                tempP += np.abs(y_bus_value) * bus2.v_pu * np.cos(bus1_delta - bus2.delta - np.angle(y_bus_value))
+            calcrealP[tempBus1] = bus1_vpu * tempP
+        for tempBus1Q, bus1Q in enumerate(self.circuit.buses.values()):
+            tempQ = 0
+            bus1Q_vpu = bus1Q.v_pu
+            bus1Q_delta = bus1Q.delta
+            for tempBus2Q, bus2Q in enumerate(self.circuit.buses.values()):
+                y_bus_value = self.circuit.y_bus.loc[f"bus{tempBus1Q + 1}", f"bus{tempBus2Q + 1}"]
+                tempQ += np.abs(y_bus_value) * bus2Q.v_pu * np.sin(bus1Q_delta - bus2Q.delta - np.angle(y_bus_value))
+            calcreacP[tempBus1Q] = bus1Q_vpu * tempQ
+        self.calcPQ = np.vstack((calcrealP, calcreacP))
+        self.mismatch = self.knownPQ - self.calcPQ
+        indices_to_delete = []
+        # Iterate through mismatch backward
+        for index in range(len(self.mismatch) - 1, -1, -1):
+            if index > len(self.circuit.buses) - 1:  # If index is in the reactive power part of mismatch
+                mismatchIndexTemp = "bus" + str(index - len(self.circuit.buses) + 1)  # Adjust index
+                if self.circuit.buses[mismatchIndexTemp].bus_type == "pv":
+                    indices_to_delete.append(index)  #mark reactive power of pv bus
+            else:
+                mismatchIndexTemp = "bus" + str(index + 1)  # Stay in real power index
+            if self.circuit.buses[mismatchIndexTemp].bus_type == "slack":
+                indices_to_delete.append(index)  #mark slack bus to delete
+        self.mismatch = np.delete(self.mismatch, indices_to_delete)
         return self.mismatch
+
+    def make_solution_vector(self):
+        bus_keys = sorted(self.circuit.buses.keys(), key=lambda x: int(x[3:]))  #sort buses in order with key lambda
+        initD = np.array([[self.circuit.buses[N].delta for N in bus_keys]])
+        initV = np.array([[self.circuit.buses[N].v_pu for N in bus_keys]])
+        self.initSol = np.hstack((initD, initV))
+        indices_to_delete = []
+        # Iterate backwards to determine which indices to remove
+        for index in range(len(self.circuit.buses) * 2 - 1, -1, -1):
+            if index > len(self.circuit.buses) - 1:  # If in reactive power section
+                temp = "bus" + str(index - len(self.circuit.buses) + 1)
+                if self.circuit.buses[temp].bus_type == "pv":  # Remove PV bus reactive power
+                    indices_to_delete.append(index)
+            else:  # If in real power section
+                temp = "bus" + str(index + 1)
+            if self.circuit.buses[temp].bus_type == "slack":  # Remove slack bus contributions
+                indices_to_delete.append(index)
+        self.initSol = np.delete(self.initSol, indices_to_delete)
+        deltaX = np.linalg.solve(self.j_matrix, self.mismatch)
+        self.initSol = self.initSol + deltaX
+        return self.initSol
 
     def calc_jacobian(self):
         self.jacob.calc_jacobian()
         self.j_matrix = self.jacob.j_matrix
         return self.j_matrix
 
+    def calc_solution(self):
+
+        tolerance = 0.0001
+
+        #give a max of 50 iterations
+        for iterations in range(50):
+            mismatchTempI = 0
+
+            #loop through every element of mismatch to check within tolerance
+            for mismatchI in range(len(self.mismatch)):
+
+                #get the values from solution vector
+                for x in range(len(self.circuit.buses)):
+
+                    X = "bus" + str(x + 1)
+
+                    if self.circuit.buses[X].bus_type != "slack" and self.circuit.buses[X].bus_type != "pv":
+                        self.circuit.buses[X].v_pu = self.initSol[x + len(self.circuit.buses) - 2]
+                        self.circuit.buses[X].delta = self.initSol[x - 1]
+                    elif self.circuit.buses[X].bus_type != "slack":
+                        self.circuit.buses[X].delta = self.initSol[x - 1]
+
+                if np.abs(self.mismatch[mismatchI]) <= tolerance:
+                    mismatchTempI += 1
+
+
+                if mismatchTempI == len(self.mismatch):
+                    converged = np.zeros((len(self.circuit.buses), 2))  # Use NumPy for 2D array
+
+                    temp = 0
+                    for k in self.circuit.buses:
+                        converged[temp, 1] = np.degrees(self.circuit.buses[k].delta)  # Store delta (angle)
+                        converged[temp, 0] = self.circuit.buses[k].v_pu  # Store voltage magnitude
+                        temp += 1
+
+                    print("Solution found")
+                    print("Iteration:", iterations)
+                    return converged
+
+            self.calc_jacobian()
+            self.make_power_mismatch()
+            self.make_solution_vector()
+
+
+    '''
     def print_jacobian(self):
            self.jacob.print_jacobian()
 
@@ -183,7 +193,7 @@ class Solution:
         self.j_inv = np.linalg.inv(self.j_matrix) #invert jacobian
         self.delta_vec = np.linalg.matmul(self.j_inv, self.mismatch)  # Solve for the correction vector
         # Update the solution vector with the correction
-        self.finalVector += 0.2*self.delta_vec  # Add the correction to the current solution
+        self.finalVector += 0.00001*self.delta_vec  # Add the correction to the current solution
 
         # Convert finalVector to 2 arrays for easier indexing
         voltages = np.ones((self.circuit.buses.__len__(), 1))  # array with size of all buses, will skip slack and pv
@@ -257,9 +267,4 @@ class Solution:
                     plt.title('Mismatch vs. Iteration')
                     plt.grid(True)
                     plt.show()
-
-
-
-
-
-
+'''
