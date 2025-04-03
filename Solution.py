@@ -115,15 +115,14 @@ class Solution:
             for mismatchI in range(len(self.mismatch)):
 
                 #get the values from solution vector
-                for x in range(len(self.circuit.buses)):
+                for busIndex in range(len(self.circuit.buses)):
 
-                    X = "bus" + str(x + 1)
 
-                    if self.circuit.buses[X].bus_type != "slack" and self.circuit.buses[X].bus_type != "pv":
-                        self.circuit.buses[X].v_pu = self.initSol[x + len(self.circuit.buses) - 2]
-                        self.circuit.buses[X].delta = self.initSol[x - 1]
-                    elif self.circuit.buses[X].bus_type != "slack":
-                        self.circuit.buses[X].delta = self.initSol[x - 1]
+                    if self.circuit.buses["bus" + str(busIndex + 1)].bus_type != "slack" and self.circuit.buses["bus" + str(busIndex + 1)].bus_type != "pv":
+                        self.circuit.buses["bus" + str(busIndex + 1)].v_pu = self.initSol[busIndex + len(self.circuit.buses) - 2]
+                        self.circuit.buses["bus" + str(busIndex + 1)].delta = self.initSol[busIndex - 1]
+                    elif self.circuit.buses["bus" + str(busIndex + 1)].bus_type != "slack":
+                        self.circuit.buses["bus" + str(busIndex + 1)].delta = self.initSol[busIndex - 1]
 
                 if np.abs(self.mismatch[mismatchI]) <= tolerance:
                     mismatchTempI += 1
@@ -133,9 +132,9 @@ class Solution:
                     converged = np.zeros((len(self.circuit.buses), 2))  # Use NumPy for 2D array
 
                     temp = 0
-                    for k in self.circuit.buses:
-                        converged[temp, 1] = np.degrees(self.circuit.buses[k].delta)  # Store delta (angle)
-                        converged[temp, 0] = self.circuit.buses[k].v_pu  # Store voltage magnitude
+                    for index in self.circuit.buses:
+                        converged[temp, 1] = np.degrees(self.circuit.buses[index].delta)  # Store delta (angle)
+                        converged[temp, 0] = self.circuit.buses[index].v_pu  # Store voltage magnitude
                         temp += 1
 
                     print("Solution found")
