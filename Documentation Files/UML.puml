@@ -160,6 +160,9 @@ class Solution {
     +calcPQ: NumPy array
     +knownPQ: NumPy array
     +initSol: NumPy array
+    +slack_index: int
+    +pv_index: int
+
 
     +calc_known_power():
     +make_power_mismatch(): NumPy array

@@ -5,10 +5,12 @@ import Jacobian as Jacobian
 from typing import Dict, List, Optional
 import matplotlib.pyplot as plt
 
+
+
 class Solution:
 
-    def __init__(self, circuit: Circuit):
-
+    def __init__(self, circuit: Circuit, mode: str):
+        self.mode = mode
         self.circuit = circuit
         self.known_power: np.array
         self.power: np.array
@@ -19,6 +21,31 @@ class Solution:
         self.calcPQ = np.array
         self.knownPQ = np.array
         self.initSol = np.array
+        self.slack_index: int
+        self.pv_index: int
+
+
+    def change_mode(self, mode: str):
+        self.mode = mode
+
+    def run_solver(self):
+        if(self.mode == "power flow"):
+            self.make_solution_vector()
+            self.calc_solution()
+        elif(self.mode == "fault analysis"):
+            fault_bus = input("Add fault bus: ")
+            st_x = np.zeros(2)
+            st_x[0] = input("Add slack generator subtransient reactance: ")
+            st_x[1] = input("Add second generator subtransient reactance: ")
+            self.calc_fault_study(fault_bus, st_x)
+            self.print_fault_voltages()
+            print("Fault current at bus", fault_bus, ": ", self.Ifn)
+
+        else:
+            print("Invalid mode.")
+            self.mode = input("Select a mode: Type fault analysis or power flow:")
+            self.run_solver()
+
 
     def calc_known_power(self):
         P = np.zeros([len(self.circuit.buses), 1])
@@ -150,115 +177,51 @@ class Solution:
     def print_jacobian(self):
            self.jacob.print_jacobian()
 
-    '''
 
-    def make_solution_vector(self):
-        #get j_matrix and mismatch
-        self.j_matrix = self.calc_jacobian()
-        self.mismatch = self.calc_mismatch()
 
-        # Initialize delta and V with appropriate sizes
-        delta = np.zeros(len(self.circuit.buses))  # Exclude slack bus from delta
-        V = np.ones(len(self.circuit.buses))  # Exclude slack and PV bus from V
+    def calc_fault_study(self, fault_bus: str, subtrans_x: [], fault_v = 1.0):
 
-        # Set voltage magnitudes for each bus (excluding slack and PV bus)
-        voltageIndex = 0
-        for bus_k in self.circuit.buses.values():
-                V[voltageIndex] = bus_k.v_pu
-                voltageIndex += 1  # Increment the index for V
+        # Add subtransient reactance to generators
+        for k, gen in enumerate(self.circuit.generators.values()):
+            gen.set_subtransient_x(subtrans_x[k])
+            if gen.bus.bus_type == "slack": #if it's the slack generator
+                self.slack_name = gen.bus.name # save slack bus name
+                slack_x_prime = gen.subtransient_x # save x"
+                slack_y_prime = 1/slack_x_prime # convert to y"
+            else: #it's a pv generator
+                self.pv_name = gen.bus.name # save pv bus name
+                pv_x_prime = gen.subtransient_x # save x"
+                pv_y_prime = 1/pv_x_prime # convert to y"
 
-        # Set voltage angles for each bus (excluding slack bus only)
-        deltaIndex = 0
-        for bus_j in self.circuit.buses.values():
-            delta[deltaIndex] = bus_j.delta
-            deltaIndex += 1  # Increment the index for delta
+        # modify y bus
+        self.circuit.calc_y_bus()
 
-        # Get rid of slack bus and PV bus voltage
-        V = np.delete(V, self.slackIndex)  # Delete slack bus column
-        V = np.delete(V, self.pvIndex - 1) # Delete PV bus column; has shifted over 1 due to deletion
+        self.circuit.y_bus.loc[self.slack_name, self.slack_name] += slack_y_prime
+        self.circuit.y_bus.loc[self.pv_name, self.pv_name] += pv_y_prime
 
-       #Get rid of slack bus delta
-        delta = np.delete(delta, self.slackIndex) # Delete slack bus column
+        # Set pre-fault voltage
+        self.circuit.buses[fault_bus].set_bus_V(fault_v)  # set the bus to fault with voltage given or default 1
 
-        # Combine the delta and V vectors into a single solution vector
-        self.finalVector = np.hstack((delta, V))  # Stack delta and V horizontally
 
-        # Solve for the correction using the mismatch
-        self.j_inv = np.linalg.inv(self.j_matrix) #invert jacobian
-        self.delta_vec = np.linalg.matmul(self.j_inv, self.mismatch)  # Solve for the correction vector
-        # Update the solution vector with the correction
-        self.finalVector += 0.00001*self.delta_vec  # Add the correction to the current solution
+        # Convert y_bus to z_bus
+        self.z_bus = np.linalg.inv(self.circuit.y_bus)
 
-        # Convert finalVector to 2 arrays for easier indexing
-        voltages = np.ones((self.circuit.buses.__len__(), 1))  # array with size of all buses, will skip slack and pv
-        deltas = np.zeros((self.circuit.buses.__len__(), 1))  # array with size of all buses, will skip slack
-        # set up indices
-        v_ind = 0
-        d_ind = 0
+        # Get Znn
+        index = self.circuit.buses[fault_bus].index - 1 # get index
+        Znn = self.z_bus[index][index]
 
-        # Copy over voltages
-        while (v_ind < len(voltages)):
-            if (v_ind != self.slackIndex and v_ind != self.slackIndex):
-                voltages[v_ind] = self.finalVector[v_ind]
-            v_ind += 1
-        # Copy over deltas
-        while (d_ind < len(deltas)):
-            if (d_ind != self.slackIndex):
-                deltas[d_ind] = self.finalVector[d_ind]
-            d_ind += 1
+        # subtransient fault current at that bus
+        self.Ifn = fault_v/Znn
 
-        # Now update buses in Circuit
-        for k, bus_k in enumerate(self.circuit.buses.values()):
-            if (k == self.slackIndex):  # if slack bus don't update anything
-                continue
-            elif (k == self.pvIndex):  # if pv bus update delta only
-                bus_k.delta = float(deltas[k])
-                continue
-            else:
-                bus_k.v_pu = float(voltages[k])
-                bus_k.delta = float(deltas[k])
+        # Calculate bus voltages
+        self.fault_voltages = np.empty(len(self.circuit.buses), dtype=np.complex128) # initialize array
+        for k, bus in enumerate(self.circuit.buses.values()): #calculate voltages
+            self.fault_voltages[k] = (1 - self.z_bus[k][index]/Znn) * fault_v
 
-        return self.finalVector  # Return the updated solution vector
+        return self.fault_voltages, self.Ifn
 
-    def calc_solution(self, tolerance = 0.001):
-        data = np.zeros(50) #empty array to hold mismatches to start
-        # Tolerance for convergence
-        tolerance = tolerance # Update tolerance if user provided otherwise default = 0.001
-        for f in range(50):  # Maximum number of iterations
-            counter = 0  # To count how many mismatch values are within tolerance
+    def print_fault_voltages(self):
+        for i, v in enumerate(self.fault_voltages):
+            print("Bus", i + 1, " voltage:", round(np.real(v), 5))
+            print("Bus", i + 1, " angle:", round(np.imag(v) * 180/np.pi, 5))
 
-            for mismatchIndex in range(len(self.mismatch)):
-                # Check if mismatch for the current bus is within tolerance
-                if np.abs(self.mismatch[mismatchIndex]) <= tolerance:
-                    counter += 1
-
-            # If all mismatches are within tolerance, we've converged
-            if counter == len(self.mismatch):
-                a = 0
-                # Populate the solution vector with delta and v_pu for each bus
-                for bus_k in self.circuit.buses.values():
-                    if bus_k != self.circuit.buses[f"bus{self.slackIndex + 1}"]:  # Skip slack bus
-                        self.solutionVect[a] = bus_k.delta  # Set delta (voltage angle)
-                        self.solutionVect[a + len(self.circuit.buses)] = bus_k.v_pu  # Set v_pu (voltage magnitude)
-                        a += 1
-
-                # Print the converged solution
-                print("Converged solution:", self.solutionVect)
-                return self.solutionVect  # Return the solution vector
-            else:
-                # Did not converge
-                print("iteration", f, "Mismatches: ", self.mismatch)
-                # ~Recursion~
-                self.make_solution_vector()
-                data[f] = self.mismatch[7]
-                if(f == 49):
-                    print("did not converge. number of mismatches within tolerance: ", counter)
-                    iterations = np.arange(1, 51)
-                    plt.figure(figsize=(8, 5))
-                    plt.plot(iterations, data, marker='o', color='blue')
-                    plt.xlabel('Iteration')
-                    plt.ylabel('Mismatch')
-                    plt.title('Mismatch vs. Iteration')
-                    plt.grid(True)
-                    plt.show()
-'''

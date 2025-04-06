@@ -140,7 +140,7 @@ print("tl6 x: ", tLine6.x_pu)
 print("tl6 b: ", np.imag(tLine6.y_shunt_pu))
 '''
 
-solution = Solution(circuit)
+solution = Solution(circuit, "power flow")
 vector = solution.calc_known_power()
 print("------------Mismatch Vector----------------")
 mismatch = solution.make_power_mismatch()
@@ -151,13 +151,14 @@ print("size of mismatch:",len(mismatch))
 # assuming bus 1 is slack for printing formatting
 print("---------------Jacobian Matrix-------------")
 # try to print out jacobian
-solution.calc_jacobian()
-solution.print_jacobian()
+#solution.calc_jacobian()
+#solution.print_jacobian()
 
 print("-----------------Solution--------------------")
+#solution.run_solver()
 
-solution.make_solution_vector()
-solution.calc_solution()
-
-
-
+print("--------------Fault Study--------------------")
+solution.change_mode("fault analysis")
+solution.run_solver()
+solution.circuit.calc_y_bus()
+solution.circuit.print_y_bus()
