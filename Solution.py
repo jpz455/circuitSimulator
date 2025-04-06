@@ -33,10 +33,11 @@ class Solution:
             self.make_solution_vector()
             self.calc_solution()
         elif(self.mode == "fault analysis"):
-            fault_bus = input("Add fault bus: ")
-            st_x = np.zeros(2)
-            st_x[0] = input("Add slack generator subtransient reactance: ")
-            st_x[1] = input("Add second generator subtransient reactance: ")
+            #fault_bus = input("Add fault bus: ")
+            fault_bus = "bus3"
+            st_x = [0.05j, 0.05j]
+            #st_x[0] = input("Add slack generator subtransient reactance: ")
+            #st_x[1] = input("Add second generator subtransient reactance: ")
             self.calc_fault_study(fault_bus, st_x)
             self.print_fault_voltages()
             print("Fault current at bus", fault_bus, ": ", self.Ifn)
@@ -195,16 +196,16 @@ class Solution:
 
         # modify y bus
         self.circuit.calc_y_bus()
-
+        #only have to modify diagonals
         self.circuit.y_bus.loc[self.slack_name, self.slack_name] += slack_y_prime
         self.circuit.y_bus.loc[self.pv_name, self.pv_name] += pv_y_prime
 
         # Set pre-fault voltage
         self.circuit.buses[fault_bus].set_bus_V(fault_v)  # set the bus to fault with voltage given or default 1
 
-
         # Convert y_bus to z_bus
-        self.z_bus = np.linalg.inv(self.circuit.y_bus)
+        self.y_bus_matrix = np.array(self.circuit.y_bus)
+        self.z_bus = np.linalg.inv(self.y_bus_matrix)
 
         # Get Znn
         index = self.circuit.buses[fault_bus].index - 1 # get index

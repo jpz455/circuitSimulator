@@ -9,7 +9,7 @@ class Generator:
         self.mw_setpoint = mw_setpoint #in MW
         self.bus = bus
         self.settings: Settings = settings
-        self.subtransient_x = 0
+        self.subtransient_x: complex = 0 + 0*1j
         self.base = 100
 
     def set_subtransient_x(self, subtransient_x: float):
