@@ -26,6 +26,7 @@ class Circuit:
 
 
 
+
     def add_bus(self, bus: Bus):
         # Check if bus already exists in system
         if bus.name in self.buses:
@@ -83,6 +84,8 @@ class Circuit:
         size = np.zeros([Bus.numBus, Bus.numBus])
         self.y_bus = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
 
+
+
         for yprim in self.transformers.keys():
             self.y_bus.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus1.name] += self.transformers[yprim].y_prim.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus1.name]
             self.y_bus.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus2.name] += self.transformers[yprim].y_prim.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus2.name]
@@ -95,6 +98,8 @@ class Circuit:
             self.y_bus.loc[self.transmission_lines[yprim].bus1.name, self.transmission_lines[yprim].bus2.name] += self.transmission_lines[yprim].y_prim.loc[self.transmission_lines[yprim].bus1.name, self.transmission_lines[yprim].bus2.name]
             self.y_bus.loc[self.transmission_lines[yprim].bus2.name, self.transmission_lines[yprim].bus1.name] += self.transmission_lines[yprim].y_prim.loc[self.transmission_lines[yprim].bus2.name, self.transmission_lines[yprim].bus1.name]
 
+
+
         return self.y_bus
 
     def print_y_bus(self):
@@ -104,6 +109,8 @@ class Circuit:
         else:
             print("\nY-Bus Matrix:")
             print(self.y_bus.to_string(float_format=lambda x: f"{x:.5f}"))
+
+
 
 
 

@@ -27,8 +27,7 @@ class Jacobian:
                 self.slackI = index
             elif bus.bus_type == "pv":
                 self.pvI = index
-        print("slack found at: ", self.slackI)
-        print("pv found at: ", self.pvI)
+
 
     def calc_jacobian(self):
        #call helper methods to calculate each submatrix

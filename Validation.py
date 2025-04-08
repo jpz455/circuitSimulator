@@ -92,12 +92,12 @@ load6 = Load("load6",bus6,0,0,settings)
 circuit.add_load(load6)
 load7 = Load("load7",bus7,0,0,settings)
 circuit.add_load(load7)
-gen1 = Generator("Gen 1",bus1,0,100, settings)
+gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,settings)
 circuit.add_generator(gen1)
-gen2 = Generator("Gen 2",bus7,0,200, settings)
+gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,settings)
 circuit.add_generator(gen2)
 # Print the Y-Bus Matrix
-circuit.print_y_bus()
+
 
 # Check existing load names
 '''
@@ -140,24 +140,24 @@ print("tl6 x: ", tLine6.x_pu)
 print("tl6 b: ", np.imag(tLine6.y_shunt_pu))
 '''
 
-solution = Solution(circuit, "power flow")
-vector = solution.calc_known_power()
-print("------------Mismatch Vector----------------")
-mismatch = solution.make_power_mismatch()
-print("size of mismatch:",len(mismatch))
+solution = Solution(circuit)
+#vector = solution.calc_known_power()
+#print("------------Mismatch Vector----------------")
+#mismatch = solution.calc_mismatch()
+#print("size of mismatch:",len(mismatch))
 
 #print(mismatch)
 # Displaying the mismatch array in a readable format
 # assuming bus 1 is slack for printing formatting
-print("---------------Jacobian Matrix-------------")
+#print("---------------Jacobian Matrix-------------")
 # try to print out jacobian
 #solution.calc_jacobian()
 #solution.print_jacobian()
 
-print("-----------------Solution--------------------")
+#print("-----------------Solution--------------------")
 #solution.run_solver()
 
 print("--------------Fault Study--------------------")
-solution.change_mode("fault analysis")
-solution.run_solver()
-solution.circuit.print_y_bus()
+
+solution.calc_fault_study("bus3")
+solution.print_fault_voltages()

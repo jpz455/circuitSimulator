@@ -7,8 +7,8 @@ import pandas as pd
 
 class Solution:
 
-    def __init__(self, circuit: Circuit, mode: str):
-        self.mode = mode
+    def __init__(self, circuit: Circuit):
+
         self.circuit = circuit
         self.known_power: np.array
         self.power: np.array
@@ -21,29 +21,6 @@ class Solution:
         self.initSol = np.array
         self.slack_index: int
         self.pv_index: int
-
-
-    def change_mode(self, mode: str):
-        self.mode = mode
-
-    def run_solver(self):
-        if(self.mode == "power flow"):
-            self.make_solution_vector()
-            self.calc_solution()
-        elif(self.mode == "fault analysis"):
-            #fault_bus = input("Add fault bus: ")
-            fault_bus = "bus3"
-            st_x = [0.05j, 0.05j]
-            #st_x[0] = input("Add slack generator subtransient reactance: ")
-            #st_x[1] = input("Add second generator subtransient reactance: ")
-            self.calc_fault_study(fault_bus, st_x)
-            self.print_fault_voltages()
-            print("Fault current at bus", fault_bus, ": ", self.Ifn)
-
-        else:
-            print("Invalid mode.")
-            self.mode = input("Select a mode: Type fault analysis or power flow:")
-            self.run_solver()
 
 
     def calc_known_power(self):
@@ -216,10 +193,10 @@ class Solution:
         return self.fault_voltages, self.Ifn
 
     def print_fault_voltages(self):
-        print("Fault Current: ",round(np.real(self.Ifn),5), round(np.imag(self.Ifn)*180/np.pi,5))
+        print("Fault Current Magnitude: ",round(np.real(self.Ifn),5))
         for i, v in enumerate(self.fault_voltages):
-            print("Bus", i + 1, " voltage:", round(np.real(v), 5))
-            print("Bus", i + 1, " angle:", round(np.imag(v) * 180 / np.pi, 5))
+            print("Bus", i + 1, " voltage magnitude:", round(np.real(v), 5))
+
 
 
     def print_jacobian(self):
@@ -227,49 +204,4 @@ class Solution:
 
 
 
-    def calc_fault_study(self, fault_bus: str, subtrans_x: [], fault_v = 1.0):
-
-        # Add subtransient reactance to generators
-        for k, gen in enumerate(self.circuit.generators.values()):
-            gen.set_subtransient_x(subtrans_x[k])
-            if gen.bus.bus_type == "slack": #if it's the slack generator
-                self.slack_name = gen.bus.name # save slack bus name
-                slack_x_prime = gen.subtransient_x # save x"
-                slack_y_prime = 1/slack_x_prime # convert to y"
-            else: #it's a pv generator
-                self.pv_name = gen.bus.name # save pv bus name
-                pv_x_prime = gen.subtransient_x # save x"
-                pv_y_prime = 1/pv_x_prime # convert to y"
-
-        # modify y bus
-        self.circuit.calc_y_bus()
-        #only have to modify diagonals
-        self.circuit.y_bus.loc[self.slack_name, self.slack_name] += slack_y_prime
-        self.circuit.y_bus.loc[self.pv_name, self.pv_name] += pv_y_prime
-
-        # Set pre-fault voltage
-        self.circuit.buses[fault_bus].set_bus_V(fault_v)  # set the bus to fault with voltage given or default 1
-
-        # Convert y_bus to z_bus
-        self.y_bus_matrix = np.array(self.circuit.y_bus)
-        self.z_bus = np.linalg.inv(self.y_bus_matrix)
-
-        # Get Znn
-        index = self.circuit.buses[fault_bus].index - 1 # get index
-        Znn = self.z_bus[index][index]
-
-        # subtransient fault current at that bus
-        self.Ifn = fault_v/Znn
-
-        # Calculate bus voltages
-        self.fault_voltages = np.empty(len(self.circuit.buses), dtype=np.complex128) # initialize array
-        for k, bus in enumerate(self.circuit.buses.values()): #calculate voltages
-            self.fault_voltages[k] = (1 - self.z_bus[k][index]/Znn) * fault_v
-
-        return self.fault_voltages, self.Ifn
-
-    def print_fault_voltages(self):
-        for i, v in enumerate(self.fault_voltages):
-            print("Bus", i + 1, " voltage:", round(np.real(v), 5))
-            print("Bus", i + 1, " angle:", round(np.imag(v) * 180/np.pi, 5))
 
