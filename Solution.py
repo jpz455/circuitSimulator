@@ -138,7 +138,7 @@ class Solution:
                         converged[temp, 0] = self.circuit.buses[index].v_pu
                         temp += 1
 
-                    print("Solution found")
+                    print("Solution found\nVpu        Angle(degrees)\n", converged)
                     print("Iteration:", iterations)
                     return converged
 

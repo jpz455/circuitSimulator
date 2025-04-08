@@ -8,17 +8,15 @@ from Settings import Settings
 from Circuit import Circuit
 from Load import Load
 from Generator import Generator
-import numpy as np
 from Solution import Solution
 
-# Initialize settings
+# ****************** Initialization settings for system *************************
 settings = Settings()
 
-# Create the circuit
+# ****************** Create circuit object **************************************
 circuit = Circuit("Power Flow Test Circuit", settings)
 
-# Define buses
-
+# ******************System bus initialization************************************
 bus1= Bus("bus1", 20, "slack")
 #'''
 bus2= Bus("bus2", 230, "pq",)
@@ -27,6 +25,8 @@ bus4=Bus("bus4", 230, "pq")
 bus5=Bus("bus5", 230, "pq")
 bus6=Bus("bus6", 230, "pq")
 bus7=Bus("bus7", 18, "pv")
+
+# ****************** Non-Flat start testing ***************************************
 '''
 bus2= Bus("bus2", 230, "pq",v_pu =.93693,delta = -4.45)
 bus3= Bus("bus3", 230, "pq", v_pu = .9205, delta = -5.47)
@@ -35,7 +35,7 @@ bus5=Bus("bus5", 230, "pq", v_pu = .92674,delta = -4.84)
 bus6=Bus("bus6", 230, "pq",v_pu = .93969,delta = -3.95)
 bus7=Bus("bus7", 18, "pv",v_pu = .999, delta = 2.15)
 #'''
-# Add buses to circuit
+
 circuit.add_bus(bus1)
 circuit.add_bus(bus2)
 circuit.add_bus(bus3)
@@ -44,8 +44,7 @@ circuit.add_bus(bus5)
 circuit.add_bus(bus6)
 circuit.add_bus(bus7)
 
-
-
+# ****************** Transformer Initialization *************************
 
 T1=Transformer("T1", bus1, bus2, 125, 8.5, 10)
 T2=Transformer("T2", bus6, bus7, 200, 10.5, 12)
@@ -53,17 +52,16 @@ T2=Transformer("T2", bus6, bus7, 200, 10.5, 12)
 circuit.add_transformer(T1)
 circuit.add_transformer(T2)
 
-# Define conductor
+# ****************** Conductor Initialization *************************
 conductor1 = Conductor("Partridge",.642,.0217,.385,460)
 circuit.add_conductor(conductor1)
 
-# Define geometry
+# ****************** Geometry/Bundle Initialization *************************
 geometry1 = Geometry("G1",0,0,19.5,0,39,0)
 circuit.add_geometry(geometry1)
-
 bundle1 = Bundle('B1',2,1.5, conductor1)
-# Define transmission lines
 
+# ****************** Transmission Line Initialization *************************
 tLine1 = TransmissionLine("tline1",bus2, bus4,bundle1,geometry1,10)
 tLine2 = TransmissionLine("tline2",bus2, bus3,bundle1,geometry1,25)
 tLine3 = TransmissionLine("tline3",bus3, bus5,bundle1,geometry1,20)
@@ -78,30 +76,26 @@ circuit.add_transmission_line(tLine4)
 circuit.add_transmission_line(tLine5)
 circuit.add_transmission_line(tLine6)
 
-# Calculate Y-Bus Matrix
-y_bus = circuit.calc_y_bus()
-load2 = Load("load2",bus2,0,0,settings)
-circuit.add_load(load2)
+# ****************** Load Initialization *************************
 load3 = Load("load3",bus3,-110,-50,settings)
 circuit.add_load(load3)
 load4 = Load("load4",bus4,-100,-70,settings)
 circuit.add_load(load4)
 load5 = Load("load5",bus5,-100,-65,settings)
 circuit.add_load(load5)
-load6 = Load("load6",bus6,0,0,settings)
-circuit.add_load(load6)
-load7 = Load("load7",bus7,0,0,settings)
-circuit.add_load(load7)
+
+
+# ****************** Generator Initialization *************************
 gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,settings)
 circuit.add_generator(gen1)
 gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,settings)
 circuit.add_generator(gen2)
-# Print the Y-Bus Matrix
 
+# ****************** Y-Bus Initialization *************************
+circuit.calc_y_bus()
 
-# Check existing load names
+#****************** PowerWorld output values *************************
 '''
-#print values for PowerWorld
 print("xfmr1 r: ", T1.r_pu)
 print("xfmr1 x: ", T1.x_pu)
 print()
@@ -140,24 +134,39 @@ print("tl6 x: ", tLine6.x_pu)
 print("tl6 b: ", np.imag(tLine6.y_shunt_pu))
 '''
 
+#****************** Solution Object Initialization *************************
 solution = Solution(circuit)
-#vector = solution.calc_known_power()
-#print("------------Mismatch Vector----------------")
-#mismatch = solution.calc_mismatch()
-#print("size of mismatch:",len(mismatch))
 
-#print(mismatch)
-# Displaying the mismatch array in a readable format
-# assuming bus 1 is slack for printing formatting
-#print("---------------Jacobian Matrix-------------")
-# try to print out jacobian
-#solution.calc_jacobian()
-#solution.print_jacobian()
+#****************** Run power flow or fault analysis *************************
 
-#print("-----------------Solution--------------------")
-#solution.run_solver()
+print("Select an analysis type:")
+print("1. Power Flow Solver")
+print("2. Fault Study")
+choice = input("Enter 1 or 2: ").strip()
 
-print("--------------Fault Study--------------------")
+if choice == '1':
+    print("---------------Power Flow Solver----------------")
+    solution.calc_known_power()
+    print("------------Mismatch Vector----------------")
+    mismatch = solution.calc_mismatch()
+    print("size of mismatch:", len(mismatch))
+    print(mismatch)
 
-solution.calc_fault_study("bus3")
-solution.print_fault_voltages()
+    print("---------------Jacobian Matrix-------------")
+    solution.calc_jacobian()
+    solution.print_jacobian()
+
+    print("-----------------Solution--------------------")
+    solution.calc_solutionRef()
+    solution.calc_solution()
+
+elif choice == '2':
+    print("--------------Fault Study--------------------")
+    fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ").strip()
+    solution.calc_fault_study(fault_bus)
+    solution.print_fault_voltages()
+
+else:
+    print("Invalid selection. Please enter 1 or 2.")
+
+
