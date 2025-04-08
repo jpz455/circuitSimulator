@@ -1,9 +1,7 @@
 import numpy as np
-import pandas as pd
 import Circuit as Circuit
 import Jacobian as Jacobian
-from typing import Dict, List, Optional
-import matplotlib.pyplot as plt
+import pandas as pd
 
 
 
@@ -70,7 +68,7 @@ class Solution:
         print("------ known power --------")
         print(self.knownPQ)
 
-    def make_power_mismatch(self):
+    def calc_mismatch(self):
         calcrealP = np.zeros([len(self.circuit.buses), 1])
         calcreacP = np.zeros([len(self.circuit.buses), 1])
         for tempBus1, bus1 in enumerate(self.circuit.buses.values()):
@@ -105,7 +103,7 @@ class Solution:
         self.mismatch = np.delete(self.mismatch, indices_to_delete)
         return self.mismatch
 
-    def make_solution_vector(self):
+    def calc_solutionRef(self):
         bus_keys = sorted(self.circuit.buses.keys(), key=lambda x: int(x[3:]))  #sort buses in order with key lambda
         initD = np.array([[self.circuit.buses[N].delta for N in bus_keys]])
         initV = np.array([[self.circuit.buses[N].v_pu for N in bus_keys]])
@@ -135,16 +133,15 @@ class Solution:
 
         tolerance = 0.0001
 
-        #give a max of 50 iterations
+
         for iterations in range(50):
             mismatchTempI = 0
 
-            #loop through every element of mismatch to check within tolerance
+
             for mismatchI in range(len(self.mismatch)):
 
-                #get the values from solution vector
-                for busIndex in range(len(self.circuit.buses)):
 
+                for busIndex in range(len(self.circuit.buses)):
 
                     if self.circuit.buses["bus" + str(busIndex + 1)].bus_type != "slack" and self.circuit.buses["bus" + str(busIndex + 1)].bus_type != "pv":
                         self.circuit.buses["bus" + str(busIndex + 1)].v_pu = self.initSol[busIndex + len(self.circuit.buses) - 2]
@@ -155,14 +152,13 @@ class Solution:
                 if np.abs(self.mismatch[mismatchI]) <= tolerance:
                     mismatchTempI += 1
 
-
                 if mismatchTempI == len(self.mismatch):
-                    converged = np.zeros((len(self.circuit.buses), 2))  # Use NumPy for 2D array
+                    converged = np.zeros((len(self.circuit.buses), 2))
 
                     temp = 0
                     for index in self.circuit.buses:
-                        converged[temp, 1] = np.degrees(self.circuit.buses[index].delta)  # Store delta (angle)
-                        converged[temp, 0] = self.circuit.buses[index].v_pu  # Store voltage magnitude
+                        converged[temp, 1] = np.degrees(self.circuit.buses[index].delta)
+                        converged[temp, 0] = self.circuit.buses[index].v_pu
                         temp += 1
 
                     print("Solution found")
@@ -170,9 +166,60 @@ class Solution:
                     return converged
 
             self.calc_jacobian()
-            self.make_power_mismatch()
-            self.make_solution_vector()
+            self.calc_mismatch()
+            self.calc_solutionRef()
 
+    def calc_fault_study(self, fault_bus: str, fault_v=1.0):
+        slack_y_prime = 0
+        pv_y_prime = 0
+
+        # Use subtransient reactance from each generator directly
+        for gen in self.circuit.generators.values():
+            # Use x1 (positive-sequence) or x2 depending on your convention
+            x_prime = gen.x1
+            y_prime = 1 / x_prime if x_prime != 0 else 0  # avoid division by zero
+
+            if gen.bus.bus_type == "slack":
+                self.slack_name = gen.bus.name
+                slack_y_prime = y_prime
+            else:  # assume all others are PV for now
+                self.pv_name = gen.bus.name
+                pv_y_prime = y_prime
+
+        # Recalculate admittance matrix
+        self.circuit.calc_y_bus()
+        self.circuit.y_bus.loc[self.slack_name, self.slack_name] += slack_y_prime
+        self.circuit.y_bus.loc[self.pv_name, self.pv_name] += pv_y_prime
+
+        # Set pre-fault voltage
+        self.circuit.buses[fault_bus].set_bus_V(fault_v)
+
+        # Invert Y bus to get Z bus
+        self.y_bus_matrix = np.array(self.circuit.y_bus)
+        self.z_bus = np.linalg.inv(self.y_bus_matrix)
+
+        # Get Znn at faulted bus
+        index = self.circuit.buses[fault_bus].index - 1
+        Znn = self.z_bus[index][index]
+
+        # Subtransient fault current
+        self.Ifn = fault_v / Znn
+
+        # Faulted bus voltages
+        self.fault_voltages = np.empty(len(self.circuit.buses), dtype=np.complex128)
+        for k, bus in enumerate(self.circuit.buses.values()):
+            self.fault_voltages[k] = (1 - self.z_bus[k][index] / Znn) * fault_v
+
+
+
+
+        return self.fault_voltages, self.Ifn
+
+    def print_fault_voltages(self):
+        print("Fault Current: ",round(np.real(self.Ifn),5), round(np.imag(self.Ifn)*180/np.pi,5))
+        for i, v in enumerate(self.fault_voltages):
+            print("Bus", i + 1, " voltage:", round(np.real(v), 5))
+            print("Bus", i + 1, " angle:", round(np.imag(v) * 180 / np.pi, 5))
 
 
     def print_jacobian(self):
