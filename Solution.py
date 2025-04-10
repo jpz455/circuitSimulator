@@ -19,8 +19,8 @@ class Solution:
         self.calcPQ = np.array
         self.knownPQ = np.array
         self.initSol = np.array
-        self.slack_index: int
-        self.pv_index: int
+        self.slack_name: str
+        self.pv_name: str
 
 
     def calc_known_power(self):
@@ -187,17 +187,12 @@ class Solution:
         for k, bus in enumerate(self.circuit.buses.values()):
             self.fault_voltages[k] = (1 - self.z_bus[k][index] / Znn) * fault_v
 
-
-
-
         return self.fault_voltages, self.Ifn
 
     def print_fault_voltages(self):
         print("Fault Current Magnitude: ",round(np.real(self.Ifn),5))
         for i, v in enumerate(self.fault_voltages):
             print("Bus", i + 1, " voltage magnitude:", round(np.real(v), 5))
-
-
 
     def print_jacobian(self):
            self.jacob.print_jacobian()

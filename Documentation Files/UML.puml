@@ -160,8 +160,13 @@ class Solution {
     +calcPQ: NumPy array
     +knownPQ: NumPy array
     +initSol: NumPy array
-    +slack_index: int
-    +pv_index: int
+    +slack_name: int
+    +pv_name: int
+    +y_bus_matrix: NumPy array
+    +z_bus: NumPy array
+    +fault_voltages: NumPy array
+    +Ifn: complex
+
 
 
     +calc_known_power():
@@ -169,7 +174,9 @@ class Solution {
     +make_solution_vector(): NumPy array
     +calc_solution(): NumPy array
     +calc_jacobian(): NumPy array
+    +calc_fault_study():
     +print_jacobian()
+    +print_fault_voltages()
     }
 
 class Jacobian {
