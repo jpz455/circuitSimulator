@@ -5,13 +5,15 @@ from Bus import Bus
 from Settings import current_settings
 
 class Transformer():
-    def __init__(self, name: str, bus1: Bus, bus2:Bus, power_rating: float, impedance_percent: float, x_over_r_ratio: float):
+    def __init__(self, name: str, bus1: Bus, bus2:Bus, power_rating: float, impedance_percent: float, x_over_r_ratio: float, connection_type: str = "y-y", grounding_x: float = 0):
         self.name = name
         self.bus1 = bus1
         self.bus2 = bus2
         self.power_rating = power_rating
         self.impedance_percent = impedance_percent
         self.x_over_r_ratio = x_over_r_ratio
+        self.connection_type = connection_type
+        self.grounding_x = grounding_x
         self.settings = current_settings
         self.z = (self.impedance_percent/100) * np.exp(1j * np.arctan(self.x_over_r_ratio))
         self.y = 1/self.z
