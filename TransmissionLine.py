@@ -18,6 +18,7 @@ class TransmissionLine:
         self.z_base = (self.bus1.base_kv ** 2) / current_settings.s_base
         self.y_base = 1 / self.z_base
 
+
         self.r = self.bundle.resistance * self.length
         # X = 2pif * (2e-7*ln(Deq/Dsl)*1609
         self.x = 2 * np.pi * current_settings.f * 2e-7 * np.log(self.geometry.Deq / self.bundle.DSL) * 1609 * self.length
@@ -36,10 +37,13 @@ class TransmissionLine:
         self.y_series_pu = 1 / self.z_pu
         self.y_shunt_pu = self.y_shunt / self.y_base
 
-
-
         self.matrix: {}
         self.y_prim = self.calc_y_prim()
+        self.y_prim_positive = None
+        self.y_prim_negative = None
+        self.y_prim_zero = None
+        self.calc_y_prim_seq()
+
 
 
     def calc_y_prim(self):
@@ -61,6 +65,35 @@ class TransmissionLine:
         }
 
         return self.y_prim
+
+    def calc_y_prim_seq(self):
+        R_pu = self.r_pu
+        X_pu = self.x_pu
+        B_pu = self.y_shunt_pu.imag
+
+        # Estimated sequence impedances and admittances
+        Z0_pu = 2.5 * R_pu + 1j * X_pu
+        Z1_pu = Z2_pu = R_pu + 1j * X_pu
+
+        Y0_pu = 1 / Z0_pu
+        Y1_pu = 1 / Z1_pu
+        Y2_pu = 1 / Z2_pu
+
+        Y_shunt_seq = 1j * B_pu
+
+        def make_y_prim(y_val):
+            return pd.DataFrame(
+                np.array([
+                    [y_val + 0.5 * Y_shunt_seq, -y_val],
+                    [-y_val, y_val + 0.5 * Y_shunt_seq]
+                ]),
+                index=[self.bus1.name, self.bus2.name],
+                columns=[self.bus1.name, self.bus2.name]
+            )
+
+        self.y_prim_positive = make_y_prim(Y1_pu)
+        self.y_prim_negative = make_y_prim(Y2_pu)
+        self.y_prim_zero = make_y_prim(Y0_pu)
 
     def print_y_prim(self):
         printout = pd.DataFrame(self.matrix)
