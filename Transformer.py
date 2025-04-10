@@ -42,7 +42,15 @@ class Transformer():
             return self.y_prim_1
 
     def print_y_prim(self, seq: int = 1):
-        print(self.y_prim_1)
+        if seq == 1:
+            print("Y Prim: Positive Sequence")
+            print(self.y_prim_1)
+        if seq == 2:
+            print("Y Prim: Negative Sequence")
+            print(self.y_prim_2)
+        if seq == 0:
+            print("Y Prim: 0 Sequence")
+            print(self.y_prim_0)
 
     def calc_y_prim_2(self):
         self.y_prim_2 = self.y_prim_1
@@ -90,5 +98,7 @@ class Transformer():
         "": [self.y_prim_0.iloc[1, 0], self.y_prim_0.iloc[1, 1]]  # Accessing second row values
         }
         return self.y_prim_0
+
+
 
 
