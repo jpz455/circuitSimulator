@@ -86,9 +86,9 @@ circuit.add_load(load5)
 
 
 # ****************** Generator Initialization *************************
-gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,settings)
+gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,0,settings)
 circuit.add_generator(gen1)
-gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,settings)
+gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,0,settings)
 circuit.add_generator(gen2)
 
 # ****************** Y-Bus Initialization *************************
