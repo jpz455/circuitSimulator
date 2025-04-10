@@ -69,6 +69,7 @@ class Generator {
     +mw_setpoint: float
     +bus: Bus
     +settings: Settings
+    +grounding_x: float
     }
 
 class Geometry{
@@ -107,6 +108,8 @@ class Transformer {
     +power_rating: float
     +impedance_percent: float
     +x_over_r_ratio: float
+    +connection_type: str = y-y
+    +grounding_x = 0.0
     +settings: Settings
     +z: complex
     +y: complex
