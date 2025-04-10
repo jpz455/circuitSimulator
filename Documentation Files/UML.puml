@@ -119,11 +119,16 @@ class Transformer {
     +y_pu: complex
     +r_pu: float
     +x_pu: float
-    +y_prim: Pandas DataFrame
+    +y_prim_1: Pandas DataFrame
+    +y_prim_2: Pandas DataFrame
+    +y_prim_3: Pandas DataFrame
     +matrix: Dict[str, complex]
 
-    +calc_y_prim(): Pandas DataFrame
-    +print_y_prim()
+    +calc_y_prim_1(): Pandas DataFrame
+    +calc_y_prim_2(): Pandas DataFrame
+    +calc_y_prim_3(): Pandas DataFrame
+
+    +print_y_prim(int = 1)
     }
 
 class TransmissionLine {
