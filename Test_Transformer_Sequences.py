@@ -1,6 +1,6 @@
 from Bundle import Bundle
 from Bus import Bus
-from Test import transformer1
+
 from Transformer import Transformer
 from Geometry import Geometry
 from Conductor import Conductor
@@ -36,8 +36,8 @@ circuit.add_bus(bus7)
 
 # ****************** Transformer Initialization *************************
 
-T1=Transformer("T1", bus1, bus2, 125, 8.5, 10)
-T2=Transformer("T2", bus6, bus7, 200, 10.5, 12)
+T1=Transformer("T1", bus1, bus2, 125, 8.5, 10,'delta-y',1)
+T2=Transformer("T2", bus6, bus7, 200, 10.5, 12,'delta-y',0)
 
 circuit.add_transformer(T1)
 circuit.add_transformer(T2)
@@ -75,18 +75,23 @@ load5 = Load("load5",bus5,-100,-65,settings)
 circuit.add_load(load5)
 
 # ****************** Generator Initialization *************************
-gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,0,settings)
+gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,0,True,settings)
 circuit.add_generator(gen1)
-gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,0,settings)
+gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,1,True,settings)
 circuit.add_generator(gen2)
 
 # ****************** Test Transformer Y Prim ***************************
 
-y_prim_pos = transformer1.calc_y_prim_1()
-y_prim_neg = transformer1.calc_y_prim_2()
-y_prim_0 = transformer1.calc_y_prim_0()
+y_prim_pos = T1.calc_y_prim_pos_seq()
+y_prim_neg = T1.calc_y_prim_neg_seq()
+y_prim_0 = T1.calc_y_prim_zero_seq()
 
-transformer1.print_y_prim(1)
-transformer1.print_y_prim(2)
-transformer1.print_y_prim(3)
+T1.print_y_prim()
 
+y_prim_pos2 = T2.calc_y_prim_pos_seq()
+y_prim_neg2 = T2.calc_y_prim_neg_seq()
+y_prim_02 = T2.calc_y_prim_zero_seq()
+
+T2.print_y_prim()
+gen1.print_y_prim()
+gen2.print_y_prim()

@@ -9,6 +9,7 @@ from Circuit import Circuit
 from Load import Load
 from Generator import Generator
 from Solution import Solution
+from Fault import Fault
 
 # ****************** Initialization settings for system *************************
 settings = Settings()
@@ -46,8 +47,8 @@ circuit.add_bus(bus7)
 
 # ****************** Transformer Initialization *************************
 
-T1=Transformer("T1", bus1, bus2, 125, 8.5, 10)
-T2=Transformer("T2", bus6, bus7, 200, 10.5, 12)
+T1=Transformer("T1", bus1, bus2, 125, 8.5, 10,'delta-y',1)
+T2=Transformer("T2", bus6, bus7, 200, 10.5, 12,'delta-y',0)
 
 circuit.add_transformer(T1)
 circuit.add_transformer(T2)
@@ -86,9 +87,9 @@ circuit.add_load(load5)
 
 
 # ****************** Generator Initialization *************************
-gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,0,settings)
+gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,0,True,settings)
 circuit.add_generator(gen1)
-gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,0,settings)
+gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,1,True,settings)
 circuit.add_generator(gen2)
 
 # ****************** Y-Bus Initialization *************************
@@ -141,8 +142,11 @@ solution = Solution(circuit)
 
 print("Select an analysis type:")
 print("1. Power Flow Solver")
-print("2. Fault Study")
-choice = input("Enter 1 or 2: ").strip()
+print("2. 3 Phase Fault Study")
+print("3. Line to ground Fault Study")
+print("4. Line to line Fault Study")
+print("5. Double line to ground Study")
+choice = input("Enter 1, 2, 3, 4, 5: ").strip()
 
 if choice == '1':
     print("---------------Power Flow Solver----------------")
@@ -161,10 +165,27 @@ if choice == '1':
     solution.calc_solution()
 
 elif choice == '2':
-    print("--------------Fault Study--------------------")
+    print("--------------3 Phase Fault Study--------------------")
+    fault = Fault(circuit)
     fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ").strip()
-    solution.calc_fault_study(fault_bus)
-    solution.print_fault_voltages()
+    fault.calc_3_phase_bal(fault_bus)
+    fault.print_fault_voltages()
+elif choice == '3':
+    print("--------------Line to ground Fault Study------------------")
+    circuit.calc_yprim_pos()
+    circuit.calc_yprim_neg()
+    circuit.calc_yprim_zero()
+
+
+    print("********POS**********")
+
+
+
+elif choice == '4':
+    print("--------------Line to line Fault Study------------------")
+elif choice == '5':
+    print("--------------Double line to ground Fault Study------------------")
+
 
 else:
     print("Invalid selection. Please enter 1 or 2.")
