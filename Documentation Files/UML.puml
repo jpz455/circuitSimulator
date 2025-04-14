@@ -14,7 +14,9 @@ class Circuit{
     +loads: Dict[str, Load]
     +generators: Dict[str, Generator]
     +settings: Settings
-    +y_bus: Pandas DataFrame
+    +y_bus_positive: Pandas DataFrame
+    +y_bus_negative: Pandas DataFrame
+    +y_bus_positive: Pandas DataFrame
 
     +add_bus(Bus)
     +add_transformer(Transformer)
@@ -23,8 +25,10 @@ class Circuit{
     +add_transmission_line(TransmissionLine)
     +add_load(Load)
     +add_generator(Generator)
-    +calc_y_bus(): DataFrame
-    +print_y_bus()
+    +calc_y_bus_positive(): Pandas DataFrame
+    +calc_y_bus_negative(): Pandas DataFrame
+    +calc_y_bus_zero(): Pandas DataFrame
+    +print_y_bus(int = 1)
     }
 
 class Bus {
@@ -69,7 +73,10 @@ class Generator {
     +mw_setpoint: float
     +bus: Bus
     +settings: Settings
-    +grounding_x: float
+    +grounding_x: float = 0.0
+    +x1: float
+    +x2: float
+    +x0: float
     }
 
 class Geometry{
@@ -119,14 +126,14 @@ class Transformer {
     +y_pu: complex
     +r_pu: float
     +x_pu: float
-    +y_prim_1: Pandas DataFrame
-    +y_prim_2: Pandas DataFrame
-    +y_prim_3: Pandas DataFrame
+    +y_prim_positive: Pandas DataFrame
+    +y_prim_negative: Pandas DataFrame
+    +y_prim_zero: Pandas DataFrame
     +matrix: Dict[str, complex]
 
-    +calc_y_prim_1(): Pandas DataFrame
-    +calc_y_prim_2(): Pandas DataFrame
-    +calc_y_prim_3(): Pandas DataFrame
+    +calc_y_prim_positive(): Pandas DataFrame
+    +calc_y_prim_negative(): Pandas DataFrame
+    +calc_y_prim_zero(): Pandas DataFrame
 
     +print_y_prim(int = 1)
     }
@@ -150,7 +157,9 @@ class TransmissionLine {
     +y_series: complex
     +y_series_pu: complex
     +y_shunt_pu: complex
-    +y_prim: Pandas DataFrame
+    +y_prim_positive: Pandas DataFrame
+    +y_prim_negative: Pandas DataFrame
+    +y_prim_zero: Pandas DataFrame
     +matrix: Dict[str, complex]
 
     +calc_y_prim(): List[complex]
@@ -170,12 +179,15 @@ class Solution {
     +initSol: NumPy array
     +slack_name: int
     +pv_name: int
-    +y_bus_matrix: NumPy array
     +z_bus: NumPy array
     +fault_voltages: NumPy array
     +Ifn: complex
-
-
+    +y_bus_positive_matrix: NumPy array
+    +y_bus_negative_matrix: NumPy array
+    +y_bus_zero_matrix: NumPy array
+    +z_bus_positive: NumPy array
+    +z_bus_negative: NumPy array
+    +z_bus_zero: NumPy array
 
     +calc_known_power():
     +make_power_mismatch(): NumPy array

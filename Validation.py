@@ -92,7 +92,7 @@ gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,0,settings)
 circuit.add_generator(gen2)
 
 # ****************** Y-Bus Initialization *************************
-circuit.calc_y_bus()
+circuit.calc_y_bus_positive()
 
 #****************** PowerWorld output values *************************
 '''
@@ -163,7 +163,7 @@ if choice == '1':
 elif choice == '2':
     print("--------------Fault Study--------------------")
     fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ").strip()
-    solution.calc_fault_study(fault_bus)
+    solution.calc_single_fault(fault_bus)
     solution.print_fault_voltages()
 
 else:

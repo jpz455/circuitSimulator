@@ -80,13 +80,7 @@ circuit.add_generator(gen1)
 gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,0,settings)
 circuit.add_generator(gen2)
 
-# ****************** Test Transformer Y Prim ***************************
-
-y_prim_pos = transformer1.calc_y_prim_1()
-y_prim_neg = transformer1.calc_y_prim_2()
-y_prim_0 = transformer1.calc_y_prim_0()
-
-transformer1.print_y_prim(1)
-transformer1.print_y_prim(2)
-transformer1.print_y_prim(3)
+# ****************** Test Y_Bus Negative ***************************
+circuit.calc_y_bus_positive()
+circuit.print_y_bus(1)
 
