@@ -115,8 +115,6 @@ class Solution:
     def calc_solution(self):
 
         tolerance = 0.0001
-
-
         for iterations in range(50):
             mismatchTempI = 0
 

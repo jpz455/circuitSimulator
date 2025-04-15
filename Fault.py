@@ -5,9 +5,9 @@ import pandas as pd
 class Fault:
     def __init__(self, circuit: Circuit):
         self.circuit = circuit
-        circuit.calc_yprim_pos()
-        circuit.calc_yprim_neg()
-        circuit.calc_yprim_zero()
+        circuit.calc_y_bus_positive()
+        circuit.calc_y_bus_negative()
+        circuit.calc_y_bus_zero()
         self.Z_bus_pos = np.linalg.inv(self.circuit.y_bus_positive)
         self.Z_bus_neg = np.linalg.inv(self.circuit.y_bus_negative)
         self.Z_bus_zero = np.linalg.inv(self.circuit.y_bus_zero)
@@ -30,7 +30,7 @@ class Fault:
                 pv_y_prime = y_prime
 
         # Recalculate admittance matrix
-        self.circuit.calc_y_bus()
+        self.circuit.calc_y_bus_no_gen()
         self.circuit.y_bus.loc[self.slack_name, self.slack_name] += slack_y_prime
         self.circuit.y_bus.loc[self.pv_name, self.pv_name] += pv_y_prime
 

@@ -92,10 +92,15 @@ gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,.01,True,settings)
 circuit.add_generator(gen2)
 
 # ****************** Y-Bus Initialization *************************
-circuit.calc_y_bus()
 
 #****************** Solution Object Initialization *************************
 solution = Solution(circuit)
-circuit.calc_yprim_pos()
 
+#****************** Y Buses *******************************************
+circuit.calc_y_bus_positive()
+circuit.calc_y_bus_negative()
+circuit.calc_y_bus_zero()
 
+circuit.print_y_bus("positive")
+circuit.print_y_bus("negative")
+circuit.print_y_bus("zero")
