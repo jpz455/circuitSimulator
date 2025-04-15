@@ -91,8 +91,6 @@ circuit.add_generator(gen1)
 gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,.01,True,settings)
 circuit.add_generator(gen2)
 
-# ****************** Y-Bus Initialization *************************
-
 #****************** Solution Object Initialization *************************
 solution = Solution(circuit)
 
@@ -100,7 +98,19 @@ solution = Solution(circuit)
 circuit.calc_y_bus_positive()
 circuit.calc_y_bus_negative()
 circuit.calc_y_bus_zero()
+circuit.calc_y_bus_no_gen()
 
 circuit.print_y_bus("positive")
 circuit.print_y_bus("negative")
 circuit.print_y_bus("zero")
+circuit.print_y_bus()
+
+#****************** Single Bus Fault Study *******************************
+fault = Fault(circuit)
+voltages, current = fault.calc_3_phase_bal("bus3")
+print()
+fault.print_fault_voltages()
+
+#****************** Power Flow ******************************************
+solution.calc_mismatch()
+solution.calc_solution()
