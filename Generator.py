@@ -24,7 +24,7 @@ class Generator:
 
 
         if grounded and self.grounding_x > 0:
-            z0_total = 1j * self.x0 + 3j * self.grounding_x  # 3x grounding impedance
+            z0_total = 1j * self.x0 + 3 * self.grounding_x  # 3x grounding impedance
         elif grounded:
             z0_total = 1j * self.x0  # solidly grounded
         else:
