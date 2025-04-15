@@ -8,8 +8,8 @@ class Fault:
         circuit.calc_yprim_pos()
         circuit.calc_yprim_neg()
         circuit.calc_yprim_zero()
-        self.Z_bus_pos = np.linalg.inv(self.circuit.y_bus_pos)
-        self.Z_bus_neg = np.linalg.inv(self.circuit.y_bus_neg)
+        self.Z_bus_pos = np.linalg.inv(self.circuit.y_bus_positive)
+        self.Z_bus_neg = np.linalg.inv(self.circuit.y_bus_negative)
         self.Z_bus_zero = np.linalg.inv(self.circuit.y_bus_zero)
 
     def calc_3_phase_bal(self, fault_bus: str, fault_v=1.0):

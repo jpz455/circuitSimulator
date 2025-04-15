@@ -20,7 +20,6 @@ circuit = Circuit("Power Flow Test Circuit", settings)
 
 # ******************System bus initialization************************************
 bus1= Bus("bus1", 20, "slack")
-#'''
 bus2= Bus("bus2", 230, "pq",)
 bus3= Bus("bus3", 230, "pq")
 bus4=Bus("bus4", 230, "pq")
@@ -86,7 +85,6 @@ circuit.add_load(load4)
 load5 = Load("load5",bus5,-100,-65,settings)
 circuit.add_load(load5)
 
-
 # ****************** Generator Initialization *************************
 gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,0,True,settings)
 circuit.add_generator(gen1)
@@ -96,104 +94,8 @@ circuit.add_generator(gen2)
 # ****************** Y-Bus Initialization *************************
 circuit.calc_y_bus()
 
-#****************** PowerWorld output values *************************
-'''
-print("xfmr1 r: ", T1.r_pu)
-print("xfmr1 x: ", T1.x_pu)
-print()
-
-print("xfmr2 r: ", T2.r_pu)
-print("xfmr2 x: ", T2.x_pu)
-print()
-
-print("tl1 r: ", tLine1.r_pu)
-print("tl1 x: ", tLine1.x_pu)
-print("tl1 b: ", np.imag(tLine1.y_shunt_pu))
-print()
-
-print("tl2 r: ", tLine2.r_pu)
-print("tl2 x: ", tLine2.x_pu)
-print("tl2 b: ", np.imag(tLine2.y_shunt_pu))
-print()
-
-print("tl3 r: ", tLine3.r_pu)
-print("tl3 x: ", tLine3.x_pu)
-print("tl3 b: ", np.imag(tLine3.y_shunt_pu))
-print()
-
-print("tl4 r: ", tLine4.r_pu)
-print("tl4 x: ", tLine4.x_pu)
-print("tl4 b: ", np.imag(tLine4.y_shunt_pu))
-print()
-
-print("tl5 r: ", tLine5.r_pu)
-print("tl5 x: ", tLine5.x_pu)
-print("tl5 b: ", np.imag(tLine5.y_shunt_pu))
-print()
-
-print("tl6 r: ", tLine6.r_pu)
-print("tl6 x: ", tLine6.x_pu)
-print("tl6 b: ", np.imag(tLine6.y_shunt_pu))
-'''
-
 #****************** Solution Object Initialization *************************
 solution = Solution(circuit)
-
-#****************** Run power flow or fault analysis *************************
-
-print("Select an analysis type:")
-print("1. Power Flow Solver")
-print("2. 3 Phase Fault Study")
-print("3. Line to ground Fault Study")
-print("4. Line to line Fault Study")
-print("5. Double line to ground Study")
-choice = input("Enter 1, 2, 3, 4, 5: ").strip()
-
-if choice == '1':
-    print("---------------Power Flow Solver----------------")
-    solution.calc_known_power()
-    print("------------Mismatch Vector----------------")
-    mismatch = solution.calc_mismatch()
-    print("size of mismatch:", len(mismatch))
-    print(mismatch)
-
-    print("---------------Jacobian Matrix-------------")
-    solution.calc_jacobian()
-    solution.print_jacobian()
-
-    print("-----------------Solution--------------------")
-    solution.calc_solutionRef()
-    solution.calc_solution()
-
-elif choice == '2':
-    print("--------------3 Phase Fault Study--------------------")
-    fault = Fault(circuit)
-    fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ")
-    fault.calc_3_phase_bal(fault_bus)
-    fault.print_fault_voltages()
-elif choice == '3':
-    print("--------------Line to ground Fault Study------------------")
-    fault = Fault(circuit)
-    fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ")
-    If, V = fault.calc_single_line_to_ground(fault_bus)
-
-
-
-elif choice == '4':
-    print("--------------Line to line Fault Study------------------")
-    fault = Fault(circuit)
-    fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ")
-    If= fault.calc_line_to_line(fault_bus)
-
-
-elif choice == '5':
-    print("--------------Double line to ground Fault Study------------------")
-    fault = Fault(circuit)
-    fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ")
-    If = fault.calc_double_line_to_ground(fault_bus)
-
-
-else:
-    print("Invalid selection. Please enter 1 to 5.")
+circuit.calc_yprim_pos()
 
 

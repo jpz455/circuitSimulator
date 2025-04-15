@@ -23,12 +23,9 @@ class Circuit:
         self.generators: Dict[str, Generator] = dict()
         self.settings: Settings = settings
         self.y_bus: pd.DataFrame = pd.DataFrame()
-        self.y_bus_pos: pd.DataFrame = pd.DataFrame()
-        self.y_bus_neg: pd.DataFrame = pd.DataFrame()
+        self.y_bus_positive: pd.DataFrame = pd.DataFrame()
+        self.y_bus_negative: pd.DataFrame = pd.DataFrame()
         self.y_bus_zero: pd.DataFrame = pd.DataFrame()
-
-
-
 
     def add_bus(self, bus: Bus):
         # Check if bus already exists in system
@@ -88,20 +85,17 @@ class Circuit:
         size = np.zeros([Bus.numBus, Bus.numBus])
         self.y_bus = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
 
-
-
         for yprim in self.transformers.keys():
-            self.y_bus.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus1.name] += self.transformers[yprim].y_prim_1.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus1.name]
-            self.y_bus.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus2.name] += self.transformers[yprim].y_prim_1.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus2.name]
-            self.y_bus.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus2.name] += self.transformers[yprim].y_prim_1.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus2.name]
-            self.y_bus.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus1.name] += self.transformers[yprim].y_prim_1.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus1.name]
+            self.y_bus.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus1.name] += self.transformers[yprim].y_prim_positive.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus1.name]
+            self.y_bus.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus2.name] += self.transformers[yprim].y_prim_positive.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus2.name]
+            self.y_bus.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus2.name] += self.transformers[yprim].y_prim_positive.loc[self.transformers[yprim].bus1.name, self.transformers[yprim].bus2.name]
+            self.y_bus.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus1.name] += self.transformers[yprim].y_prim_positive.loc[self.transformers[yprim].bus2.name, self.transformers[yprim].bus1.name]
 
         for yprim in self.transmission_lines.keys():
             self.y_bus.loc[self.transmission_lines[yprim].bus1.name, self.transmission_lines[yprim].bus1.name] += self.transmission_lines[yprim].y_prim.loc[self.transmission_lines[yprim].bus1.name, self.transmission_lines[yprim].bus1.name]
             self.y_bus.loc[self.transmission_lines[yprim].bus2.name, self.transmission_lines[yprim].bus2.name] += self.transmission_lines[yprim].y_prim.loc[self.transmission_lines[yprim].bus2.name, self.transmission_lines[yprim].bus2.name]
             self.y_bus.loc[self.transmission_lines[yprim].bus1.name, self.transmission_lines[yprim].bus2.name] += self.transmission_lines[yprim].y_prim.loc[self.transmission_lines[yprim].bus1.name, self.transmission_lines[yprim].bus2.name]
             self.y_bus.loc[self.transmission_lines[yprim].bus2.name, self.transmission_lines[yprim].bus1.name] += self.transmission_lines[yprim].y_prim.loc[self.transmission_lines[yprim].bus2.name, self.transmission_lines[yprim].bus1.name]
-
 
 
         return self.y_bus
@@ -118,83 +112,73 @@ class Circuit:
 
     def calc_yprim_pos (self):
         size = np.zeros([Bus.numBus, Bus.numBus])
-        self.y_bus_pos = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
+        self.y_bus_positive = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
 
         for yprim_1 in self.transformers.keys():
-            self.y_bus_pos.loc[self.transformers[yprim_1].bus1.name, self.transformers[yprim_1].bus1.name] += self.transformers[yprim_1].y_prim_1.loc[self.transformers[yprim_1].bus1.name, self.transformers[yprim_1].bus1.name]
-            self.y_bus_pos.loc[self.transformers[yprim_1].bus2.name, self.transformers[yprim_1].bus2.name] += self.transformers[yprim_1].y_prim_1.loc[self.transformers[yprim_1].bus2.name, self.transformers[yprim_1].bus2.name]
-            self.y_bus_pos.loc[self.transformers[yprim_1].bus1.name, self.transformers[yprim_1].bus2.name] += self.transformers[yprim_1].y_prim_1.loc[self.transformers[yprim_1].bus1.name, self.transformers[yprim_1].bus2.name]
-            self.y_bus_pos.loc[self.transformers[yprim_1].bus2.name, self.transformers[yprim_1].bus1.name] += self.transformers[yprim_1].y_prim_1.loc[self.transformers[yprim_1].bus2.name, self.transformers[yprim_1].bus1.name]
+            self.y_bus_positive.loc[self.transformers[yprim_1].bus1.name, self.transformers[yprim_1].bus1.name] += self.transformers[yprim_1].y_prim_positive.loc[self.transformers[yprim_1].bus1.name, self.transformers[yprim_1].bus1.name]
+            self.y_bus_positive.loc[self.transformers[yprim_1].bus2.name, self.transformers[yprim_1].bus2.name] += self.transformers[yprim_1].y_prim_positive.loc[self.transformers[yprim_1].bus2.name, self.transformers[yprim_1].bus2.name]
+            self.y_bus_positive.loc[self.transformers[yprim_1].bus1.name, self.transformers[yprim_1].bus2.name] += self.transformers[yprim_1].y_prim_positive.loc[self.transformers[yprim_1].bus1.name, self.transformers[yprim_1].bus2.name]
+            self.y_bus_positive.loc[self.transformers[yprim_1].bus2.name, self.transformers[yprim_1].bus1.name] += self.transformers[yprim_1].y_prim_positive.loc[self.transformers[yprim_1].bus2.name, self.transformers[yprim_1].bus1.name]
 
         for y_prim_positive in self.transmission_lines.keys():
-            self.y_bus_pos.loc[self.transmission_lines[y_prim_positive].bus1.name, self.transmission_lines[y_prim_positive].bus1.name] += self.transmission_lines[y_prim_positive].y_prim.loc[self.transmission_lines[y_prim_positive].bus1.name, self.transmission_lines[y_prim_positive].bus1.name]
-            self.y_bus_pos.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus2.name] += self.transmission_lines[y_prim_positive].y_prim.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus2.name]
-            self.y_bus_pos.loc[self.transmission_lines[y_prim_positive].bus1.name, self.transmission_lines[y_prim_positive].bus2.name] += self.transmission_lines[y_prim_positive].y_prim.loc[self.transmission_lines[y_prim_positive].bus1.name, self.transmission_lines[y_prim_positive].bus2.name]
-            self.y_bus_pos.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus1.name] += self.transmission_lines[y_prim_positive].y_prim.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus1.name]
+            self.y_bus_positive.loc[self.transmission_lines[y_prim_positive].bus1.name, self.transmission_lines[y_prim_positive].bus1.name] += self.transmission_lines[y_prim_positive].y_prim.loc[self.transmission_lines[y_prim_positive].bus1.name, self.transmission_lines[y_prim_positive].bus1.name]
+            self.y_bus_positive.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus2.name] += self.transmission_lines[y_prim_positive].y_prim.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus2.name]
+            self.y_bus_positive.loc[self.transmission_lines[y_prim_positive].bus1.name, self.transmission_lines[y_prim_positive].bus2.name] += self.transmission_lines[y_prim_positive].y_prim.loc[self.transmission_lines[y_prim_positive].bus1.name, self.transmission_lines[y_prim_positive].bus2.name]
+            self.y_bus_positive.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus1.name] += self.transmission_lines[y_prim_positive].y_prim.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus1.name]
 
         for key in self.generators.keys():
             gen = self.generators[key]
-            self.y_bus_pos.loc[gen.bus.name, gen.bus.name] += gen.y_prim_1.loc[gen.bus.name, gen.bus.name]
+            self.y_bus_positive.loc[gen.bus.name, gen.bus.name] += gen.y_prim_1.loc[gen.bus.name, gen.bus.name]
 
 
-        return self.y_bus_pos
+        return self.y_bus_positive
     def calc_yprim_neg (self):
         size = np.zeros([Bus.numBus, Bus.numBus])
-        self.y_bus_neg = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
+        self.y_bus_negative = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
 
         for yprim_2 in self.transformers.keys():
-            self.y_bus_neg.loc[self.transformers[yprim_2].bus1.name, self.transformers[yprim_2].bus1.name] += self.transformers[yprim_2].y_prim_1.loc[self.transformers[yprim_2].bus1.name, self.transformers[yprim_2].bus1.name]
-            self.y_bus_neg.loc[self.transformers[yprim_2].bus2.name, self.transformers[yprim_2].bus2.name] += self.transformers[yprim_2].y_prim_1.loc[self.transformers[yprim_2].bus2.name, self.transformers[yprim_2].bus2.name]
-            self.y_bus_neg.loc[self.transformers[yprim_2].bus1.name, self.transformers[yprim_2].bus2.name] += self.transformers[yprim_2].y_prim_1.loc[self.transformers[yprim_2].bus1.name, self.transformers[yprim_2].bus2.name]
-            self.y_bus_neg.loc[self.transformers[yprim_2].bus2.name, self.transformers[yprim_2].bus1.name] += self.transformers[yprim_2].y_prim_1.loc[self.transformers[yprim_2].bus2.name, self.transformers[yprim_2].bus1.name]
+            self.y_bus_negative.loc[self.transformers[yprim_2].bus1.name, self.transformers[yprim_2].bus1.name] += self.transformers[yprim_2].y_prim_negative.loc[self.transformers[yprim_2].bus1.name, self.transformers[yprim_2].bus1.name]
+            self.y_bus_negative.loc[self.transformers[yprim_2].bus2.name, self.transformers[yprim_2].bus2.name] += self.transformers[yprim_2].y_prim_negative.loc[self.transformers[yprim_2].bus2.name, self.transformers[yprim_2].bus2.name]
+            self.y_bus_negative.loc[self.transformers[yprim_2].bus1.name, self.transformers[yprim_2].bus2.name] += self.transformers[yprim_2].y_prim_negative.loc[self.transformers[yprim_2].bus1.name, self.transformers[yprim_2].bus2.name]
+            self.y_bus_negative.loc[self.transformers[yprim_2].bus2.name, self.transformers[yprim_2].bus1.name] += self.transformers[yprim_2].y_prim_negative.loc[self.transformers[yprim_2].bus2.name, self.transformers[yprim_2].bus1.name]
 
         for y_prim_negative in self.transmission_lines.keys():
-            self.y_bus_neg.loc[self.transmission_lines[y_prim_negative].bus1.name, self.transmission_lines[y_prim_negative].bus1.name] += self.transmission_lines[y_prim_negative].y_prim.loc[self.transmission_lines[y_prim_negative].bus1.name, self.transmission_lines[y_prim_negative].bus1.name]
-            self.y_bus_neg.loc[self.transmission_lines[y_prim_negative].bus2.name, self.transmission_lines[y_prim_negative].bus2.name] += self.transmission_lines[y_prim_negative].y_prim.loc[self.transmission_lines[y_prim_negative].bus2.name, self.transmission_lines[y_prim_negative].bus2.name]
-            self.y_bus_neg.loc[self.transmission_lines[y_prim_negative].bus1.name, self.transmission_lines[y_prim_negative].bus2.name] += self.transmission_lines[y_prim_negative].y_prim.loc[self.transmission_lines[y_prim_negative].bus1.name, self.transmission_lines[y_prim_negative].bus2.name]
-            self.y_bus_neg.loc[self.transmission_lines[y_prim_negative].bus2.name, self.transmission_lines[y_prim_negative].bus1.name] += self.transmission_lines[y_prim_negative].y_prim.loc[self.transmission_lines[y_prim_negative].bus2.name, self.transmission_lines[y_prim_negative].bus1.name]
+            self.y_bus_negative.loc[self.transmission_lines[y_prim_negative].bus1.name, self.transmission_lines[y_prim_negative].bus1.name] += self.transmission_lines[y_prim_negative].y_prim.loc[self.transmission_lines[y_prim_negative].bus1.name, self.transmission_lines[y_prim_negative].bus1.name]
+            self.y_bus_negative.loc[self.transmission_lines[y_prim_negative].bus2.name, self.transmission_lines[y_prim_negative].bus2.name] += self.transmission_lines[y_prim_negative].y_prim.loc[self.transmission_lines[y_prim_negative].bus2.name, self.transmission_lines[y_prim_negative].bus2.name]
+            self.y_bus_negative.loc[self.transmission_lines[y_prim_negative].bus1.name, self.transmission_lines[y_prim_negative].bus2.name] += self.transmission_lines[y_prim_negative].y_prim.loc[self.transmission_lines[y_prim_negative].bus1.name, self.transmission_lines[y_prim_negative].bus2.name]
+            self.y_bus_negative.loc[self.transmission_lines[y_prim_negative].bus2.name, self.transmission_lines[y_prim_negative].bus1.name] += self.transmission_lines[y_prim_negative].y_prim.loc[self.transmission_lines[y_prim_negative].bus2.name, self.transmission_lines[y_prim_negative].bus1.name]
 
         for key in self.generators.keys():
             gen = self.generators[key]
-            self.y_bus_neg.loc[gen.bus.name, gen.bus.name] += gen.y_prim_2.loc[gen.bus.name, gen.bus.name]
+            self.y_bus_negative.loc[gen.bus.name, gen.bus.name] += gen.y_prim_2.loc[gen.bus.name, gen.bus.name]
 
 
 
-        return self.y_bus_neg
+        return self.y_bus_negative
 
     def calc_yprim_zero(self):
         size = np.zeros([Bus.numBus, Bus.numBus])
         self.y_bus_zero = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
-
-
-
 
         # Loop through transformers
         for y_prim_0 in self.transformers.keys():
 
             transformer = self.transformers[y_prim_0]
 
-
-
-
-
             # Add the zero-sequence admittances to Y-Bus matrix
-            self.y_bus_zero.loc[transformer.bus1.name, transformer.bus1.name] += transformer.y_prim_0.loc[
+            self.y_bus_zero.loc[transformer.bus1.name, transformer.bus1.name] += transformer.y_prim_zero.loc[
                 transformer.bus1.name, transformer.bus1.name]
-            self.y_bus_zero.loc[transformer.bus2.name, transformer.bus2.name] += transformer.y_prim_0.loc[
+            self.y_bus_zero.loc[transformer.bus2.name, transformer.bus2.name] += transformer.y_prim_zero.loc[
                 transformer.bus2.name, transformer.bus2.name]
-            self.y_bus_zero.loc[transformer.bus1.name, transformer.bus2.name] += transformer.y_prim_0.loc[
+            self.y_bus_zero.loc[transformer.bus1.name, transformer.bus2.name] += transformer.y_prim_zero.loc[
                 transformer.bus1.name, transformer.bus2.name]
-            self.y_bus_zero.loc[transformer.bus2.name, transformer.bus1.name] += transformer.y_prim_0.loc[
+            self.y_bus_zero.loc[transformer.bus2.name, transformer.bus1.name] += transformer.y_prim_zero.loc[
                 transformer.bus2.name, transformer.bus1.name]
 
         # Loop through transmission lines
         for y_prim_zero in self.transmission_lines.keys():
 
             line = self.transmission_lines[y_prim_zero]
-
-
-
 
             # Add the zero-sequence admittances to Y-Bus matrix
             self.y_bus_zero.loc[line.bus1.name, line.bus1.name] += line.y_prim_zero.loc[line.bus1.name, line.bus1.name]
@@ -206,11 +190,6 @@ class Circuit:
         for key in self.generators.keys():
             gen = self.generators[key]
 
-
-
-
-
-
             # Add the generator zero-sequence admittance to Y-Bus matrix
             # Ensure that `gen.bus.name` is being used correctly
             bus_name = gen.bus.name  # bus_name should be the index for the y_bus_zero DataFrame
@@ -218,7 +197,6 @@ class Circuit:
                 self.y_bus_zero.loc[bus_name, bus_name] += gen.y_prim_0.loc[bus_name, bus_name]
             else:
                 print(f"Error: Bus name {bus_name} not found in y_bus_zero index.")
-
 
         return self.y_bus_zero
 
