@@ -137,10 +137,10 @@ class Circuit:
             self.y_bus_positive.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus2.name] += self.transmission_lines[y_prim_positive].y_prim.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus2.name]
             self.y_bus_positive.loc[self.transmission_lines[y_prim_positive].bus1.name, self.transmission_lines[y_prim_positive].bus2.name] += self.transmission_lines[y_prim_positive].y_prim.loc[self.transmission_lines[y_prim_positive].bus1.name, self.transmission_lines[y_prim_positive].bus2.name]
             self.y_bus_positive.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus1.name] += self.transmission_lines[y_prim_positive].y_prim.loc[self.transmission_lines[y_prim_positive].bus2.name, self.transmission_lines[y_prim_positive].bus1.name]
-        #
-        # for key in self.generators.keys():
-        #     gen = self.generators[key]
-        #     self.y_bus_positive.loc[gen.bus.name, gen.bus.name] += gen.y_prim_1.loc[gen.bus.name, gen.bus.name]
+
+        for key in self.generators.keys():
+            gen = self.generators[key]
+            self.y_bus_positive.loc[gen.bus.name, gen.bus.name] += gen.y_prim_1.loc[gen.bus.name, gen.bus.name]
 
         return self.y_bus_positive
 
@@ -161,9 +161,9 @@ class Circuit:
             self.y_bus_negative.loc[self.transmission_lines[y_prim_negative].bus1.name, self.transmission_lines[y_prim_negative].bus2.name] += self.transmission_lines[y_prim_negative].y_prim.loc[self.transmission_lines[y_prim_negative].bus1.name, self.transmission_lines[y_prim_negative].bus2.name]
             self.y_bus_negative.loc[self.transmission_lines[y_prim_negative].bus2.name, self.transmission_lines[y_prim_negative].bus1.name] += self.transmission_lines[y_prim_negative].y_prim.loc[self.transmission_lines[y_prim_negative].bus2.name, self.transmission_lines[y_prim_negative].bus1.name]
 
-        # for key in self.generators.keys():
-        #     gen = self.generators[key]
-        #     self.y_bus_negative.loc[gen.bus.name, gen.bus.name] += gen.y_prim_2.loc[gen.bus.name, gen.bus.name]
+        for key in self.generators.keys():
+            gen = self.generators[key]
+            self.y_bus_negative.loc[gen.bus.name, gen.bus.name] += gen.y_prim_2.loc[gen.bus.name, gen.bus.name]
 
         return self.y_bus_negative
 
@@ -197,17 +197,17 @@ class Circuit:
             self.y_bus_zero.loc[line.bus1.name, line.bus2.name] += line.y_prim_zero.loc[line.bus1.name, line.bus2.name]
             self.y_bus_zero.loc[line.bus2.name, line.bus1.name] += line.y_prim_zero.loc[line.bus2.name, line.bus1.name]
 
-        # # Loop through generators
-        # for key in self.generators.keys():
-        #     gen = self.generators[key]
-        #
-        #     # Add the generator zero-sequence admittance to Y-Bus matrix
-        #     # Ensure that `gen.bus.name` is being used correctly
-        #     bus_name = gen.bus.name  # bus_name should be the index for the y_bus_zero DataFrame
-        #     if bus_name in self.y_bus_zero.index:
-        #         self.y_bus_zero.loc[bus_name, bus_name] += gen.y_prim_0.loc[bus_name, bus_name]
-        #     else:
-        #         print(f"Error: Bus name {bus_name} not found in y_bus_zero index.")
+        # Loop through generators
+        for key in self.generators.keys():
+            gen = self.generators[key]
+
+            # Add the generator zero-sequence admittance to Y-Bus matrix
+            # Ensure that `gen.bus.name` is being used correctly
+            bus_name = gen.bus.name  # bus_name should be the index for the y_bus_zero DataFrame
+            if bus_name in self.y_bus_zero.index:
+                self.y_bus_zero.loc[bus_name, bus_name] += gen.y_prim_0.loc[bus_name, bus_name]
+            else:
+                print(f"Error: Bus name {bus_name} not found in y_bus_zero index.")
 
         return self.y_bus_zero
 
