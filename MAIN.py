@@ -118,3 +118,8 @@ solution.calc_known_power()
 solution.calc_mismatch()
 solution.calc_solutionRef()
 solution.calc_solution()
+#**************** Unbalanced Faults **********************************
+# TO DO
+fault.calc_line_to_line("bus1")
+fault.calc_double_line_to_ground("bus1")
+fault.calc_single_line_to_ground("bus1")

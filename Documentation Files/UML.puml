@@ -14,6 +14,7 @@ class Circuit{
     +loads: Dict[str, Load]
     +generators: Dict[str, Generator]
     +settings: Settings
+    +y_bus: Pandas DataFrame
     +y_bus_positive: Pandas DataFrame
     +y_bus_negative: Pandas DataFrame
     +y_bus_positive: Pandas DataFrame
@@ -25,10 +26,11 @@ class Circuit{
     +add_transmission_line(TransmissionLine)
     +add_load(Load)
     +add_generator(Generator)
+    +calc_y_bus_no_gen(): Pandas DataFrame
     +calc_y_bus_positive(): Pandas DataFrame
     +calc_y_bus_negative(): Pandas DataFrame
     +calc_y_bus_zero(): Pandas DataFrame
-    +print_y_bus(int = 1)
+    +print_y_bus(str = "")
     }
 
 class Bus {
@@ -221,6 +223,14 @@ class Jacobian {
     +print_jacobian()
     }
 
+class Fault{
+    +circuit: Circuit
+    +Z_bus_pos: NumPy array
+    +Z_bus_neg: NumPy array
+    +Z_bus_zero: NumPy array
+
+}
+
 
 Circuit *-- Transformer
 Circuit *-- Bus
@@ -252,7 +262,7 @@ Generator *-- Settings
 Load *-- Bus
 Load *-- Settings
 
-
+Fault *-- Circuit
 
 
 
