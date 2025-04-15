@@ -137,7 +137,6 @@ class Circuit:
             self.y_bus_pos.loc[gen.bus.name, gen.bus.name] += gen.y_prim_1.loc[gen.bus.name, gen.bus.name]
 
 
-
         return self.y_bus_pos
     def calc_yprim_neg (self):
         size = np.zeros([Bus.numBus, Bus.numBus])
@@ -160,26 +159,24 @@ class Circuit:
             self.y_bus_neg.loc[gen.bus.name, gen.bus.name] += gen.y_prim_2.loc[gen.bus.name, gen.bus.name]
 
 
+
         return self.y_bus_neg
 
     def calc_yprim_zero(self):
         size = np.zeros([Bus.numBus, Bus.numBus])
         self.y_bus_zero = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
 
-        print("Initial Y-Bus matrix:")
-        print(self.y_bus_zero.to_string(float_format=lambda x: f"{x:.5f}"))
+
+
 
         # Loop through transformers
         for y_prim_0 in self.transformers.keys():
-            print(f"\nAdding zero-sequence admittance for transformer {y_prim_0} to Y-Bus matrix:")
+
             transformer = self.transformers[y_prim_0]
 
-            # Assuming y_prim_zero represents the zero-sequence admittance matrix
-            print(f"Zero-sequence y_prim_0 for transformer {y_prim_0}:")
-            print(transformer.y_prim_0.to_string(float_format=lambda x: f"{x:.5f}"))
 
-            # Check if the bus names are correct
-            print(f"Bus1: {transformer.bus1.name}, Bus2: {transformer.bus2.name}")
+
+
 
             # Add the zero-sequence admittances to Y-Bus matrix
             self.y_bus_zero.loc[transformer.bus1.name, transformer.bus1.name] += transformer.y_prim_0.loc[
@@ -193,15 +190,11 @@ class Circuit:
 
         # Loop through transmission lines
         for y_prim_zero in self.transmission_lines.keys():
-            print(f"\nAdding zero-sequence admittance for transmission line {y_prim_zero} to Y-Bus matrix:")
+
             line = self.transmission_lines[y_prim_zero]
 
-            # Assuming y_prim_zero represents the zero-sequence admittance matrix
-            print(f"Zero-sequence y_prim_0 for transmission line {y_prim_zero}:")
-            print(line.y_prim_zero.to_string(float_format=lambda x: f"{x:.5f}"))
 
-            # Check if the bus names are correct
-            print(f"Bus1: {line.bus1.name}, Bus2: {line.bus2.name}")
+
 
             # Add the zero-sequence admittances to Y-Bus matrix
             self.y_bus_zero.loc[line.bus1.name, line.bus1.name] += line.y_prim_zero.loc[line.bus1.name, line.bus1.name]
@@ -212,14 +205,11 @@ class Circuit:
         # Loop through generators
         for key in self.generators.keys():
             gen = self.generators[key]
-            print(f"\nAdding zero-sequence admittance for generator {key} to Y-Bus matrix:")
 
-            # Assuming y_prim_0 represents the zero-sequence admittance matrix for the generator
-            print(f"Zero-sequence y_prim_0 for generator {key}:")
-            print(gen.y_prim_0.to_string(float_format=lambda x: f"{x:.5f}"))
 
-            # Check if the bus name is correct
-            print(f"Bus: {gen.bus.name}")
+
+
+
 
             # Add the generator zero-sequence admittance to Y-Bus matrix
             # Ensure that `gen.bus.name` is being used correctly
@@ -229,8 +219,7 @@ class Circuit:
             else:
                 print(f"Error: Bus name {bus_name} not found in y_bus_zero index.")
 
-        print("\nFinal Y-Bus matrix:")
-        print(self.y_bus_zero.to_string(float_format=lambda x: f"{x:.5f}"))
+
         return self.y_bus_zero
 
 

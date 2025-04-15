@@ -11,6 +11,7 @@ from Generator import Generator
 from Solution import Solution
 from Fault import Fault
 
+
 # ****************** Initialization settings for system *************************
 settings = Settings()
 
@@ -89,7 +90,7 @@ circuit.add_load(load5)
 # ****************** Generator Initialization *************************
 gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,0,True,settings)
 circuit.add_generator(gen1)
-gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,1,True,settings)
+gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,.01,True,settings)
 circuit.add_generator(gen2)
 
 # ****************** Y-Bus Initialization *************************
@@ -167,27 +168,32 @@ if choice == '1':
 elif choice == '2':
     print("--------------3 Phase Fault Study--------------------")
     fault = Fault(circuit)
-    fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ").strip()
+    fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ")
     fault.calc_3_phase_bal(fault_bus)
     fault.print_fault_voltages()
 elif choice == '3':
     print("--------------Line to ground Fault Study------------------")
-    circuit.calc_yprim_pos()
-    circuit.calc_yprim_neg()
-    circuit.calc_yprim_zero()
-
-
-    print("********POS**********")
+    fault = Fault(circuit)
+    fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ")
+    If, V = fault.calc_single_line_to_ground(fault_bus)
 
 
 
 elif choice == '4':
     print("--------------Line to line Fault Study------------------")
+    fault = Fault(circuit)
+    fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ")
+    If= fault.calc_line_to_line(fault_bus)
+
+
 elif choice == '5':
     print("--------------Double line to ground Fault Study------------------")
+    fault = Fault(circuit)
+    fault_bus = input("Enter the faulted bus (e.g., 'bus3'): ")
+    If = fault.calc_double_line_to_ground(fault_bus)
 
 
 else:
-    print("Invalid selection. Please enter 1 or 2.")
+    print("Invalid selection. Please enter 1 to 5.")
 
 
