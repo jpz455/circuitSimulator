@@ -32,8 +32,6 @@ class Jacobian:
 
     def calc_jacobian(self):
        #call helper methods to calculate each submatrix
-        print(self.y_bus.size)
-
         j1 = self.calc_j1() #6x6 (exclude slack r/c)
         j2 = self.calc_j2() #6x5 (exclude slack r/c, pv c)
         j3 = self.calc_j3() #5x6 (exclude slack r/c, pv r)

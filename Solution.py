@@ -37,19 +37,18 @@ class Solution:
             mismatchKey = "load" + str(index + 1)
             genKey = "Gen " + str(index + 1)
             if mismatchKey in self.circuit.loads:
-                print(f"Found {mismatchKey} at bus {bus}")
+                #print(f"Found {mismatchKey} at bus {bus}")
                 self.knownPQ[index] = self.circuit.loads[mismatchKey].real_pwr
                 self.knownPQ[index + len(self.circuit.buses)] = self.circuit.loads[mismatchKey].reactive_pwr
             elif genKey in self.circuit.generators and self.circuit.buses["bus" + str(index + 1)].bus_type != "slack":
-                print(f"Found {genKey} at bus {self.circuit.generators[genKey].bus.name}")
+                #print(f"Found {genKey} at bus {self.circuit.generators[genKey].bus.name}")
                 bus_name = self.circuit.generators[genKey].bus.name
                 bus_index = int(bus_name[3:])
                 self.knownPQ[bus_index - 1] = self.circuit.generators[genKey].mw_setpoint
-            else:
-                print(f"{mismatchKey} does not exist at bus {bus}")
+
         self.knownPQ = self.knownPQ/self.circuit.settings.s_base
-        print("------ known power --------")
-        print(self.knownPQ)
+        #print("------ known power --------")
+        #print(self.knownPQ)
 
     def calc_mismatch(self):
         calcrealP = np.zeros([len(self.circuit.buses), 1])
@@ -109,7 +108,6 @@ class Solution:
 
     def calc_jacobian(self):
         self.circuit.calc_y_bus_no_gen()
-        print(self.jacob.y_bus.shape)
         self.jacob.calc_jacobian()
         self.j_matrix = self.jacob.j_matrix
         return self.j_matrix

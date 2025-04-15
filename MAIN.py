@@ -111,7 +111,7 @@ fault = Fault(circuit)
 voltages, current = fault.calc_3_phase_bal("bus3")
 print()
 fault.print_fault_voltages()
-
+print()
 #****************** Power Flow ****************************************
 solution.calc_jacobian()
 solution.calc_known_power()
