@@ -6,7 +6,6 @@ class Jacobian:
 
     def __init__(self, circuit: Circuit):
         self.circuit = circuit
-        self.y_bus = np.array(self.circuit.y_bus_positive) #convert y_bus to array
         self.slackI: int
         self.pvI: int
         self.j_matrix: np.array
@@ -18,6 +17,8 @@ class Jacobian:
         self.j4 = np.zeros([self.size, self.size])
 
         self.find_buses()
+        self.circuit.calc_y_bus_no_gen()
+        self.y_bus = np.array(self.circuit.y_bus)
 
 
     def find_buses(self):
@@ -31,6 +32,8 @@ class Jacobian:
 
     def calc_jacobian(self):
        #call helper methods to calculate each submatrix
+        print(self.y_bus.size)
+
         j1 = self.calc_j1() #6x6 (exclude slack r/c)
         j2 = self.calc_j2() #6x5 (exclude slack r/c, pv c)
         j3 = self.calc_j3() #5x6 (exclude slack r/c, pv r)

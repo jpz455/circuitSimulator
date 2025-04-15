@@ -108,6 +108,8 @@ class Solution:
         return self.initSol
 
     def calc_jacobian(self):
+        self.circuit.calc_y_bus_no_gen()
+        print(self.jacob.y_bus.shape)
         self.jacob.calc_jacobian()
         self.j_matrix = self.jacob.j_matrix
         return self.j_matrix
@@ -118,9 +120,7 @@ class Solution:
         for iterations in range(50):
             mismatchTempI = 0
 
-
             for mismatchI in range(len(self.mismatch)):
-
 
                 for busIndex in range(len(self.circuit.buses)):
 

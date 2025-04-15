@@ -10,6 +10,7 @@ from Load import Load
 from Generator import Generator
 from Solution import Solution
 from Fault import Fault
+from Jacobian import Jacobian
 
 
 # ****************** Initialization settings for system *************************
@@ -111,6 +112,9 @@ voltages, current = fault.calc_3_phase_bal("bus3")
 print()
 fault.print_fault_voltages()
 
-#****************** Power Flow ******************************************
+#****************** Power Flow ****************************************
+solution.calc_jacobian()
+solution.calc_known_power()
 solution.calc_mismatch()
+solution.calc_solutionRef()
 solution.calc_solution()
