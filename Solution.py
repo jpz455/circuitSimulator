@@ -3,8 +3,6 @@ import Circuit as Circuit
 import Jacobian as Jacobian
 import pandas as pd
 
-
-
 class Solution:
 
     def __init__(self, circuit: Circuit):
