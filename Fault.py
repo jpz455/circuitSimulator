@@ -184,7 +184,7 @@ class Fault:
         else:
             print("Invalid study type. Try again with 3pb, ltl, sltg, or dltg.")
 
-    def calc_single_line_to_ground(self, fault_bus: str, fault_v = 1.0, z_f = 0.0):
+    def calc_single_line_to_ground(self, fault_bus: str, fault_v: float = 1.0, z_f = 0.0):
         # Calculate all z buses
         self.Z_bus_positive = self.calc_z_bus_pos(fault_bus, fault_v)
         self.Z_bus_negative = self.calc_z_bus_neg(fault_bus, fault_v)
@@ -210,30 +210,29 @@ class Fault:
         Ineg = Ipos
         Izero = Ipos
 
-        I = np.empty([3, 1], dtype=np.complex128)
-        I[0, 0] = Izero
-        I[1, 0] = Ipos
-        I[2, 0] = Ineg
+        I = [Izero, Ipos, Izero]
+        I_sltg = self.sequence_to_phase(I)
 
-       # Calculate voltages at fault bus
-        v = np.zeros([3, 1])
-        v[1, 0] = fault_v
+        print("Single Line to Ground Fault at ", fault_bus)
+        print("Phase A Current:", np.real(I_sltg[0]), np.angle(I_sltg[0]) * 180 / np.pi)
+        print("Phase B Current:", np.real(I_sltg[1]), np.angle(I_sltg[1]) * 180 / np.pi)
+        print("Phase C Current:", np.real(I_sltg[2]), np.angle(I_sltg[2]) * 180 / np.pi)
 
+        # Get sequence voltages at the faulted bus
 
-        vfb = v - np.matmul(sltg_z, I)
+        index = self.circuit.buses[fault_bus].index - 1
 
-        # now get phase voltages
-        transform_matrix = np.ones([3, 3], dtype = np.complex128)
-        a = np.exp(2j*np.pi/3)
-        transform_matrix[1][1] = a*a
-        transform_matrix[2][2] = a*a
-        transform_matrix[2][1] = a
-        transform_matrix[1][2] = a
+        for bus in self.circuit.buses:
+            Z0 = self.Z_bus_zero[index,index]
+            Z1 = self.Z_bus_positive[index, index]
+            Z2 = self.Z_bus_negative[index, index]
+            # returns in zero,pos,neg
+            Vk = self.calc_fault_voltages(Vf=1, Z0=Z0, Z1=Z1, Z2=Z2, I0=Izero, I1=Ipos, I2=Ineg)
+            # Convert sequence voltages to phase voltages
+            Vabc = self.sequence_to_phase(Vk)
+            for i, phase in enumerate(['A', 'B', 'C']):
+                print(f"{bus} Phase {phase}: |V| = {np.abs(Vabc[i]):.4f} p.u., ∠ = {np.angle(Vabc[i], deg=True):.2f}°")
 
-        self.fault_voltages_sltg = np.matmul(transform_matrix, vfb) # 3x3 times 3x1 = 3x1
-        self.I_sltg= np.matmul(transform_matrix, I)
-
-        return self.fault_voltages_sltg, self.I_sltg
 
     def calc_fault_voltages(self, Vf, Z0, Z1, Z2, I0, I1, I2):
         # Assemble impedance and current vectors
