@@ -110,7 +110,7 @@ circuit.print_y_bus()
 fault = Fault(circuit)
 voltages, current = fault.calc_3_phase_bal("bus3")
 print()
-fault.print_fault_voltages()
+fault.print_fault_voltages("3pb")
 print()
 #****************** Power Flow ****************************************
 solution.calc_jacobian()
@@ -120,6 +120,4 @@ solution.calc_solutionRef()
 solution.calc_solution()
 #**************** Unbalanced Faults **********************************
 # TO DO
-fault.calc_line_to_line("bus1")
-fault.calc_double_line_to_ground("bus1")
 fault.calc_single_line_to_ground("bus1")
