@@ -67,30 +67,13 @@ class Fault:
 
         return self.fault_voltages_3pb, self.I_3pb
 
-    def print_fault_voltages(self, study: str):
+    def print_fault_voltages(self):
         # 3 phase balanced
-        if study == '3pb':
             print("Fault Current Magnitude: ", round(np.real(self.I_3pb), 5))
             for i, v in enumerate(self.fault_voltages_3pb):
                 print("Bus", i + 1, " voltage magnitude:", round(np.real(v), 5))
 
-        # line to line
-        elif study == 'ltl':
-            print(self.fault_voltages_ltl, self.I_ltl)
 
-        # single line to ground
-        elif study == 'sltg':
-            for phase, i in enumerate(self.I_sltg):
-                print("Phase:", phase, " Current: ", i)
-            for phase, v in enumerate(self.fault_voltages_sltg):
-                print("Phase", phase, " voltage magnitude:", v)
-
-        # double line to ground
-        elif study == 'dltg':
-            print(self.fault_voltages_dltg, self.I_dltg)
-
-        else:
-            print("Invalid study type. Try again with 3pb, ltl, sltg, or dltg.")
 
     def calc_single_line_to_ground(self, fault_bus: str, fault_v: float = 1.0, z_f = 0.0):
         # Get Znn at faulted bus
