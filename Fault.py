@@ -165,21 +165,24 @@ class Fault:
             for i, v in enumerate(self.fault_voltages_3pb):
                 print("Bus", i + 1, " voltage magnitude:", round(np.real(v), 5))
         elif study == 'ltl':
-            print("Fault Current Magnitude: ", round(np.real(self.I_ltl), 5))
+            for i, v in enumerate(self.I_ltl):
+                print("Fault Current Magnitude: ", round(np.real(self.I_ltl), 5))
             for i, v in enumerate(self.fault_voltages_ltl):
-                print("Bus", i + 1, " voltage magnitude:", round(np.real(v), 5))
+                print("Phase", i, " voltage magnitude:", v)
         elif study == 'sltg':
-            print("Fault Current Magnitude: ", round(np.real(self.I_sltg), 5))
+            for i, v in enumerate(self.I_sltg):
+                print("Fault Current Magnitude: ", i)
             for i, v in enumerate(self.fault_voltages_sltg):
-                print("Bus", i + 1, " voltage magnitude:", round(np.real(v), 5))
+                print("Bus", i + 1, " voltage magnitude:", v)
         elif study == 'dltg':
-            print("Fault Current Magnitude: ", round(np.real(self.I_dltg), 5))
+            for i, v in enumerate(self.I_dltg):
+                print("Fault Current Magnitude: ", round(np.real(self.I_dltg), 5))
             for i, v in enumerate(self.fault_voltages_dltg):
                 print("Bus", i + 1, " voltage magnitude:", round(np.real(v), 5))
         else:
             print("Invalid study type. Try again with 3pb, ltl, sltg, or dltg.")
 
-    def calc_single_line_to_ground(self, fault_bus: str, fault_v = 1.0):
+    def calc_single_line_to_ground(self, fault_bus: str, fault_v = 1.0, z_f = 0.0):
         # Calculate all z buses
         self.Z_bus_positive = self.calc_z_bus_pos(fault_bus, fault_v)
         self.Z_bus_negative = self.calc_z_bus_neg(fault_bus, fault_v)
@@ -191,16 +194,42 @@ class Fault:
         Znn_neg = self.Z_bus_negative[index][index]
         Znn_zero = self.Z_bus_zero[index][index]
 
+        # Create impedance matrix
+        sltg_z = np.zeros([3,3], dtype=np.complex128)
+        sltg_z[0][0] = Znn_zero
+        sltg_z[1][1] = Znn_pos
+        sltg_z[2][2] = Znn_neg
+
         # connect all sequences in series
-        Znn_total = Znn_neg + Znn_pos + Znn_zero
-        self.I_ltl = fault_v/Znn_total
+        Znn_total = Znn_neg + Znn_pos + Znn_zero + 3*z_f
 
-        # Get voltages
-        self.fault_voltages_ltl = np.empty(len(self.circuit.buses), dtype=np.complex128)
-        for k, bus in enumerate(self.circuit.buses.values()):
-            self.fault_voltages_ltl[k] = (1 - self.z_bus[k][index] / Znn_total) * fault_v
+        # Calculate currents
+        Ipos = fault_v/Znn_total
+        Ineg = Ipos
+        Izero = Ipos
 
-        return self.I_ltl, self.fault_voltages_ltl
+        I = np.zeros([3, 1])
+        values = [Izero, Ipos, Ineg]
+        I[:, 0] = values
+
+       # Calculate voltages at fault bus
+        v = np.zeros([3, 1])
+        v[1, 0] = fault_v
+
+        vfb = v - sltg_z*I
+
+        # now get phase voltages
+        transform_matrix = np.ones([3, 3])
+        a = np.exp(2j*np.pi/3)
+        transform_matrix[1][1] = a*a
+        transform_matrix[2][2] = a*a
+        transform_matrix[2][1] = a
+        transform_matrix[1][2] = a
+
+        self.fault_voltages_sltg = transform_matrix*vfb
+        self.I_sltg= transform_matrix*I
+
+        return self.fault_voltages_sltg, self.I_sltg
 
     def calc_line_to_line(self, fault_bus: str):
 
