@@ -237,5 +237,4 @@ class Fault:
 
     def calc_double_line_to_ground(self, fault_bus: str, Zf=0):
 
-
         return None
