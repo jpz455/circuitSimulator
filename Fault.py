@@ -24,98 +24,6 @@ class Fault:
         self.I_sltg: complex
         self.I_dltg: complex
 
-
-    def calc_z_bus_pos(self, fault_bus: str, fault_v = 1.0):
-        slack_y_prime = 0
-        pv_y_prime = 0
-
-        # Use subtransient reactance from each generator directly
-        for gen in self.circuit.generators.values():
-            # Positive sequence
-            x_prime_pos = gen.x1
-            y_prime_pos = 1 / x_prime_pos if x_prime_pos != 0 else 0  # avoid division by zero
-
-            if gen.bus.bus_type == "slack":
-                self.slack_name = gen.bus.name
-                slack_y_prime_pos = y_prime_pos
-            else:  # assume all others are PV for now
-                self.pv_name = gen.bus.name
-                pv_y_prime_pos = y_prime_pos
-
-        # Recalculate admittance matrix
-        self.circuit.calc_y_bus_positive()
-        self.circuit.y_bus_positive.loc[self.slack_name, self.slack_name] += slack_y_prime
-        self.circuit.y_bus_positive.loc[self.pv_name, self.pv_name] += pv_y_prime
-
-        # Set pre-fault voltage
-        self.circuit.buses[fault_bus].set_bus_V(fault_v)
-
-        # Invert Y bus to get Z bus
-        self.y_bus_matrix_positive = np.array(self.circuit.y_bus_positive)
-        self.z_bus_positive = np.linalg.inv(self.y_bus_matrix_positive)
-
-        return self.z_bus_positive
-
-    def calc_z_bus_neg(self, fault_bus: str, fault_v = 1.0):
-        slack_y_prime = 0
-        pv_y_prime = 0
-
-        # Use subtransient reactance from each generator directly
-        for gen in self.circuit.generators.values():
-            # Positive sequence
-            x_prime_neg = gen.x1
-            y_prime_neg = 1 / x_prime_neg if x_prime_neg != 0 else 0  # avoid division by zero
-
-            if gen.bus.bus_type == "slack":
-                self.slack_name = gen.bus.name
-                slack_y_prime_neg = y_prime_neg
-            else:  # assume all others are PV for now
-                self.pv_name = gen.bus.name
-                pv_y_prime_neg = y_prime_neg
-        # Recalculate admittance matrix
-        self.circuit.calc_y_bus_negative()
-        self.circuit.y_bus_negative.loc[self.slack_name, self.slack_name] += slack_y_prime
-        self.circuit.y_bus_negative.loc[self.pv_name, self.pv_name] += pv_y_prime
-
-        # Set pre-fault voltage
-        self.circuit.buses[fault_bus].set_bus_V(fault_v)
-
-        # Invert Y bus to get Z bus
-        self.y_bus_matrix_negative = np.array(self.circuit.y_bus_negative)
-        self.z_bus_negative = np.linalg.inv(self.y_bus_matrix_negative)
-
-        return self.z_bus_negative
-
-    def calc_z_bus_zero(self, fault_bus: str, fault_v=1.0):
-            slack_y_prime = 0
-            pv_y_prime = 0
-
-            # Use subtransient reactance from each generator directly
-            for gen in self.circuit.generators.values():
-                # Positive sequence
-                x_prime_zero = gen.x1
-                y_prime_zero = 1 / x_prime_zero if x_prime_zero != 0 else 0  # avoid division by zero
-
-                if gen.bus.bus_type == "slack":
-                    self.slack_name = gen.bus.name
-                    slack_y_prime_zero = y_prime_zero
-                else:  # assume all others are PV for now
-                    self.pv_name = gen.bus.name
-                    pv_y_prime_zero = y_prime_zero
-            # Recalculate admittance matrix
-            self.circuit.calc_y_bus_zero()
-            self.circuit.y_bus_zero.loc[self.slack_name, self.slack_name] += slack_y_prime
-            self.circuit.y_bus_zero.loc[self.pv_name, self.pv_name] += pv_y_prime
-
-            # Set pre-fault voltage
-            self.circuit.buses[fault_bus].set_bus_V(fault_v)
-
-            # Invert Y bus to get Z bus
-            self.y_bus_matrix_zero = np.array(self.circuit.y_bus_zero)
-            self.z_bus_zero = np.linalg.inv(self.y_bus_matrix_zero)
-
-            return self.z_bus_zero
-
     def calc_3_phase_bal(self, fault_bus: str, fault_v=1.0):
         slack_y_prime = 0
         pv_y_prime = 0
@@ -185,32 +93,21 @@ class Fault:
             print("Invalid study type. Try again with 3pb, ltl, sltg, or dltg.")
 
     def calc_single_line_to_ground(self, fault_bus: str, fault_v: float = 1.0, z_f = 0.0):
-        # Calculate all z buses
-        self.Z_bus_positive = self.calc_z_bus_pos(fault_bus, fault_v)
-        self.Z_bus_negative = self.calc_z_bus_neg(fault_bus, fault_v)
-        self.Z_bus_zero = self.calc_z_bus_zero(fault_bus, fault_v)
-
         # Get Znn at faulted bus
-        index = self.circuit.buses[fault_bus].index - 1
-        Znn_pos = self.Z_bus_positive[index][index]
-        Znn_neg = self.Z_bus_negative[index][index]
-        Znn_zero = self.Z_bus_zero[index][index]
-
-        # Create impedance matrix
-        sltg_z = np.zeros([3,3], dtype=np.complex128)
-        sltg_z[0][0] = Znn_zero
-        sltg_z[1][1] = Znn_pos
-        sltg_z[2][2] = Znn_neg
+        fault_index = self.circuit.buses[fault_bus].index - 1
+        Znn_pos = self.Z_bus_positive[fault_index][fault_index]
+        Znn_neg = self.Z_bus_negative[fault_index][fault_index]
+        Znn_zero = self.Z_bus_zero[fault_index][fault_index]
 
         # connect all sequences in series
         Znn_total = Znn_neg + Znn_pos + Znn_zero + 3*z_f
 
         # Calculate currents
-        Ipos = fault_v/Znn_total
-        Ineg = Ipos
-        Izero = Ipos
+        I_zero_0= fault_v/Znn_total
+        I_pos_1 = I_zero_0
+        I_neg_2 = I_zero_0
 
-        I = [Izero, Ipos, Izero]
+        I = [I_zero_0, I_pos_1, I_neg_2]
         I_sltg = self.sequence_to_phase(I)
 
         print("Single Line to Ground Fault at ", fault_bus)
@@ -219,15 +116,12 @@ class Fault:
         print("Phase C Current:", np.real(I_sltg[2]), np.angle(I_sltg[2]) * 180 / np.pi)
 
         # Get sequence voltages at the faulted bus
-
-        index = self.circuit.buses[fault_bus].index - 1
-
         for bus in self.circuit.buses:
-            Z0 = self.Z_bus_zero[index,index]
-            Z1 = self.Z_bus_positive[index, index]
-            Z2 = self.Z_bus_negative[index, index]
+            Z0 = self.Z_bus_zero[self.circuit.buses[bus].index-1, fault_index]
+            Z1 = self.Z_bus_positive[self.circuit.buses[bus].index-1, fault_index]
+            Z2 = self.Z_bus_negative[self.circuit.buses[bus].index-1, fault_index]
             # returns in zero,pos,neg
-            Vk = self.calc_fault_voltages(Vf=1, Z0=Z0, Z1=Z1, Z2=Z2, I0=Izero, I1=Ipos, I2=Ineg)
+            Vk = self.calc_fault_voltages(Vf=1, Z0=Z0, Z1=Z1, Z2=Z2, I0=I_zero_0, I1=I_pos_1, I2=I_neg_2)
             # Convert sequence voltages to phase voltages
             Vabc = self.sequence_to_phase(Vk)
             for i, phase in enumerate(['A', 'B', 'C']):
