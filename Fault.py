@@ -160,25 +160,27 @@ class Fault:
         return self.fault_voltages_3pb, self.I_3pb
 
     def print_fault_voltages(self, study: str):
+        # 3 phase balanced
         if study == '3pb':
             print("Fault Current Magnitude: ", round(np.real(self.I_3pb), 5))
             for i, v in enumerate(self.fault_voltages_3pb):
                 print("Bus", i + 1, " voltage magnitude:", round(np.real(v), 5))
+
+        # line to line
         elif study == 'ltl':
-            for i, v in enumerate(self.I_ltl):
-                print("Fault Current Magnitude: ", round(np.real(self.I_ltl), 5))
-            for i, v in enumerate(self.fault_voltages_ltl):
-                print("Phase", i, " voltage magnitude:", v)
+            print(self.fault_voltages_ltl, self.I_ltl)
+
+        # single line to ground
         elif study == 'sltg':
-            for i, v in enumerate(self.I_sltg):
-                print("Fault Current Magnitude: ", i)
-            for i, v in enumerate(self.fault_voltages_sltg):
-                print("Bus", i + 1, " voltage magnitude:", v)
+            for phase, i in enumerate(self.I_sltg):
+                print("Phase:", phase, " Current: ", i)
+            for phase, v in enumerate(self.fault_voltages_sltg):
+                print("Phase", phase, " voltage magnitude:", v)
+
+        # double line to ground
         elif study == 'dltg':
-            for i, v in enumerate(self.I_dltg):
-                print("Fault Current Magnitude: ", round(np.real(self.I_dltg), 5))
-            for i, v in enumerate(self.fault_voltages_dltg):
-                print("Bus", i + 1, " voltage magnitude:", round(np.real(v), 5))
+            print(self.fault_voltages_dltg, self.I_dltg)
+
         else:
             print("Invalid study type. Try again with 3pb, ltl, sltg, or dltg.")
 
@@ -208,26 +210,28 @@ class Fault:
         Ineg = Ipos
         Izero = Ipos
 
-        I = np.zeros([3, 1])
-        values = [Izero, Ipos, Ineg]
-        I[:, 0] = values
+        I = np.empty([3, 1], dtype=np.complex128)
+        I[0, 0] = Izero
+        I[1, 0] = Ipos
+        I[2, 0] = Ineg
 
        # Calculate voltages at fault bus
         v = np.zeros([3, 1])
         v[1, 0] = fault_v
 
-        vfb = v - sltg_z*I
+
+        vfb = v - np.matmul(sltg_z, I)
 
         # now get phase voltages
-        transform_matrix = np.ones([3, 3])
+        transform_matrix = np.ones([3, 3], dtype = np.complex128)
         a = np.exp(2j*np.pi/3)
         transform_matrix[1][1] = a*a
         transform_matrix[2][2] = a*a
         transform_matrix[2][1] = a
         transform_matrix[1][2] = a
 
-        self.fault_voltages_sltg = transform_matrix*vfb
-        self.I_sltg= transform_matrix*I
+        self.fault_voltages_sltg = np.matmul(transform_matrix, vfb) # 3x3 times 3x1 = 3x1
+        self.I_sltg= np.matmul(transform_matrix, I)
 
         return self.fault_voltages_sltg, self.I_sltg
 
