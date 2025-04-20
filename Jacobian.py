@@ -17,7 +17,7 @@ class Jacobian:
         self.j4 = np.zeros([self.size, self.size])
 
         self.find_buses()
-        self.circuit.calc_y_bus_no_gen()
+        self.circuit.calc_y_bus()
         self.y_bus = np.array(self.circuit.y_bus)
 
 
@@ -40,8 +40,9 @@ class Jacobian:
             [j1, j2],
             [j3, j4]
         ]])
-
-        self.j_matrix = self.j_matrix.reshape(11,11)
+        #2*numbuses - 2*slack - 1*pv
+        j_dimen = 2*len(self.circuit.buses)-2-1
+        self.j_matrix = self.j_matrix.reshape(j_dimen,j_dimen)
         return self.j_matrix
 
     def calc_j1(self):
@@ -95,14 +96,14 @@ class Jacobian:
         for k, bus_k in enumerate(self.circuit.buses.values()):
             delta_k = bus_k.delta * np.pi / 180  # Convert delta_k to radians
             v_k = bus_k.v_pu  # Get Vk
-            y_kk = np.abs(self.circuit.y_bus_positive.iloc[k, k])  # Get Ykk
-            theta_kk = np.angle(self.circuit.y_bus_positive.iloc[k, k])  # Get theta_kk
+            y_kk = np.abs(self.circuit.y_bus.iloc[k, k])  # Get Ykk
+            theta_kk = np.angle(self.circuit.y_bus.iloc[k, k])  # Get theta_kk
 
             for n, bus_n in enumerate(self.circuit.buses.values()):
                 if k != n:
-                    y_kn = np.abs(self.circuit.y_bus_positive.iloc[k, n])  # Get Ykn
+                    y_kn = np.abs(self.circuit.y_bus.iloc[k, n])  # Get Ykn
                     delta_n = bus_n.delta * np.pi / 180  # Convert delta_n to radians
-                    theta_kn = np.angle(self.circuit.y_bus_positive.iloc[k, n])  # Get theta_kn
+                    theta_kn = np.angle(self.circuit.y_bus.iloc[k, n])  # Get theta_kn
 
                     # Compute off-diagonal terms
                     j2[k, n] = v_k * y_kn * np.cos(delta_k - delta_n - theta_kn)
@@ -110,9 +111,9 @@ class Jacobian:
                     sum_terms = 0
                     for x, bus_x in enumerate(self.circuit.buses.values()):
                         v_x = bus_x.v_pu  # Get Vx
-                        y_kx = np.abs(self.circuit.y_bus_positive.iloc[k, x])  # Get Ykx
+                        y_kx = np.abs(self.circuit.y_bus.iloc[k, x])  # Get Ykx
                         delta_x = bus_x.delta * np.pi / 180  # Convert delta_x to radians
-                        theta_kx = np.angle(self.circuit.y_bus_positive.iloc[k, x])  # Get theta_kx
+                        theta_kx = np.angle(self.circuit.y_bus.iloc[k, x])  # Get theta_kx
 
                         sum_terms += y_kx * v_x * np.cos(delta_k - delta_x - theta_kx)
 
@@ -184,14 +185,14 @@ class Jacobian:
         for k, bus_k in enumerate(self.circuit.buses.values()):
             delta_k = bus_k.delta * np.pi / 180  # Convert delta_k to radians
             v_k = bus_k.v_pu  # Get Vk
-            y_kk = np.abs(self.circuit.y_bus_positive.iloc[k, k])  # Get Ykk
-            theta_kk = np.angle(self.circuit.y_bus_positive.iloc[k, k])  # Get theta_kk
+            y_kk = np.abs(self.circuit.y_bus.iloc[k, k])  # Get Ykk
+            theta_kk = np.angle(self.circuit.y_bus.iloc[k, k])  # Get theta_kk
 
             for n, bus_n in enumerate(self.circuit.buses.values()):
                 if k != n:
-                    y_kn = np.abs(self.circuit.y_bus_positive.iloc[k, n])  # Get Ykn
+                    y_kn = np.abs(self.circuit.y_bus.iloc[k, n])  # Get Ykn
                     delta_n = bus_n.delta * np.pi / 180  # Convert delta_n to radians
-                    theta_kn = np.angle(self.circuit.y_bus_positive.iloc[k, n])  # Get theta_kn
+                    theta_kn = np.angle(self.circuit.y_bus.iloc[k, n])  # Get theta_kn
 
                     # Compute off-diagonal terms
                     j4[k, n] = v_k * y_kn * np.sin(delta_k - delta_n - theta_kn)
@@ -199,9 +200,9 @@ class Jacobian:
                     sum_terms = 0
                     for x, bus_x in enumerate(self.circuit.buses.values()):
                         v_x = bus_x.v_pu  # Get Vx
-                        y_kx = np.abs(self.circuit.y_bus_positive.iloc[k, x])  # Get Ykx
+                        y_kx = np.abs(self.circuit.y_bus.iloc[k, x])  # Get Ykx
                         delta_x = bus_x.delta * np.pi / 180  # Convert delta_x to radians
-                        theta_kx = np.angle(self.circuit.y_bus_positive.iloc[k, x])  # Get theta_kx
+                        theta_kx = np.angle(self.circuit.y_bus.iloc[k, x])  # Get theta_kx
 
                         sum_terms += y_kx * v_x * np.sin(delta_k - delta_x - theta_kx)
 

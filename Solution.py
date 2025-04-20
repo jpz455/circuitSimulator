@@ -19,12 +19,8 @@ class Solution:
         self.initSol = np.array
         self.slack_name: str
         self.pv_name: str
-        self.y_bus_positive_matrix: np.array
-        self.y_bus_negative_matrix: np.array
-        self.y_bus_zero_matrix: np.array
-        self.z_bus_positive: np.array
-        self.z_bus_negative: np.array
-        self.z_bus_zero: np.array
+
+
 
 
     def calc_known_power(self):
@@ -45,6 +41,7 @@ class Solution:
                 self.knownPQ[bus_index - 1] = self.circuit.generators[genKey].mw_setpoint
 
         self.knownPQ = self.knownPQ/self.circuit.settings.s_base
+        return self.knownPQ
         #print("------ known power --------")
         #print(self.knownPQ)
 
@@ -56,7 +53,7 @@ class Solution:
             bus1_vpu = bus1.v_pu
             bus1_delta = bus1.delta
             for tempBus2, bus2 in enumerate(self.circuit.buses.values()):
-                y_bus_value = self.circuit.y_bus_positive.loc[f"bus{tempBus1 + 1}", f"bus{tempBus2 + 1}"]
+                y_bus_value = self.circuit.y_bus.loc[f"bus{tempBus1 + 1}", f"bus{tempBus2 + 1}"]
                 tempP += np.abs(y_bus_value) * bus2.v_pu * np.cos(bus1_delta - bus2.delta - np.angle(y_bus_value))
             calcrealP[tempBus1] = bus1_vpu * tempP
         for tempBus1Q, bus1Q in enumerate(self.circuit.buses.values()):
@@ -64,7 +61,7 @@ class Solution:
             bus1Q_vpu = bus1Q.v_pu
             bus1Q_delta = bus1Q.delta
             for tempBus2Q, bus2Q in enumerate(self.circuit.buses.values()):
-                y_bus_value = self.circuit.y_bus_positive.loc[f"bus{tempBus1Q + 1}", f"bus{tempBus2Q + 1}"]
+                y_bus_value = self.circuit.y_bus.loc[f"bus{tempBus1Q + 1}", f"bus{tempBus2Q + 1}"]
                 tempQ += np.abs(y_bus_value) * bus2Q.v_pu * np.sin(bus1Q_delta - bus2Q.delta - np.angle(y_bus_value))
             calcreacP[tempBus1Q] = bus1Q_vpu * tempQ
         self.calcPQ = np.vstack((calcrealP, calcreacP))
@@ -105,153 +102,45 @@ class Solution:
         return self.initSol
 
     def calc_jacobian(self):
-        self.circuit.calc_y_bus_no_gen()
+
         self.jacob.calc_jacobian()
         self.j_matrix = self.jacob.j_matrix
         return self.j_matrix
 
     def calc_solution(self):
-
         tolerance = 0.0001
-        for iterations in range(50):
-            mismatchTempI = 0
+        max_iter = 50
 
-            for mismatchI in range(len(self.mismatch)):
 
-                for busIndex in range(len(self.circuit.buses)):
 
-                    if self.circuit.buses["bus" + str(busIndex + 1)].bus_type != "slack" and self.circuit.buses["bus" + str(busIndex + 1)].bus_type != "pv":
-                        self.circuit.buses["bus" + str(busIndex + 1)].v_pu = self.initSol[busIndex + len(self.circuit.buses) - 2]
-                        self.circuit.buses["bus" + str(busIndex + 1)].delta = self.initSol[busIndex - 1]
-                    elif self.circuit.buses["bus" + str(busIndex + 1)].bus_type != "slack":
-                        self.circuit.buses["bus" + str(busIndex + 1)].delta = self.initSol[busIndex - 1]
-
-                if np.abs(self.mismatch[mismatchI]) <= tolerance:
-                    mismatchTempI += 1
-
-                if mismatchTempI == len(self.mismatch):
-                    converged = np.zeros((len(self.circuit.buses), 2))
-
-                    temp = 0
-                    for index in self.circuit.buses:
-                        converged[temp, 1] = np.degrees(self.circuit.buses[index].delta)
-                        converged[temp, 0] = self.circuit.buses[index].v_pu
-                        temp += 1
-
-                    print("Solution found\nVpu        Angle(degrees)\n", converged)
-                    print("Iteration:", iterations)
-                    return converged
-
+        for iterations in range(max_iter):
             self.calc_jacobian()
             self.calc_mismatch()
-            self.calc_solutionRef()
 
-    def calc_single_fault(self, fault_bus: str, fault_v=1.0):
-        slack_y_prime = 0
-        pv_y_prime = 0
+            if np.all(np.abs(self.mismatch) <= tolerance):
+                break
 
-        # Get updated y_bus
-        self.z_bus_positive= self.calc_z_bus_positive()
+            deltaX = np.linalg.solve(self.j_matrix, self.mismatch)
+            self.initSol = self.initSol + deltaX
 
-        # Set pre-fault voltage
-        self.circuit.buses[fault_bus].set_bus_V(fault_v)
+            # Update bus voltages and angles
+            for busIndex, (bus_name, bus) in enumerate(self.circuit.buses.items()):
+                if bus.bus_type == "pq":
+                    bus.v_pu = self.initSol[busIndex + len(self.circuit.buses) - 2]
+                    bus.delta = self.initSol[busIndex - 1]
+                elif bus.bus_type == "pv":
+                    bus.delta = self.initSol[busIndex - 1]
 
-        # Get Znn at faulted bus
-        index = self.circuit.buses[fault_bus].index - 1
-        Znn = self.z_bus_positive[index][index]
+        # Package final converged values
+        converged = np.zeros((len(self.circuit.buses), 2))
+        for i, bus in enumerate(self.circuit.buses.values()):
+            converged[i, 0] = bus.v_pu
+            converged[i, 1] = np.degrees(bus.delta)
 
-        # Subtransient fault current
-        self.Ifn = fault_v / Znn
-
-        # Faulted bus voltages
-        self.fault_voltages = np.empty(len(self.circuit.buses), dtype=np.complex128)
-        for k, bus in enumerate(self.circuit.buses.values()):
-            self.fault_voltages[k] = (1 - self.z_bus[k][index] / Znn) * fault_v
-
-        return self.fault_voltages, self.Ifn
-
-    def print_fault_voltages(self):
-        print("Fault Current Magnitude: ",round(np.real(self.Ifn),5))
-        for i, v in enumerate(self.fault_voltages):
-            print("Bus", i + 1, " voltage magnitude:", round(np.real(v), 5))
+        return converged, iterations + 1
 
     def print_jacobian(self):
            self.jacob.print_jacobian()
 
-    def calc_z_bus_negative(self):
-        # Use subtransient reactance from each generator directly
-        for gen in self.circuit.generators.values():
-            # Use x2 for negative
-            x_prime = gen.x2
-            y_prime = 1 / x_prime if x_prime != 0 else 0  # avoid division by zero
 
-            if gen.bus.bus_type == "slack":
-                self.slack_name = gen.bus.name
-                slack_y_prime = y_prime
-            else:  # assume all others are PV for now
-                self.pv_name = gen.bus.name
-                pv_y_prime = y_prime
 
-        # Recalculate admittance matrix
-        self.circuit.calc_y_bus_negative()
-        self.circuit.y_bus_negative.loc[self.slack_name, self.slack_name] += slack_y_prime
-        self.circuit.y_bus_negative.loc[self.pv_name, self.pv_name] += pv_y_prime
-
-        # Invert Y bus to get Z bus
-        self.y_bus_negative_matrix = np.array(self.circuit.y_bus_negative)
-        self.z_bus_negative = np.linalg.inv(self.y_bus_negative_matrix)
-
-        # Return Z bus
-        return self.z_bus_negative
-
-    def calc_z_bus_positive(self):
-        # Use subtransient reactance from each generator directly
-        for gen in self.circuit.generators.values():
-            # Use x1 (positive-sequence)
-            x_prime = gen.x1
-            y_prime = 1 / x_prime if x_prime != 0 else 0  # avoid division by zero
-
-            if gen.bus.bus_type == "slack":
-                self.slack_name = gen.bus.name
-                slack_y_prime = y_prime
-            else:  # assume all others are PV for now
-                self.pv_name = gen.bus.name
-                pv_y_prime = y_prime
-
-        # Recalculate admittance matrix
-        self.circuit.calc_y_bus_positive()
-        self.circuit.y_bus_positive.loc[self.slack_name, self.slack_name] += slack_y_prime
-        self.circuit.y_bus_positive.loc[self.pv_name, self.pv_name] += pv_y_prime
-
-        # Invert Y bus to get Z bus
-        self.y_bus_positive_matrix = np.array(self.circuit.y_bus_positive)
-        self.z_bus_positive= np.linalg.inv(self.y_bus_positive_matrix)
-
-        # Return Z bus
-        return self.z_bus_positive
-
-    def calc_z_bus_zero(self):
-        # Use subtransient reactance from each generator directly
-        for gen in self.circuit.generators.values():
-            # Use x0 for zero sequence
-            x_prime = gen.x0
-            y_prime = 1 / x_prime if x_prime != 0 else 0  # avoid division by zero
-
-            if gen.bus.bus_type == "slack":
-                self.slack_name = gen.bus.name
-                slack_y_prime = y_prime
-            else:  # assume all others are PV for now
-                self.pv_name = gen.bus.name
-                pv_y_prime = y_prime
-
-        # Recalculate admittance matrix
-        self.circuit.calc_y_bus_zero()
-        self.circuit.y_bus_zero.loc[self.slack_name, self.slack_name] += slack_y_prime
-        self.circuit.y_bus_zero.loc[self.pv_name, self.pv_name] += pv_y_prime
-
-        # Invert Y bus to get Z bus
-        self.y_bus_zero_matrix = np.array(self.circuit.y_bus_positive)
-        self.z_bus_zero = np.linalg.inv(self.y_bus_zero_matrix)
-
-        # Return Z bus
-        return self.z_bus_zero

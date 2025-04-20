@@ -1,11 +1,19 @@
 from Conductor import Conductor as Conductor
 import numpy as np
 class Bundle:
-    def __init__(self,name:str,num_conductors:float,spacing:float,conductor:Conductor):
+    def __init__(self, name: str, num_conductors, spacing: float, conductor: Conductor):
+
+
+        try:
+            num_conductors = int(num_conductors)
+        except Exception:
+            raise ValueError("Number of conductors must be convertible to an integer.")
+
+        if num_conductors < 1:
+            raise ValueError("Number of conductors must be ≥ 1.")
+
         if spacing <= 0:
             raise ValueError("Spacing must be a positive value.")
-        if not isinstance(num_conductors, int) or num_conductors < 1:
-            raise ValueError("Number of conductors must be an integer greater than or equal to 1.")
 
         self.name = name
         self.spacing = spacing
@@ -18,6 +26,7 @@ class Bundle:
         # Calculate D_SL and D_SC
         self.DSL = self.calculate_DSL()
         self.DSC = self.calculate_DSC()
+
 
     def calculate_DSL(self):
         if self.num_conductors == 1:

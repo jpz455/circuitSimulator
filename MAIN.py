@@ -62,6 +62,8 @@ circuit.add_conductor(conductor1)
 geometry1 = Geometry("G1",0,0,19.5,0,39,0)
 circuit.add_geometry(geometry1)
 bundle1 = Bundle('B1',2,1.5, conductor1)
+circuit.add_bundle(bundle1)
+
 
 # ****************** Transmission Line Initialization *************************
 tLine1 = TransmissionLine("tline1",bus2, bus4,bundle1,geometry1,10)
@@ -96,32 +98,12 @@ circuit.add_generator(gen2)
 solution = Solution(circuit)
 
 #****************** Y Buses *******************************************
-circuit.calc_y_bus_positive()
-circuit.calc_y_bus_negative()
-circuit.calc_y_bus_zero()
-circuit.calc_y_bus_no_gen()
 
-circuit.print_y_bus("positive")
-circuit.print_y_bus("negative")
-circuit.print_y_bus("zero")
-circuit.print_y_bus()
+circuit.calc_y_bus()
+known = solution.calc_known_power()
+print(known)
+solution.calc_mismatch()
+solution.calc_jacobian()
+solution.calc_solutionRef()
+print(solution.calc_solution())
 
-#****************** Single Bus Fault Study *******************************
-fault = Fault(circuit)
-#voltages, current = fault.calc_3_phase_bal("bus3")
-#print()
-#fault.print_fault_voltages()
-#print()
-#****************** Power Flow ****************************************
-#solution.calc_jacobian()
-#solution.calc_known_power()
-#solution.calc_mismatch()
-#solution.calc_solutionRef()
-#solution.calc_solution()
-#**************** Unbalanced Faults **********************************
-# TO DO
-#print("Line to Line fault")
-#fault.calc_line_to_line("bus3",0)
-print("Double line to ground fault")
-fault.calc_double_line_to_ground("bus3",0)
-#fault.calc_single_line_to_ground("bus3",0)

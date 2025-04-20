@@ -20,9 +20,9 @@ class TransmissionLine:
         self._calculate_impedance()
         self._calculate_admittance()
         self.y_prim = self._calc_y_prim()
-        self.y_prim_positive = None
-        self.y_prim_negative = None
-        self.y_prim_zero = None
+        print("y_prim",self.name)
+        print(self.y_prim)
+
         self._calc_sequence_admittance()
 
     def _calculate_impedance(self):
