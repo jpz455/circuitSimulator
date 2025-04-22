@@ -121,8 +121,8 @@ fault = Fault(circuit)
 #**************** Unbalanced Faults **********************************
 # TO DO
 #print("Line to Line fault")
-#fault.calc_line_to_line("bus3",0)
+#fault.calc_line_to_line("bus2",0)
 print("Double line to ground fault")
-fault.calc_double_line_to_ground("bus3",0)
-print()
-fault.calc_single_line_to_ground("bus3",1)
+fault.calc_double_line_to_ground("bus2",0)
+#print()
+#fault.calc_single_line_to_ground("bus2",1)

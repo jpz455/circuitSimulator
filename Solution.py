@@ -26,7 +26,6 @@ class Solution:
         self.z_bus_negative: np.array
         self.z_bus_zero: np.array
 
-
     def calc_known_power(self):
         P = np.zeros([len(self.circuit.buses), 1])
         Q = np.zeros([len(self.circuit.buses), 1])
@@ -147,9 +146,6 @@ class Solution:
             self.calc_solutionRef()
 
     def calc_single_fault(self, fault_bus: str, fault_v=1.0):
-        slack_y_prime = 0
-        pv_y_prime = 0
-
         # Get updated y_bus
         self.z_bus_positive= self.calc_z_bus_positive()
 

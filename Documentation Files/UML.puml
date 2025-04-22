@@ -137,7 +137,6 @@ class Transformer {
     +calc_y_prim_positive(): Pandas DataFrame
     +calc_y_prim_negative(): Pandas DataFrame
     +calc_y_prim_zero(): Pandas DataFrame
-
     +print_y_prim(int = 1)
     }
 
@@ -182,7 +181,6 @@ class Solution {
     +initSol: NumPy array
     +slack_name: int
     +pv_name: int
-    +z_bus: NumPy array
     +fault_voltages: NumPy array
     +Ifn: complex
     +y_bus_positive_matrix: NumPy array
@@ -197,7 +195,7 @@ class Solution {
     +make_solution_vector(): NumPy array
     +calc_solution(): NumPy array
     +calc_jacobian(): NumPy array
-    +calc_fault_study():
+    +calc_single_fault():
     +print_jacobian()
     +print_fault_voltages()
     }
@@ -225,10 +223,24 @@ class Jacobian {
 
 class Fault{
     +circuit: Circuit
-    +Z_bus_pos: NumPy array
-    +Z_bus_neg: NumPy array
+    +Z_bus_positive: NumPy array
+    +Z_bus_negative: NumPy array
     +Z_bus_zero: NumPy array
+    +z_bus: NumPy array
+    +y_bus_matrix_positive: NumPy array
+    +y_bus_matrix: NumPy array
+    +y_bus_matrix_negative: NumPy array
+    +y_bus_matrix_zero: NumPy array
+    +slack_name: str
+    +pv_name: str
 
+    +calc_3_phase_bal(fault_bus: str, fault_v = 1.0)
+    +print_fault_voltages()
+    +calc_single_line_to_ground(fault_bus: str, fault_v = 1.0, Zf = 0.0)
+    +calc_line_to_line(fault_bus: str, Zf = 0)
+    +calc_double_line_to_ground(fault_bus: str, Zf = 0)
+    +calc_fault_voltages(Vf, Z0, Z1, Z2, I0, I1, I2)
+    +sequence_to_phase(sequence: NumPy array)
 }
 
 
