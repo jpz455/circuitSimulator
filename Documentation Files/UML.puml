@@ -181,8 +181,6 @@ class Solution {
     +initSol: NumPy array
     +slack_name: int
     +pv_name: int
-    +fault_voltages: NumPy array
-    +Ifn: complex
     +y_bus_positive_matrix: NumPy array
     +y_bus_negative_matrix: NumPy array
     +y_bus_zero_matrix: NumPy array
@@ -195,9 +193,7 @@ class Solution {
     +make_solution_vector(): NumPy array
     +calc_solution(): NumPy array
     +calc_jacobian(): NumPy array
-    +calc_single_fault():
     +print_jacobian()
-    +print_fault_voltages()
     }
 
 class Jacobian {
@@ -234,13 +230,13 @@ class Fault{
     +slack_name: str
     +pv_name: str
 
-    +calc_3_phase_bal(fault_bus: str, fault_v = 1.0)
+    +calc_3_phase_bal(fault_bus: str, fault_v: float = 1.0): NumPy array, complex
     +print_fault_voltages()
-    +calc_single_line_to_ground(fault_bus: str, fault_v = 1.0, Zf = 0.0)
-    +calc_line_to_line(fault_bus: str, Zf = 0)
-    +calc_double_line_to_ground(fault_bus: str, Zf = 0)
-    +calc_fault_voltages(Vf, Z0, Z1, Z2, I0, I1, I2)
-    +sequence_to_phase(sequence: NumPy array)
+    +calc_single_line_to_ground(fault_bus: str, fault_v: float = 1.0, Zf: float = 0.0)
+    +calc_line_to_line(fault_bus: str, Zf: float = 0)
+    +calc_double_line_to_ground(fault_bus: str, Zf: float = 0)
+    +calc_fault_voltages(Vf: float, Z0: complex, Z1: complex, Z2: complex, I0: complex, I1: complex, I2: complex): NumPy Array
+    +sequence_to_phase(sequence: List): NumPy array
 }
 
 

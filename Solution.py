@@ -145,32 +145,6 @@ class Solution:
             self.calc_mismatch()
             self.calc_solutionRef()
 
-    def calc_single_fault(self, fault_bus: str, fault_v=1.0):
-        # Get updated y_bus
-        self.z_bus_positive= self.calc_z_bus_positive()
-
-        # Set pre-fault voltage
-        self.circuit.buses[fault_bus].set_bus_V(fault_v)
-
-        # Get Znn at faulted bus
-        index = self.circuit.buses[fault_bus].index - 1
-        Znn = self.z_bus_positive[index][index]
-
-        # Subtransient fault current
-        self.Ifn = fault_v / Znn
-
-        # Faulted bus voltages
-        self.fault_voltages = np.empty(len(self.circuit.buses), dtype=np.complex128)
-        for k, bus in enumerate(self.circuit.buses.values()):
-            self.fault_voltages[k] = (1 - self.z_bus[k][index] / Znn) * fault_v
-
-        return self.fault_voltages, self.Ifn
-
-    def print_fault_voltages(self):
-        print("Fault Current Magnitude: ",round(np.real(self.Ifn),5))
-        for i, v in enumerate(self.fault_voltages):
-            print("Bus", i + 1, " voltage magnitude:", round(np.real(v), 5))
-
     def print_jacobian(self):
            self.jacob.print_jacobian()
 
