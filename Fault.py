@@ -69,10 +69,10 @@ class Fault:
 
     def calc_single_line_to_ground(self, fault_bus: str, fault_v: float = 1.0, Zf = 0.0):
         # Get Znn at faulted bus
-        fault_index = self.circuit.buses[fault_bus].index - 1
-        Znn_pos = self.Z_bus_positive[fault_index][fault_index]
-        Znn_neg = self.Z_bus_negative[fault_index][fault_index]
-        Znn_zero = self.Z_bus_zero[fault_index][fault_index]
+        fault_index = self.circuit.buses[fault_bus].index - 1  #switch to zero based index
+        Znn_pos = self.Z_bus_positive[fault_index][fault_index] #get positive Z at bus
+        Znn_neg = self.Z_bus_negative[fault_index][fault_index] #get negative Z at bus
+        Znn_zero = self.Z_bus_zero[fault_index][fault_index]    #get zero Z at bus
 
         # connect all sequences in series
         Znn_total = Znn_neg + Znn_pos + Znn_zero + 3 * Zf
@@ -96,7 +96,7 @@ class Fault:
             Z1 = self.Z_bus_positive[self.circuit.buses[bus].index-1, fault_index]
             Z2 = self.Z_bus_negative[self.circuit.buses[bus].index-1, fault_index]
             # returns in zero,pos,neg
-            Vk = self.calc_fault_voltages(Vf=1, Z0=Z0, Z1=Z1, Z2=Z2, I0=I_zero_0, I1=I_pos_1, I2=I_neg_2)
+            Vk = self.calc_fault_voltages(Vf=fault_v, Z0=Z0, Z1=Z1, Z2=Z2, I0=I_zero_0, I1=I_pos_1, I2=I_neg_2)
             # Convert sequence voltages to phase voltages
             Vabc = self.sequence_to_phase(Vk)
             for i, phase in enumerate(['A', 'B', 'C']):
@@ -109,7 +109,7 @@ class Fault:
         # Prefault voltage vector: only positive sequence has Vf
         V_prefault = np.array([0, Vf, 0], dtype=complex)
         # Calculate sequence voltages at faulted bus
-        Vk = V_prefault - Z_diag @ I_seq
+        Vk = V_prefault - np.matmul(Z_diag, I_seq)
         # returns in 0 pos neg
         return Vk
 
@@ -124,14 +124,17 @@ class Fault:
             [1, a, a2]
         ], dtype=complex)
         seq_array = np.array(sequence, dtype=complex)
-        phases = A @ seq_array
+        phases = np.matmul(A, seq_array)
         return phases
 
-    def calc_line_to_line(self, fault_bus: str, Zf=0):
+    def calc_line_to_line(self, fault_bus: str, fault_v: float = 1.0,  Zf=0):
         fault_loc = self.circuit.buses[fault_bus].index - 1  # zero-based index
-        I_neg_2 = 1 / (self.Z_bus_positive[fault_loc][fault_loc] + self.Z_bus_negative[fault_loc][fault_loc] + Zf)
-        I_pos_1 = -1 * I_neg_2
-        I_zero_0 = 0
+        Znn_neg = self.Z_bus_negative[fault_loc][fault_loc]
+        Znn_pos = self.Z_bus_positive[fault_loc][fault_loc]
+        Z_total = Znn_pos + Znn_neg + Zf
+        I_pos_1 = fault_v / Z_total
+        I_neg_2 = -1 * I_pos_1 #equal and opposite to Ipos
+        I_zero_0 = 0 #no zero sequence current
         Ip: np.array = [I_zero_0, I_pos_1, I_neg_2]
         Ik = self.sequence_to_phase(Ip)
         print("Phase A Current:", np.real(Ik[0]), np.angle(Ik[0]) * 180 / np.pi)
@@ -143,21 +146,28 @@ class Fault:
             Z1 = self.Z_bus_positive[self.circuit.buses[bus].index - 1, fault_loc]
             Z2 = self.Z_bus_negative[self.circuit.buses[bus].index - 1, fault_loc]
             # returns in zero,pos,neg
-            Vk = self.calc_fault_voltages(Vf=1, Z0=Z0, Z1=Z1, Z2=Z2, I0=I_zero_0, I1=I_pos_1, I2=I_neg_2)
+            Vk = self.calc_fault_voltages(Vf=fault_v, Z0=Z0, Z1=Z1, Z2=Z2, I0=I_zero_0, I1=I_pos_1, I2=I_neg_2)
             # Convert sequence voltages to phase voltages
             Vabc = self.sequence_to_phase(Vk)
             for i, phase in enumerate(['A', 'B', 'C']):
                 print(f"{bus} Phase {phase}: |V| = {np.abs(Vabc[i]):.4f} p.u., ∠ = {np.angle(Vabc[i], deg=True):.2f}°")
 
-    def calc_double_line_to_ground(self, fault_bus: str, Zf=0):
+    def calc_double_line_to_ground(self, fault_bus: str, fault_v: float = 1.0, Zf=0):
         fault_loc = self.circuit.buses[fault_bus].index - 1  # zero-based index
-        num1 = self.Z_bus_negative[fault_loc][fault_loc] * (self.Z_bus_zero[fault_loc][fault_loc] + 3 * Zf)
-        den1 = self.Z_bus_negative[fault_loc][fault_loc] + self.Z_bus_zero[fault_loc][fault_loc] + 3 * Zf
-        num2 = self.Z_bus_zero[fault_loc][fault_loc] + 3 * Zf
-        den2 = self.Z_bus_zero[fault_loc][fault_loc] + 3 * Zf + self.Z_bus_negative[fault_loc][fault_loc]
-        I_pos_1 = 1 / (self.Z_bus_positive[fault_loc][fault_loc] + (num1 / den1))
-        I_neg_2 = -1 * I_pos_1 * (num2 / den2)
-        I_zero_0 = -1 * I_pos_1 * (self.Z_bus_negative[fault_loc][fault_loc] / den2)
+        Znn_neg = self.Z_bus_negative[fault_loc][fault_loc]
+        Znn_pos = self.Z_bus_positive[fault_loc][fault_loc]
+        Znn_zero = self.Z_bus_zero[fault_loc][fault_loc]
+
+        I_pos_num = Znn_neg*(Znn_zero + 3*Zf)
+        I_pos_den = Znn_neg + Znn_zero + 3*Zf
+        I_neg_num = Znn_zero + 3*Zf
+        I_neg_den = Znn_zero + 3*Zf + Znn_neg
+        I_zero_den = Znn_zero + 3*Zf + Znn_neg
+
+        I_pos_1 = fault_v / (Znn_pos + (I_pos_num/I_pos_den))
+        I_neg_2 = (-1 * I_pos_1) * (I_neg_num / I_neg_den)
+        I_zero_0 = (-1 * I_pos_1) * (Znn_neg/ I_zero_den)
+
         Ip: np.array = [I_zero_0, I_pos_1, I_neg_2]
         Ik = self.sequence_to_phase(Ip)
         print("Phase A Current:", np.real(Ik[0]), np.angle(Ik[0]) * 180 / np.pi)
@@ -169,7 +179,7 @@ class Fault:
             Z1 = self.Z_bus_positive[self.circuit.buses[bus].index - 1, fault_loc]
             Z2 = self.Z_bus_negative[self.circuit.buses[bus].index - 1, fault_loc]
             # returns in zero,pos,neg
-            Vk = self.calc_fault_voltages(Vf=1, Z0=Z0, Z1=Z1, Z2=Z2, I0=I_zero_0, I1=I_pos_1, I2=I_neg_2)
+            Vk = self.calc_fault_voltages(Vf=fault_v, Z0=Z0, Z1=Z1, Z2=Z2, I0=I_zero_0, I1=I_pos_1, I2=I_neg_2)
             # Convert sequence voltages to phase voltages
             Vabc = self.sequence_to_phase(Vk)
             for i, phase in enumerate(['A', 'B', 'C']):
