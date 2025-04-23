@@ -139,6 +139,6 @@ gui = GUI(circuit)
 
 app = QApplication(sys.argv)
 
-window = MainWindow(circuit)
+window = MainWindow()
 window.show()
 app.exec()
