@@ -1,3 +1,7 @@
+import sys
+
+from PyQt5.QtWidgets import QApplication
+
 import Window
 from Bundle import Bundle
 from Bus import Bus
@@ -139,4 +143,8 @@ gui = GUI(circuit)
 # gui.draw_buses()
 # gui.get_UI()
 
-app = Window.MainWindow
+app = QApplication(sys.argv)
+
+window = MainWindow(circuit)
+window.show()
+app.exec()
