@@ -26,6 +26,7 @@ class Circuit:
         self.y_bus_positive: pd.DataFrame = pd.DataFrame()
         self.y_bus_negative: pd.DataFrame = pd.DataFrame()
         self.y_bus_zero: pd.DataFrame = pd.DataFrame()
+        self.buses_num: int = Bus.numBus
 
     def add_bus(self, bus: Bus):
         # Check if bus already exists in system
@@ -34,7 +35,6 @@ class Circuit:
         else:
             self.buses[bus.name] = bus  # Add bus to the dictionary using its name as the key
             self.busRef.append(bus.name)
-
 
     def add_transformer(self,transformer:Transformer):
         if transformer.name in self.transformers:

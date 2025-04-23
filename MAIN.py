@@ -11,6 +11,7 @@ from Generator import Generator
 from Solution import Solution
 from Fault import Fault
 from Jacobian import Jacobian
+from GUI import GUI
 
 
 # ****************** Initialization settings for system *************************
@@ -120,9 +121,17 @@ fault = Fault(circuit)
 #solution.calc_solution()
 #**************** Unbalanced Faults **********************************
 # TO DO
-print("Line to Line fault")
-fault.calc_line_to_line("bus7",1, 0)
-print("Double line to ground fault")
-fault.calc_double_line_to_ground("bus7",1, 0)
-print()
-fault.calc_single_line_to_ground("bus7",1, 0)
+# print("Line to Line fault")
+# fault.calc_line_to_line("bus7",1, 0)
+# print("Double line to ground fault")
+# fault.calc_double_line_to_ground("bus7",1, 0)
+# print()
+# fault.calc_single_line_to_ground("bus7",1, 0)
+#*****************GUI*************************************************
+
+gui = GUI(circuit)
+#gui.draw_gens()
+#gui.draw_loads()
+#gui.draw_trans()
+gui.draw_lines()
+gui.draw_buses()
