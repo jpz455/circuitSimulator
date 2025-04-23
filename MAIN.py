@@ -136,12 +136,6 @@ fault = Fault(circuit)
 #*****************GUI*************************************************
 
 gui = GUI(circuit)
-#gui.draw_gens()
-#gui.draw_loads()
-#gui.draw_trans()
-# gui.draw_lines()
-# gui.draw_buses()
-# gui.get_UI()
 
 app = QApplication(sys.argv)
 

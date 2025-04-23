@@ -80,8 +80,7 @@ class Circuit:
             else:
                 self.generators[generator.name] = generator
 
-        # for power flow no generators
-
+    # for power flow no generators
     def calc_y_bus_no_gen(self):
         size = np.zeros([Bus.numBus, Bus.numBus])
         self.y_bus = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
@@ -127,7 +126,7 @@ class Circuit:
                 print("\nSolution Y-Bus Matrix:")
                 print(self.y_bus.to_string(float_format=lambda x: f"{x:.5f}"))
 
-    #POSITIVE SEQUENCE YBUS
+    # POSITIVE SEQUENCE YBUS
     def calc_y_bus_positive (self):
         size = np.zeros([Bus.numBus, Bus.numBus])
         self.y_bus_positive = pd.DataFrame(data=size, index=self.busRef, columns=self.busRef, dtype=complex)
@@ -149,7 +148,6 @@ class Circuit:
             self.y_bus_positive.loc[gen.bus.name, gen.bus.name] += gen.y_prim_1.loc[gen.bus.name, gen.bus.name]
 
         return self.y_bus_positive
-
 
     def calc_y_bus_negative (self):
         size = np.zeros([Bus.numBus, Bus.numBus])

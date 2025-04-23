@@ -46,8 +46,6 @@ class MainWindow(QMainWindow):
         load_button.clicked.connect(self.load_button_e)
 
         self.setCentralWidget(container)
-
-
         self.circuit = circuit
         self.gui = GUI(circuit)
 
