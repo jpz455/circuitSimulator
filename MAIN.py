@@ -1,3 +1,4 @@
+import Window
 from Bundle import Bundle
 from Bus import Bus
 from Transformer import Transformer
@@ -12,6 +13,7 @@ from Solution import Solution
 from Fault import Fault
 from Jacobian import Jacobian
 from GUI import GUI
+from Window import MainWindow
 
 
 # ****************** Initialization settings for system *************************
@@ -133,5 +135,8 @@ gui = GUI(circuit)
 #gui.draw_gens()
 #gui.draw_loads()
 #gui.draw_trans()
-gui.draw_lines()
-gui.draw_buses()
+# gui.draw_lines()
+# gui.draw_buses()
+# gui.get_UI()
+
+app = Window.MainWindow

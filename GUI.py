@@ -1,5 +1,7 @@
 import schemdraw as sd
 import schemdraw.elements as elm
+from PyQt5.QtWidgets import QApplication, QWidget
+import sys
 from Circuit import Circuit
 import numpy as np
 
@@ -11,6 +13,14 @@ class GUI:
         self.line_elms = circuit.transmission_lines # all lines
         self.trans_elms = circuit.transformers # all transformers
         self.bus_elms = circuit.buses # all buses
+
+    def get_UI(self):
+        app = QApplication(sys.argv)
+        window = QWidget()
+        window.show()
+        app.exec_()
+
+
     #draws generators but not according to circuit
     def draw_gens(self):
         with sd.Drawing():
