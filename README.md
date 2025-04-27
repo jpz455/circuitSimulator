@@ -1,0 +1,93 @@
+GUI Class
+Enhancement Overview
+The enhancement I developed for Project 3 is a Graphical User Interface (GUI) for the Newton-Raphson power flow solver. This GUI leverages the modular design of the backend solver and provides a more user-friendly and intuitive experience for system creation and simulation.
+
+Each component within the solver — such as buses, transformers, conductors, geometries, bundles, transmission lines, loads, and generators — has dedicated input fields where users can specify the necessary characteristics (e.g., transmission line length, load MW and MVar, generator voltage setpoints).
+
+Once the system is fully constructed, the Run Power Flow button executes the backend solver, displaying final bus voltages and angles in a formatted output window.
+
+Purpose
+After working with the backend power flow solver purely through hard-coded main.py files, it became clear that manually entering system setups required a higher attention to detail and was prone to more errors than interacting with a more visual program like PowerWorld.
+
+The purpose of the GUI enhancement is to:
+
+Improve user experience by allowing users to build the system interactively
+
+Reduce user error by providing structured input fields
+
+Streamline system creation by allowing users to add components through button clicks rather than manual Python code
+
+Enhance usability for users with less coding experience
+
+This GUI enables users to build even complex systems faster and more accurately compared to writing manual input scripts.
+
+Inputs and Outputs
+Inputs
+Inputs are entered into textboxes and radio buttons in the GUI. Typical inputs include:
+
+Bus: Name (e.g., bus1), Base kV, Bus Type (PQ, PV, Slack)
+
+Transformer: Bus names, impedance, X/R ratio, connection type
+
+Conductor: Diameter, GMR, resistance, ampacity
+
+Geometry: Coordinates for phase conductors
+
+Bundle: Number of conductors, spacing
+
+Transmission Line: Start bus, end bus, length
+
+Load: Associated bus, real power (P), reactive power (Q)
+
+Generator: Bus, voltage setpoint, reactances (X1, X2, X0), grounding impedance
+
+Note: All bus names must follow the format busX, generators as GenX, and loads as loadX to match backend dictionary keys.
+
+Outputs
+System setup log
+
+Validation messages (e.g., missing buses, invalid inputs)
+
+Final bus voltage magnitudes and phase angles
+
+Newton-Raphson solver convergence status and iteration count
+
+Intermediate outputs such as Y-bus matrix summaries, known powers, and Jacobian setup
+
+References
+Used ChatGPT to learn how to build and organize a Tkinter GUI for modular component addition
+
+StackOverflow: How to write GUI in Python
+
+Instructions for Running and Testing
+Setup
+Download or clone the repository branch containing the GUI files and backend modules (Settings.py, Circuit.py, Bus.py, etc.).
+
+Open a terminal window (Mac/Linux) or command prompt (Windows).
+
+Running the Program
+Instead of pressing "Run" inside PyCharm, type the following command manually into the terminal:
+
+bash
+Copy
+Edit
+python3 GUI.py
+This will launch the interactive GUI window.
+
+Important: Full-screen the window to access all input sections easily.
+
+Building the System
+Start by initializing the system (enter system name, base frequency, and power base).
+
+Add each component by filling out the respective fields and clicking their buttons.
+
+Always add at least one Slack bus before running power flow.
+
+Once your system is built, click the Run Power Flow button to compute the voltages and angles.
+
+Key Assumptions
+Only one Bundle and one Geometry are primarily used by default.
+
+Transmission lines use the last-added bundle and geometry automatically.
+
+Multiple bundles and geometries can be created, but the latest entry will be used unless customized further.
