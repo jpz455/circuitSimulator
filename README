@@ -179,12 +179,4 @@ bash
 Copy
 Edit
 /screenshots/
-    test_case1_inputs.png
-    test_case1_guioutput.png
-    test_case1_finalvoltages.png
-    test_case1_externalvalidation.jpg
-    test_case2_inputs.png
-    test_case2_guioutput.png
-    test_case2_finalvoltages.png
-    test_case2_externalvalidation.jpg
-    test_case2_diagram.jpg
+    test_case_1_GUI_init.pdf
