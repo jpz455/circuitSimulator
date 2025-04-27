@@ -9,8 +9,7 @@ from Circuit import Circuit
 from Load import Load
 from Generator import Generator
 from Solution import Solution
-from Fault import Fault
-from Jacobian import Jacobian
+
 
 
 # ****************** Initialization settings for system *************************
@@ -30,7 +29,7 @@ bus7=Bus("bus7", 18, "pv")
 
 # ****************** Non-Flat start testing ***************************************
 '''
-bus2= Bus("bus2", 230, "pq",v_pu =.93693,delta = -4.45)
+bus2= Bus("bus2", 230, "pq",v_pu =.93693,delta = p-4.45)
 bus3= Bus("bus3", 230, "pq", v_pu = .9205, delta = -5.47)
 bus4=Bus("bus4", 230, "pq",v_pu = .92981,delta = -4.7)
 bus5=Bus("bus5", 230, "pq", v_pu = .92674,delta = -4.84)
@@ -105,5 +104,10 @@ print(known)
 solution.calc_mismatch()
 solution.calc_jacobian()
 solution.calc_solutionRef()
-print(solution.calc_solution())
-
+array,it = solution.calc_solution()
+print("\n--- Solution Found ---")
+print(f"Iterations: {it}")
+print(f"{'V (pu)':>10} {'Angle (deg)':>15}")
+print("-" * 26)
+for row in array:
+    print(f"{row[0]:>10.4f} {row[1]:>15.2f}")

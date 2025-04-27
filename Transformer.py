@@ -44,8 +44,7 @@ class Transformer():
                 "y matrix": [self.y_prim_positive.iloc[0, 0], self.y_prim_positive.iloc[0, 1]],  # Accessing first row values
                 "": [self.y_prim_positive.iloc[1, 0], self.y_prim_positive.iloc[1, 1]]  # Accessing second row values
             }
-            print("Y Prim: Positive Sequence")
-            print(self.y_prim_positive)
+
             return self.y_prim_positive
 
     def print_y_prim(self, seq: int = 1):

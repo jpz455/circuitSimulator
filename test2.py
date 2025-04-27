@@ -94,10 +94,15 @@ guess = solution2.calc_solutionRef()
 print("Initial solution reference")
 print(guess)
 print("solution")
-print(solution2.calc_solution())
+array, it = solution2.calc_solution()
 #****************** Power Flow ****************************************
 
-
+print("\n--- Solution Found ---")
+print(f"Iterations: {it}")
+print(f"{'V (pu)':>10} {'Angle (deg)':>15}")
+print("-" * 26)
+for row in array:
+    print(f"{row[0]:>10.4f} {row[1]:>15.2f}")
 
 #****************** Y Buses *******************************************
 

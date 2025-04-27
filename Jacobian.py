@@ -41,6 +41,7 @@ class Jacobian:
             [j3, j4]
         ]])
         #2*numbuses - 2*slack - 1*pv
+
         j_dimen = 2*len(self.circuit.buses)-2-1
         self.j_matrix = self.j_matrix.reshape(j_dimen,j_dimen)
         return self.j_matrix
