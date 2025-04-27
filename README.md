@@ -1,3 +1,7 @@
+# GUI Class
+
+## Enhancement Overview
+The enhancement I developed for Project 3 is a Graphical User Interface (GUI)...
 GUI Class
 Enhancement Overview
 The enhancement I developed for Project 3 is a Graphical User Interface (GUI) for the Newton-Raphson power flow solver. This GUI leverages the modular design of the backend solver and provides a more user-friendly and intuitive experience for system creation and simulation.
