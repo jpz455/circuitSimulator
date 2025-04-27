@@ -176,7 +176,6 @@ GUI assumes use of the latest-added bundle and geometry unless customized.
 Recommended screenshot folder structure:
 
 bash
-Copy
-Edit
+
 /screenshots/
     test_case_1_GUI_init.pdf
