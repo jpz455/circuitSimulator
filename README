@@ -1,12 +1,15 @@
 Project 3 Enhancement: Graphical User Interface (GUI) for Power Flow Solver
 🛠️ Enhancement Overview
-The enhancement I developed for Project 3 is a Graphical User Interface (GUI) for the Newton-Raphson power flow solver. This GUI leverages the modular design of the backend solver and provides a more user-friendly and intuitive experience for system creation and simulation.
+The enhancement I developed for Project 3 is a Graphical User Interface (GUI) for the Newton-Raphson power flow solver.
+This GUI leverages the modular design of the backend solver and provides a more user-friendly and intuitive experience for system creation and simulation.
 
 Each component within the solver — such as buses, transformers, conductors, geometries, bundles, transmission lines, loads, and generators — has dedicated input fields where users can specify the necessary characteristics (e.g., transmission line length, load MW and MVar, generator voltage setpoints).
+
 Once the system is fully constructed, the Run Power Flow button executes the backend solver, displaying final bus voltages and angles in a formatted output window.
 
 🎯 Purpose
 After working with the backend power flow solver purely through hard-coded main.py files, it became clear that manually entering system setups demanded high attention to detail and was prone to errors.
+
 The purpose of the GUI enhancement is to:
 
 Improve user experience by allowing users to build the system interactively.
@@ -39,9 +42,10 @@ Transmission Line: Start bus, end bus, length
 
 Load: Associated bus, real power (P), reactive power (Q)
 
-Generator: Bus, voltage setpoint, reactances (X1, X2, X0), grounding impedance
+Generator: Bus, voltage setpoint, reactances (X₁, X₂, X₀), grounding impedance
 
-Note: All bus names must follow the format busX, generators as Gen X, and loads as loadX to match backend dictionary keys.
+Note:
+All bus names must follow the format busX, generators as Gen X, and loads as loadX to match backend dictionary keys.
 
 Outputs
 System setup log
@@ -55,7 +59,7 @@ Newton-Raphson solver convergence status and iteration count
 Intermediate outputs such as Y-bus matrix summaries, known powers, Jacobian setup (in the output box)
 
 📚 References
-Used ChatGPT to learn how to build and organize a Tkinter GUI for modular component addition.
+ChatGPT was used to learn how to build and organize a Tkinter GUI for modular component addition.
 
 Backend Newton-Raphson method based on:
 
@@ -65,45 +69,46 @@ Hadi Saadat, Power System Analysis, 2nd Ed., McGraw-Hill, 2002.
 
 🚀 Instructions for Running and Testing
 Setup
-Download or clone the repository branch containing the GUI files and all backend modules (Settings.py, Circuit.py, Bus.py, etc.).
+Download or clone the repository branch containing the GUI files and backend modules (Settings.py, Circuit.py, Bus.py, etc.).
 
 Open a terminal window (Mac/Linux) or command prompt (Windows).
 
 Running the Program
-Instead of pressing "Run" inside PyCharm, type the following command manually into the terminal:
+Instead of pressing "Run" inside PyCharm, manually type the following command into your terminal:
 
 bash
 Copy
 Edit
 python3 GUI.py
 This will launch the interactive GUI window.
-Important: Full-screen the window to access all input sections easily.
+
+Important:
+Full-screen the window to access all input sections easily.
 
 Building the System
-Start by initializing the system (system name, base frequency, and power base).
+Initialize the system (enter system name, base frequency, and base power).
 
-Add each component by filling out the input fields and pressing the corresponding button.
+Add components by filling out the respective fields and clicking their buttons.
 
-Always add at least one Slack bus before running power flow.
+Add at least one Slack bus before attempting to run power flow.
 
-Once your system is built, click the "Run Power Flow" button to compute the voltages and angles.
+Once the system is fully created, click "Run Power Flow" to compute voltages and angles.
 
 Key Assumptions
 Only one Bundle and one Geometry are primarily used by default.
 
-Transmission lines use the last-added bundle and last-added geometry automatically.
+Transmission lines automatically use the last-added bundle and geometry.
 
-Multiple bundles and geometries can be created but the latest entry will be used unless manually customized further.
+Multiple bundles and geometries can be created, but the latest entries will be used unless customized further.
 
 📸 Validation Cases
 ✅ Case 1: Test Case 1 — 7-Bus System (Slack, Loads, and Generators)
 System Setup:
-
 7 buses total
 
-One Slack Bus (bus1, 20 kV)
+Slack Bus (bus1, 20 kV)
 
-Five PQ buses (buses 2–6, 230 kV)
+Five PQ buses (bus2–bus6, 230 kV)
 
 One PV bus (bus7, 18 kV)
 
@@ -111,13 +116,17 @@ Two transformers
 
 Loads and generators distributed across buses
 
-Input Setup Screenshot:
+Screenshots:
+Input Setup Screenshot
 
-GUI Power Flow Output:
+GUI Power Flow Output
+(Insert screenshot path here if available)
 
-Final Bus Voltages (GUI Computed):
+Final Bus Voltages (GUI Computed)
+(Insert screenshot path here if available)
 
-Validation Against External Tool:
+Validation Against External Tool
+(Insert screenshot path here if available)
 
 ✏️ Observations:
 GUI solution matches external validation bus-by-bus to 4 decimal places.
@@ -130,10 +139,9 @@ Voltage angles agree within ~0.1°.
 
 ✅ Case 2: Test Case 2 — 7-Bus System (Different Configuration)
 System Setup:
-
 7 buses total
 
-One Slack Bus (bus1, 13.8 kV)
+Slack Bus (bus1, 13.8 kV)
 
 Other buses at 345 kV and 20 kV
 
@@ -141,15 +149,20 @@ Two transformers
 
 Different load and generator distribution compared to Case 1
 
-Input Setup Screenshot:
+Screenshots:
+Input Setup Screenshot
 
-GUI Power Flow Output:
+GUI Power Flow Output
+(Insert screenshot path here if available)
 
-Final Bus Voltages (GUI Computed):
+Final Bus Voltages (GUI Computed)
+(Insert screenshot path here if available)
 
-Validation Against External Tool:
+Validation Against External Tool
+(Insert screenshot path here if available)
 
-System Diagram:
+System Diagram
+(Insert system diagram screenshot path here if available)
 
 ✏️ Observations:
 GUI solver converged successfully in 11 iterations.
@@ -172,10 +185,20 @@ Correct formatting for bus names (busX), loads (loadX), and generators (Gen X) m
 
 GUI assumes use of the latest-added bundle and geometry unless customized.
 
-📁 Organizing Screenshots
-Recommended screenshot folder structure:
+📁 Screenshot Organization
+Recommended folder structure:
 
 bash
-
+Copy
+Edit
 /screenshots/
     test_case_1_GUI_init.pdf
+    test_case_1_guioutput.png
+    test_case_1_finalvoltages.png
+    test_case_1_externalvalidation.png
+    test_case_2_GUI_init.pdf
+    test_case_2_guioutput.png
+    test_case_2_finalvoltages.png
+    test_case_2_externalvalidation.png
+    test_case_2_diagram.png
+✅ Ready for Submission!
