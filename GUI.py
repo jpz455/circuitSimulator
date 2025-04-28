@@ -12,6 +12,10 @@ from TransmissionLine import TransmissionLine
 from Solution import Solution
 
 
+
+#functions to incorporate user inputs into backend code
+
+#add in power base and frequency
 def initialize_system():
     global settings, system
     try:
@@ -26,10 +30,10 @@ def initialize_system():
     system = Circuit(name, settings)
     log(f"✅ System '{name}' initialized at {f} Hz, {s_base} MVA")
 
-
+#keep track of components within circuit added
 def log_section(title):
     log("\n" + "=" * 40)
-    log(f"🔷 {title}")
+    log(f" {title}")
     log("=" * 40 + "\n")
 
 def add_bus():
@@ -318,25 +322,25 @@ def run_power_flow():
         return
 
     try:
-        log("🔎 Running Power Flow...")
-        log(f"📡 Circuit Summary: {len(system.buses)} buses, {len(system.loads)} loads, {len(system.generators)} gens")
+        log(" Running Power Flow...")
+        log(f" Circuit Summary: {len(system.buses)} buses, {len(system.loads)} loads, {len(system.generators)} gens")
 
         # Debug list of buses
-        log("🧵 Buses:")
+        log(" Buses:")
         for name, bus in system.buses.items():
             log(f"• {name}: {bus.base_kv} kV, type={bus.bus_type}, V={bus.v_pu:.4f}, Δ={bus.delta:.2f}°")
 
         # Debug list of loads
-        log("💡 Loads:")
+        log(" Loads:")
         for name, load in system.loads.items():
             log(f"• {name} at {load.bus.name}: P={load.real_pwr:.2f} MW, Q={load.reactive_pwr:.2f} MVar")
 
         # Debug list of generators
-        log("⚡ Generators:")
+        log(" Generators:")
         for name, gen in system.generators.items():
             log(f"• {name} at {gen.bus.name}: Vset={gen.voltage_setpoint}, MW={gen.mw_setpoint}")
 
-        log("🔌 Transmission Lines:")
+        log(" Transmission Lines:")
         for name, line in system.transmission_lines.items():
             assert isinstance(line.bundle, Bundle), f"❌ Bundle for line '{name}' is not a valid Bundle object!"
             assert isinstance(line.geometry, Geometry), f"❌ Geometry for line '{name}' is not a valid Geometry object!"
@@ -350,41 +354,41 @@ def run_power_flow():
         for name, bus in system.buses.items():
             log(f"• {name}: {bus.base_kv} kV, type={bus.bus_type}, V={bus.v_pu:.4f}, ∠ = {bus.delta:.2f}°")
 
-        log("🔍 Transformer Y-Prim Matrices:")
+        log(" Transformer Y-Prim Matrices:")
         for name, xfmr in system.transformers.items():
             log(f"\n{name} Y Prim: Positive Sequence")
             log(xfmr.y_prim_positive.to_string())
 
-        log("\n🔍 Transmission Line Y-Prim Matrices:")
+        log("\n Transmission Line Y-Prim Matrices:")
         for name, line in system.transmission_lines.items():
             log(f"\n{name} Y Prim: Positive Sequence")
             log(line.y_prim.to_string())
-        log("🧵 All Bus Names in System:")
+        log(" All Bus Names in System:")
         for bname in system.buses.keys():
             log(f"• '{bname}'")
 
 
-        log("🛠️ Calculating Y-bus...")
+        log("🛠 Calculating Y-bus...")
         system.calc_y_bus()
-        log(system.print_y_bus())
-        log("📥 Computing known powers...")
+
+        log(" Computing known powers...")
         solver.calc_known_power()
 
-        log("🔁 Calculating mismatch vector...")
+        log(" Calculating mismatch vector...")
         solver.calc_mismatch()
 
-        log("🧮 Forming Jacobian...")
+        log(" Forming Jacobian...")
         solver.calc_jacobian()
 
-        log("📍 Setting initial guess (flat or non-flat)...")
+        log(" Setting initial guess (flat or non-flat)...")
         solver.calc_solutionRef()
 
-        log("⚙️ Starting Newton-Raphson iterations...")
+        log(" Starting Newton-Raphson iterations...")
         converged_values, iterations = solver.calc_solution()
 
         if converged_values is not None:
             log(f"✅ Power flow converged in {iterations} iterations.")
-            log("📊 Final Bus Voltages:")
+            log(" Final Bus Voltages:")
             for i, (v, a) in enumerate(converged_values):
                 log(f"• Bus {i + 1}: |V| = {v:.4f} pu, ∠ = {a:.2f}°")
         else:
@@ -401,6 +405,8 @@ maingui = tk.Tk()
 maingui.config(bg="#a79f9f")
 maingui.title("Power Simulator")
 maingui.geometry("1500x1500")
+
+#following code is all format and visual setup of GUI
 
 #**********SYSTEM SETUP**********************************
 systemLabel = tk.Label(master=maingui, text="General System Setup")
@@ -915,11 +921,6 @@ button_canvas.create_text(150, 45, text="Run Power Flow", font=("", 14, "bold"),
 
 # Bind click event to the canvas
 button_canvas.bind("<Button-1>", run_power_flow_callback)
-
-
-
-
-
 
 
 def log(msg):
