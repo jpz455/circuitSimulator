@@ -57,12 +57,13 @@ circuit_3.add_transmission_line(tline3)
 circuit_3.add_transmission_line(tline4)
 circuit_3.add_transmission_line(tline5)
 
-load3 = Load("load5",bus5,-200,-60,settings)
+load3 = Load('load3',bus3,-180,-40,settings)
+load5 = Load("load5",bus5,-200,-60,settings)
 load6 = Load('load6',bus6,-245,-80,settings)
-load7 = Load('load3',bus3,-180,-40,settings)
+
 circuit_3.add_load(load3)
 circuit_3.add_load(load6)
-circuit_3.add_load(load7)
+circuit_3.add_load(load5)
 
 # ****************** Generator Initialization *************************
 gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,0,True,settings)
