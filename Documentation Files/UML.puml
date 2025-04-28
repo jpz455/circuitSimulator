@@ -2,7 +2,21 @@
 'https://plantuml.com/class-diagram
 
 skinparam ClassBackgroundColor #PaleTurquoise
-
+class GUI {
+    +system: Circuit
+    +settings: Settings
+    +initialize_system()
+    +add_bus()
+    +add_transformer()
+    +add_conductor()
+    +add_geometry()
+    +add_bundle()
+    +add_transmission_line()
+    +add_load()
+    +add_generator()
+    +run_power_flow()
+    +log(msg: str)
+}
 class Circuit{
     +name: str
     +buses: Dict[str, Bus]
@@ -231,7 +245,9 @@ class Fault{
 
 }
 
-
+GUI --> Circuit
+GUI --> Settings
+GUI --> Solution
 Circuit *-- Transformer
 Circuit *-- Bus
 Circuit *-- TransmissionLine
