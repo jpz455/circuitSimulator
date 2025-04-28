@@ -368,7 +368,7 @@ def run_power_flow():
             log(f"• '{bname}'")
 
 
-        log("🛠 Calculating Y-bus...")
+        log(" Calculating Y-bus...")
         system.calc_y_bus()
 
         log(" Computing known powers...")
