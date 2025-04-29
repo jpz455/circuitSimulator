@@ -139,6 +139,9 @@ gui = GUI(circuit)
 
 app = QApplication(sys.argv)
 
-window = MainWindow()
-window.show()
-app.exec()
+# window = MainWindow()
+# window.show()
+# app.exec()
+
+
+gui.draw_buses()
