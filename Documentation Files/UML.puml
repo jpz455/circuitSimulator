@@ -119,7 +119,7 @@ class Transformer {
     +impedance_percent: float
     +x_over_r_ratio: float
     +connection_type: str = y-y
-    +grounding_x = 0.0
+    +grounding_x: float = 0.0
     +settings: Settings
     +z: complex
     +y: complex

@@ -27,8 +27,10 @@ class Transformer():
         self.y_prim_negative = self.calc_y_prim_negative()
         self.y_prim_zero = self.calc_y_prim_zero()
         self.matrix: Dict[str, complex] = {}
+        self.y_grounded: float
 
     def calc_y_prim_positive(self):
+
             self.y_prim_positive = np.array([[self.y_pu, -1 * self.y_pu],
                                              [-1 * self.y_pu, self.y_pu]])
             # Convert the numpy array to a DataFrame
@@ -99,6 +101,7 @@ class Transformer():
         }
         return self.y_prim_zero
 
+                
 
 
 
