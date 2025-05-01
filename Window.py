@@ -2,15 +2,20 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import QAction, QApplication, QMainWindow, QPushButton, QMenu, QLabel, QVBoxLayout, QWidget
+from numpy.ma.core import power
+
 from GUI import GUI
 from Bus import Bus
+from Generator import Generator
 from Geometry import Geometry
+from Load import Load
 from Transformer import Transformer
 from TransmissionLine import TransmissionLine
 from Conductor import Conductor
 from Bundle import Bundle
 from Circuit import Circuit
-from Settings import Settings
+from Settings import Settings, current_settings
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -89,19 +94,71 @@ class MainWindow(QMainWindow):
         print("Transmission line added")
 
     def trans_button_e(self):
-        print("Transformer")
 
-        #self.gui.draw_trans()
+        name = QtWidgets.QInputDialog.getText(self, 'Name', 'Enter transformer name: ')
+        bus1_name = QtWidgets.QInputDialog.getText(self, 'Bus 1', 'Enter bus 1 name: ')
+        bus2_name = QtWidgets.QInputDialog.getText(self, 'Bus 2', 'Enter bus 2 name: ')
+        power_rating = QtWidgets.QInputDialog.getDouble(self, 'Length', 'Enter power rating (MW): ')
+        z_per = QtWidgets.QInputDialog.getDouble(self, 'Impedance Percent', 'Enter impedance percentage: ')
+        x_over_r = QtWidgets.QInputDialog.getDouble(self, 'X over R Ratio', 'Enter x over r ratio: ')
+        connection = QtWidgets.QInputDialog.getText(self, 'Connection', 'Enter connection type: ')
+        ground = QtWidgets.QInputDialog.getText(self, 'Grounding Reactance', 'Enter grounding reactance: ')
+
+        # get bus from circuit
+        bus1 = self.circuit.buses[bus1_name[0]]
+        bus2 = self.circuit.buses[bus2_name[0]]
+
+        #add transformer
+        transformer = Transformer(name[0], bus1, bus2, power_rating[0], z_per[0], x_over_r[0], connection[0], ground[0])
+        self.circuit.add_transformer(transformer)
+
+        #print
+        print("Transformer added")
 
     def gen_button_e(self):
-        print("Generator")
+        #get inputs
+        name = QtWidgets.QInputDialog.getText(self, 'Name', 'Enter generator name: ')
+        bus_name = QtWidgets.QInputDialog.getText(self, 'Bus 1', 'Enter bus name: ')
+        v_set = QtWidgets.QInputDialog.getDouble(self, 'Voltage Set Point', 'Enter voltage set point (kV): ')
+        mw_set = QtWidgets.QInputDialog.getDouble(self, 'Power Set Point', 'Enter power set point (MW): ')
+        x1 = QtWidgets.QInputDialog.getDouble(self, 'X1', 'Enter X1: ')
+        x2 = QtWidgets.QInputDialog.getDouble(self, 'X2', 'Enter X2: ')
+        x3 = QtWidgets.QInputDialog.getDouble(self, 'X3', 'Enter X3: ')
+        ground_x = QtWidgets.QInputDialog.getDouble(self, 'Grounding X', 'Enter grounding reactance: ')
+        ground_bool = QtWidgets.QInputDialog.getText(self, 'Grounded', 'Enter t if grounded, f if false : ')
 
-        #self.gui.draw_gens()
+        #set grounded or not
+        if ground_bool == 't':
+            ground_bool = True
+        else:
+            ground_bool = False
+
+        #get bus
+        bus = self.circuit.buses[bus_name[0]]
+
+        #make generator
+        generator = Generator(name, bus, v_set, mw_set, x1, x2, x3, ground_x, ground_bool)
+
+        #add generator
+        self.circuit.add_generator(generator)
+        print("Generator Added")
 
     def load_button_e(self):
-        print("Load")
+        # get inputs
+        name = QtWidgets.QInputDialog.getText(self, 'Name', 'Enter generator name: ')
+        bus_name = QtWidgets.QInputDialog.getText(self, 'Bus 1', 'Enter bus name: ')
+        q = QtWidgets.QInputDialog.getDouble(self, 'Reactive Power', 'Enter reactive power (MVAR): ')
+        p = QtWidgets.QInputDialog.getDouble(self, 'Real Power', 'Enter real power (MW): ')
 
-        #self.gui.draw_loads()
+        # get bus
+        bus = self.circuit.buses[bus_name[0]]
+
+        # make load
+        load = Load(name[0], bus, p[0], q[0], current_settings)
+
+        # add load
+        self.circuit.add_generator(load)
+        print("Load Added")
 
 
     def set_up(self):
@@ -129,3 +186,5 @@ class MainWindow(QMainWindow):
         geometry = Geometry("geometry", xa[0], ya[0], xb[0], yb[0], xc[0], yc[0])
 
         return bundle, geometry
+
+

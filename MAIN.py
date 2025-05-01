@@ -16,7 +16,6 @@ from Generator import Generator
 from Solution import Solution
 from Fault import Fault
 from Jacobian import Jacobian
-from GUI import GUI
 from Window import MainWindow
 
 
@@ -135,13 +134,10 @@ fault = Fault(circuit)
 # fault.calc_single_line_to_ground("bus7",1, 0)
 #*****************GUI*************************************************
 
-gui = GUI(circuit)
-
+# Main function, that initialize the app and window required to run the Pyqt UI
 app = QApplication(sys.argv)
+window = MainWindow()
+window.show()
+sys.exit(app.exec_())
 
-# window = MainWindow()
-# window.show()
-# app.exec()
 
-
-gui.draw_buses()
