@@ -1,4 +1,5 @@
 from PyQt5 import QtWidgets
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QTabWidget
 import numpy as np
 
@@ -43,25 +44,11 @@ class MainWindow(QMainWindow):
         self.create_test_tab()
 
         # set colors
-        self.solve_circuit_tab.setStyleSheet("background-color: #E5FFDD")
         self.add_components_tab.setStyleSheet("background-color: #FFEFDD")
-        self.test_tab.setStyleSheet("background-color: #DDFCFF")
+        self.solve_circuit_tab.setStyleSheet("background-color: #E5FFDD")
         self.fault_study_tab.setStyleSheet("background-color: #F6E9FF")
+        self.test_tab.setStyleSheet("background-color: #DDFCFF")
 
-
-        for button in self.fault_buttons:
-            button.setStyleSheet("background-color: #DAAAF7")
-            button.setMinimumSize(50, 50)
-
-        for button in self.component_buttons:
-            button.setStyleSheet("background-color: #FFCF98")
-            button.setMinimumSize(50, 50)
-
-        self.solve_button.setStyleSheet("background-color: #A9F193")
-        self.solve_button.setMinimumSize(50, 50)
-
-        self.test_circuit_button.setStyleSheet("background-color: #7DDFE9")
-        self.test_circuit_button.setMinimumSize(50, 50)
 
     # helper method
     def uncheck_button(self, button):
@@ -78,7 +65,6 @@ class MainWindow(QMainWindow):
 
         # buttons
         self.bus_button = QPushButton("Add Bus")
-        self.bus_button.resize(100, 100)
         self.line_button = QPushButton("Add Line")
         self.trans_button = QPushButton("Add Transformer")
         self.gen_button = QPushButton("Add Generator")
@@ -91,9 +77,11 @@ class MainWindow(QMainWindow):
         self.gen_label = QLabel("Generators:")
         self.load_label = QLabel("Loads:")
 
-        # list of buttons
+
+        # lists
         self.component_buttons = [self.bus_button, self.line_button, self.trans_button, self.gen_button,
                                   self.load_button]
+        self.component_labels = [self.bus_label, self.line_label, self.trans_label, self.gen_label, self.load_label]
 
         # add to layout
         layout.addWidget(self.bus_button)
@@ -111,6 +99,16 @@ class MainWindow(QMainWindow):
         # set checkable
         for button in self.component_buttons:
             button.setCheckable(True)
+
+        # change size of labels
+        for label in self.component_labels:
+            label.setFont(QFont("Arial", 12))
+
+        # make buttons bigger, colored
+        for button in self.component_buttons:
+            button.setStyleSheet("background-color: #FFCF98")
+            button.setMinimumSize(50, 50)
+            button.setFont(QFont("Arial", 14))
 
         # connect signals
         self.bus_button.clicked.connect(self.bus_button_e)
@@ -135,14 +133,23 @@ class MainWindow(QMainWindow):
 
         # label
         self.solution_voltage_label = QLabel("Solution Voltage")
+        self.solution_voltage_label.setFont(QFont("Arial", 18))
+        self.solution_voltage_text = QLabel()
+        self.solution_voltage_text.setFont(QFont("Arial", 14))
 
         # set up button
         self.solve_button.setCheckable(True)
         self.solve_button.clicked.connect(self.solve_button_e)
 
+        # make button bigger, set colors
+        self.solve_button.setStyleSheet("background-color: #A9F193")
+        self.solve_button.setMinimumSize(50, 50)
+        self.solve_button.setFont(QFont("Arial", 14))
+
         # add to layout
         layout.addWidget(self.solve_button)
         layout.addWidget(self.solution_voltage_label)
+        layout.addWidget(self.solution_voltage_text)
 
         # add layout to tab
         self.solve_circuit_tab.setLayout(layout)
@@ -164,7 +171,11 @@ class MainWindow(QMainWindow):
 
         # labels
         self.fault_current_label = QLabel("Fault Current")
+        self.fault_current_label.setFont(QFont("Arial", 16))
+
         self.fault_voltage_label = QLabel("Fault Voltage")
+        self.fault_voltage_label.setFont(QFont("Arial", 16))
+
 
         # lists
         self.fault_buttons = [self.fault_bus_button, self.balanced_fault_button, self.line_to_line_fault_button,
@@ -193,6 +204,12 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.fault_current_label)
         layout.addWidget(self.fault_voltage_label)
 
+        # make buttons bigger, colored
+        for button in self.fault_buttons:
+            button.setStyleSheet("background-color: #DAAAF7")
+            button.setMinimumSize(50, 50)
+            button.setFont(QFont("Arial", 14))
+
         # add layout to tab
         self.fault_study_tab.setLayout(layout)
 
@@ -214,6 +231,18 @@ class MainWindow(QMainWindow):
         self.test_lines_label = QLabel("Test Circuit Lines:")
         self.test_gens_label = QLabel("Test Circuit Generators:")
         self.test_loads_label = QLabel("Test Circuit Loads:")
+
+        # list of labels
+        self.test_labels = [self.test_circuit_label, self.test_buses_label, self.test_trans_label, self.test_lines_label, self.test_gens_label, self.test_loads_label]
+
+        # make text bigger for labels
+        for label in self.test_labels:
+            label.setFont(QFont("Arial", 12))
+
+        # make button bigger, set color
+        self.test_circuit_button.setStyleSheet("background-color: #7DDFE9")
+        self.test_circuit_button.setMinimumSize(50, 50)
+        self.test_circuit_button.setFont(QFont("Arial", 14))
 
         # set up button
         self.test_circuit_button.setCheckable(True)
@@ -462,6 +491,7 @@ class MainWindow(QMainWindow):
             load_label = "\n".join(load_details)
             self.load_label.setText(load_label)
 
+    # POWER FLOW SOLVER
     def solve_button_e(self):
         # check button
         self.solve_button.setChecked(True)
@@ -480,13 +510,14 @@ class MainWindow(QMainWindow):
 
         # calculate
         solved_v = self.solution.calc_solution()
+        label_v = ("Solution Voltages:\n\n"
+                   "Voltage                            Angle\n")
 
         # load labels
-        label_v = ("Solution Voltages:\n"
-                   "Voltage (pu)                Angle(deg)")
-
         for v in solved_v:
-            label_v += "\n" + str(np.round(v[0], 4)) + "                        " + str(np.round(v[1], 4))
+            v_pu = f"{v[0]: .4f}"
+            v_ang = f"{v[1]: .4f}"
+            label_v += "\n" + str(v_pu) + "  p.u." +"                  " + str(v_ang) + "°"
 
         self.solution_voltage_label.setText(label_v)
 
@@ -495,6 +526,7 @@ class MainWindow(QMainWindow):
         self.solve_button.setCheckable(True)
         self.solve_button.setEnabled(True)
 
+    # FAULTS
     def fault_bus_button_e(self):
         # set checked button, uncheck all others
         self.set_checked_fault_button(self.fault_bus_button)
@@ -522,11 +554,11 @@ class MainWindow(QMainWindow):
         V, I = self.fault.calc_3_phase_bal(self.fault_bus_name, self.fault_v)
 
         #print
-        label_i = "Fault Current Magnitude:\n" + str(round(np.real(I), 5))
+        label_i = "Fault Current Magnitude:\n" + str(round(np.real(I), 5)) + " p.u."
         label_v = "Fault Voltages:"
 
         for index, v in enumerate(V):
-            label_v += "\n" + "Bus " + str(index) +"        " + str(np.round(np.real(v), 5))
+            label_v += "\n" + "Bus " + str(index) +"         " + str(np.round(np.real(v), 5)) + " p.u."
 
         self.fault_voltage_label.setText(label_v)
         self.fault_current_label.setText(label_i)
@@ -597,8 +629,6 @@ class MainWindow(QMainWindow):
                     f"\n{bus} Phase {phase}: |V| = {np.abs(V[v]):.4f} p.u., ∠ = {np.angle(V[v], deg=True):.2f}°")
                 self.fault_voltage_label.setText(v_label)
 
-
-    # FAULTS
     def set_checked_fault_button(self, button):
         # ensures that only the clicked button is active
         button.setChecked(True)
