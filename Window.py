@@ -372,7 +372,7 @@ class MainWindow(QMainWindow):
         self.fault_voltage_label = QLabel("Fault Voltage")
 
         # lists
-        self.fault_buttons = [self.fault_bus_button, self.line_to_line_fault_button, self.single_line_fault_button, self.double_line_fault_button]
+        self.fault_buttons = [self.fault_bus_button, self.balanced_fault_button, self.line_to_line_fault_button, self.single_line_fault_button, self.double_line_fault_button]
 
         # connect signals
         self.fault_bus_button.clicked.connect(self.fault_bus_button_e)
@@ -381,6 +381,12 @@ class MainWindow(QMainWindow):
         self.single_line_fault_button.clicked.connect(self.single_line_fault_button_e)
         self.double_line_fault_button.clicked.connect(self.double_line_fault_button_e)
 
+        # intially should only allow user to add fault bus
+        for button in self.fault_buttons:
+            button.setCheckable(False)
+            button.setEnabled(False)
+        self.fault_bus_button.setCheckable(True)
+        self.fault_bus_button.setEnabled(True)
 
         # add to layout
         layout.addWidget(self.fault_bus_button)
@@ -438,6 +444,14 @@ class MainWindow(QMainWindow):
         self.fault_bus_name, ok = QtWidgets.QInputDialog.getText(self, 'Fault Bus', 'Enter name of fault bus: ')
         self.fault_v, ok2 = QtWidgets.QInputDialog.getDouble(self, 'Fault Voltage', 'Enter fault voltage: ', decimals=5)
 
+        # intialize fault
+        self.fault = Fault(self.circuit)
+
+        #enable other buttons
+        for button in self.fault_buttons:
+            button.setEnabled(True)
+            button.setCheckable(True)
+
         # uncheck button
         self.uncheck_button(self.fault_bus_button)
 
@@ -445,14 +459,11 @@ class MainWindow(QMainWindow):
         # check button, uncheck others
         self.set_checked_fault_button(self.balanced_fault_button)
 
-        # initialize fault study
-        self.fault = Fault(self.circuit)
-
         # call fault method to solve balanced fault
         V, I = self.fault.calc_3_phase_bal(self.fault_bus_name, self.fault_v)
-        self.fault.print_fault_voltages()
-        label_i = "Fault Current Magnitude:\n" + str(round(np.real(I), 5))
 
+        #print
+        label_i = "Fault Current Magnitude:\n" + str(round(np.real(I), 5))
         label_v = "Fault Voltages:"
 
         for index, v in enumerate(V):
@@ -467,9 +478,6 @@ class MainWindow(QMainWindow):
     def line_to_line_fault_button_e(self):
         # check button, uncheck others
         self.set_checked_fault_button(self.line_to_line_fault_button)
-
-        # initialize fault study
-        self.fault = Fault(self.circuit)
 
         # call fault method to solve balanced fault
         V, I = self.fault.calc_line_to_line(self.fault_bus_name, self.fault_v)
@@ -490,9 +498,46 @@ class MainWindow(QMainWindow):
         self.uncheck_button(self.balanced_fault_button)
 
     def single_line_fault_button_e(self):
-        pass
+        # check button, uncheck others
+        self.set_checked_fault_button(self.single_line_fault_button)
+
+        # call fault method to solve balanced fault
+        V, I = self.fault.calc_single_line_to_ground(self.fault_bus_name, self.fault_v)
+
+        # print
+        v_label = "Fault Voltages:"
+        i_label = "Fault Current:"
+        for i, phase in enumerate(['A', 'B', 'C']):
+            i_label += (f"\n Phase {phase}: I = {np.real(I[i]): .4f} p.u.")
+            self.fault_current_label.setText(i_label)
+
+        for bus in self.circuit.buses:
+            for v, phase in enumerate(['A', 'B', 'C']):
+                v_label += (
+                    f"\n{bus} Phase {phase}: |V| = {np.abs(V[v]):.4f} p.u., ∠ = {np.angle(V[v], deg=True):.2f}°")
+                self.fault_voltage_label.setText(v_label)
+
     def double_line_fault_button_e(self):
-        pass
+        # check button, uncheck others
+        self.set_checked_fault_button(self.double_line_fault_button)
+
+
+        # call fault method to solve balanced fault
+        V, I = self.fault.calc_double_line_to_ground(self.fault_bus_name, self.fault_v)
+
+        # print
+        v_label = "Fault Voltages:"
+        i_label = "Fault Current:"
+        for i, phase in enumerate(['A', 'B', 'C']):
+            i_label += (f"\n Phase {phase}: I = {np.real(I[i]): .4f} p.u.")
+            self.fault_current_label.setText(i_label)
+
+        for bus in self.circuit.buses:
+            for v, phase in enumerate(['A', 'B', 'C']):
+                v_label += (
+                    f"\n{bus} Phase {phase}: |V| = {np.abs(V[v]):.4f} p.u., ∠ = {np.angle(V[v], deg=True):.2f}°")
+                self.fault_voltage_label.setText(v_label)
+
     def set_checked_fault_button(self, button):
         # ensures that only the clicked button is active
         button.setChecked(True)
@@ -601,7 +646,7 @@ class MainWindow(QMainWindow):
         load3 = Load("load3", bus5, -100, -65, current_settings)
         self.circuit.add_load(load3)
 
-        # update all the things
+        # update all the things on the test circuit tab
         bus_details = ["Buses:"]
         for bus in self.circuit.buses.values():
             details = f"Name: {bus.name}, Base: {bus.base_kv}, Type: {bus.bus_type}, V_pu: {bus.v_pu}, Delta: {bus.delta}"
@@ -637,4 +682,10 @@ class MainWindow(QMainWindow):
         load_label = "\n".join(load_details)
         self.test_loads_label.setText(load_label)
 
+        # should also update on add components tab
+        self.update_circuit_elements("bus")
+        self.update_circuit_elements("load")
+        self.update_circuit_elements("trans")
+        self.update_circuit_elements("gen")
+        self.update_circuit_elements("line")
 
