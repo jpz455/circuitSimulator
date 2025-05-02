@@ -402,30 +402,18 @@ class MainWindow(QMainWindow):
     def solve_button_e(self):
         # check button
         self.solve_button.setChecked(True)
-        print(self.circuit.buses.keys())
-        print(self.circuit.transformers.keys())
-        print(self.circuit.generators.keys())
-        print(self.circuit.loads.keys())
-        print(self.circuit.transmission_lines.keys())
-
 
         # solve circuit
         # set up solution
+
         self.solution = Solution(self.circuit)
+        self.solution.calc_jacobian()
         self.solution.calc_known_power()
         self.solution.calc_mismatch()
-        jacob = self.solution.calc_jacobian()
+        self.solution.calc_solutionRef()
+        self.solution.calc_solution()
 
-        # solve and save voltages
-        # try:
-        #     voltage_matrix = self.solution.calc_solution()
-        # except Exception as e:
-        #     self.errorLabel.setText(e)
-        #     voltage_matrix = None
 
-        #print voltages to label
-        v_label = ("Solution found\nVpu        Angle(degrees)\n", jacob)
-        self.solution_voltage_label.setText(v_label)
 
         # uncheck button
         self.solve_button.setChecked(False)
