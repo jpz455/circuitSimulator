@@ -449,7 +449,17 @@ class MainWindow(QMainWindow):
         self.fault = Fault(self.circuit)
 
         # call fault method to solve balanced fault
-        self.fault.calc_3_phase_bal(self.fault_bus_name, self.fault_v)
+        V, I = self.fault.calc_3_phase_bal(self.fault_bus_name, self.fault_v)
+        self.fault.print_fault_voltages()
+        label_i = "Fault Current Magnitude:\n" + str(round(np.real(I), 5))
+
+        label_v = "Fault Voltages:"
+
+        for index, v in enumerate(V):
+            label_v += "\n" + "Bus " + str(index) +"        " + str(np.round(np.real(v), 5))
+
+        self.fault_voltage_label.setText(label_v)
+        self.fault_current_label.setText(label_i)
 
         # uncheck
         self.uncheck_button(self.balanced_fault_button)
@@ -464,14 +474,21 @@ class MainWindow(QMainWindow):
         # call fault method to solve balanced fault
         V, I = self.fault.calc_line_to_line(self.fault_bus_name, self.fault_v)
 
+        # print
+        v_label = "Fault Voltages:"
+        i_label = "Fault Current:"
+        for i, phase in enumerate(['A', 'B', 'C']):
+            i_label += (f"\n Phase {phase}: I = {np.real(I[i]): .4f} p.u.")
+            self.fault_current_label.setText(i_label)
+
         for bus in self.circuit.buses:
             for v, phase in enumerate(['A', 'B', 'C']):
-                str = (f"{bus} Phase {phase}: |V| = {np.abs(V[v]):.4f} p.u., ∠ = {np.angle(V[v], deg=True):.2f}°")
-                self.fault_voltage_label.setText(str)
-
+                v_label += (f"\n{bus} Phase {phase}: |V| = {np.abs(V[v]):.4f} p.u., ∠ = {np.angle(V[v], deg=True):.2f}°")
+                self.fault_voltage_label.setText(v_label)
 
         # uncheck
         self.uncheck_button(self.balanced_fault_button)
+
     def single_line_fault_button_e(self):
         pass
     def double_line_fault_button_e(self):
