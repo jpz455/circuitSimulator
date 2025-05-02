@@ -50,8 +50,8 @@ class MainWindow(QMainWindow):
         name = QtWidgets.QInputDialog.getText(self, 'Name', 'Enter bus name: ')
         base = QtWidgets.QInputDialog.getInt(self, 'Base Voltage', 'Enter bus voltage base (kV): ')
         type = QtWidgets.QInputDialog.getText(self, 'Type', 'Enter bus type: ')
-        v = QtWidgets.QInputDialog.getDouble(self, 'Voltage', 'Enter bus voltage (pu): ')
-        delta = QtWidgets.QInputDialog.getDouble(self, 'Delta', 'Enter bus delta (deg): ')
+        v = QtWidgets.QInputDialog.getDouble(self, 'Voltage', 'Enter bus voltage (pu): ', decimals = 5)
+        delta = QtWidgets.QInputDialog.getDouble(self, 'Delta', 'Enter bus delta (deg): ', decimals = 5)
         bus = Bus(name[0], base[0], type[0], v[0], delta[0])
 
         # add bus to circuit
@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
         name = QtWidgets.QInputDialog.getText(self, 'Name', 'Enter transmission line name: ')
         bus1_name = QtWidgets.QInputDialog.getText(self, 'Bus 1', 'Enter bus 1 name: ')
         bus2_name = QtWidgets.QInputDialog.getText(self, 'Bus 2', 'Enter bus 2 name: ')
-        length = QtWidgets.QInputDialog.getDouble(self, 'Length', 'Enter transmission line length (mi): ')
+        length = QtWidgets.QInputDialog.getDouble(self, 'Length', 'Enter transmission line length (mi): ', decimals = 5)
 
         # get bus from circuit
         bus1 = self.circuit.buses[bus1_name[0]]
@@ -96,16 +96,16 @@ class MainWindow(QMainWindow):
     def trans_button_e(self):
 
         # uncheck all other buttons, check this one
-        self.set_checked_component_buttons(self.line_button)
+        self.set_checked_component_buttons(self.trans_button)
 
         name = QtWidgets.QInputDialog.getText(self, 'Name', 'Enter transformer name: ')
         bus1_name = QtWidgets.QInputDialog.getText(self, 'Bus 1', 'Enter bus 1 name: ')
         bus2_name = QtWidgets.QInputDialog.getText(self, 'Bus 2', 'Enter bus 2 name: ')
-        power_rating = QtWidgets.QInputDialog.getDouble(self, 'Length', 'Enter power rating (MW): ')
-        z_per = QtWidgets.QInputDialog.getDouble(self, 'Impedance Percent', 'Enter impedance percentage: ')
-        x_over_r = QtWidgets.QInputDialog.getDouble(self, 'X over R Ratio', 'Enter x over r ratio: ')
+        power_rating = QtWidgets.QInputDialog.getDouble(self, 'Length', 'Enter power rating (MW): ', decimals = 5)
+        z_per = QtWidgets.QInputDialog.getDouble(self, 'Impedance Percent', 'Enter impedance percentage: ', decimals = 5)
+        x_over_r = QtWidgets.QInputDialog.getDouble(self, 'X over R Ratio', 'Enter x over r ratio: ', decimals = 5)
         connection = QtWidgets.QInputDialog.getText(self, 'Connection', 'Enter connection type: ')
-        ground = QtWidgets.QInputDialog.getDouble(self, 'Grounding Reactance', 'Enter grounding reactance: ')
+        ground = QtWidgets.QInputDialog.getDouble(self, 'Grounding Reactance', 'Enter grounding reactance: ', decimals = 5)
 
         # get bus from circuit
         bus1 = self.circuit.buses[bus1_name[0]]
@@ -127,12 +127,12 @@ class MainWindow(QMainWindow):
         # get inputs
         name = QtWidgets.QInputDialog.getText(self, 'Name', 'Enter generator name: ')
         bus_name = QtWidgets.QInputDialog.getText(self, 'Bus 1', 'Enter bus name: ')
-        v_set = QtWidgets.QInputDialog.getDouble(self, 'Voltage Set Point', 'Enter voltage set point (kV): ')
-        mw_set = QtWidgets.QInputDialog.getDouble(self, 'Power Set Point', 'Enter power set point (MW): ')
-        x1 = QtWidgets.QInputDialog.getDouble(self, 'X1', 'Enter X1: ')
-        x2 = QtWidgets.QInputDialog.getDouble(self, 'X2', 'Enter X2: ')
-        x3 = QtWidgets.QInputDialog.getDouble(self, 'X3', 'Enter X3: ')
-        ground_x = QtWidgets.QInputDialog.getDouble(self, 'Grounding X', 'Enter grounding reactance: ')
+        v_set = QtWidgets.QInputDialog.getDouble(self, 'Voltage Set Point', 'Enter voltage set point (kV): ', decimals = 5)
+        mw_set = QtWidgets.QInputDialog.getDouble(self, 'Power Set Point', 'Enter power set point (MW): ', decimals = 5)
+        x1 = QtWidgets.QInputDialog.getDouble(self, 'X1', 'Enter X1: ', decimals = 5)
+        x2 = QtWidgets.QInputDialog.getDouble(self, 'X2', 'Enter X2: ', decimals = 5)
+        x3 = QtWidgets.QInputDialog.getDouble(self, 'X3', 'Enter X3: ', decimals = 5)
+        ground_x = QtWidgets.QInputDialog.getDouble(self, 'Grounding X', 'Enter grounding reactance: ', decimals = 5)
         ground_bool = QtWidgets.QInputDialog.getText(self, 'Grounded', 'Enter t if grounded, f if false : ')
 
         #set grounded or not
@@ -165,8 +165,8 @@ class MainWindow(QMainWindow):
         # get inputs
         name = QtWidgets.QInputDialog.getText(self, 'Name', 'Enter load name: ')
         bus_name = QtWidgets.QInputDialog.getText(self, 'Bus 1', 'Enter bus name: ')
-        q = QtWidgets.QInputDialog.getDouble(self, 'Reactive Power', 'Enter reactive power (MVAR): ')
-        p = QtWidgets.QInputDialog.getDouble(self, 'Real Power', 'Enter real power (MW): ')
+        q = QtWidgets.QInputDialog.getDouble(self, 'Reactive Power', 'Enter reactive power (MVAR): ', decimals = 5)
+        p = QtWidgets.QInputDialog.getDouble(self, 'Real Power', 'Enter real power (MW): ', decimals = 5)
 
         # get bus
         bus = self.circuit.buses[bus_name[0]]
@@ -184,10 +184,10 @@ class MainWindow(QMainWindow):
     def setup_lines(self):
         # get basic inputs for lines
         #conductor
-        d = QtWidgets.QInputDialog.getDouble(self, 'Diameter', 'Enter conductor diameter: ')
-        GMR = QtWidgets.QInputDialog.getDouble(self, 'GMR', 'Enter conductor GMR: ')
-        r = QtWidgets.QInputDialog.getDouble(self, 'Resistance', 'Enter conductor resistance: ')
-        amp = QtWidgets.QInputDialog.getDouble(self, 'Amperage', 'Enter conductor amperage: ')
+        d = QtWidgets.QInputDialog.getDouble(self, 'Diameter', 'Enter conductor diameter: ', decimals = 5)
+        GMR = QtWidgets.QInputDialog.getDouble(self, 'GMR', 'Enter conductor GMR: ', decimals = 5)
+        r = QtWidgets.QInputDialog.getDouble(self, 'Resistance', 'Enter conductor resistance: ', decimals = 5)
+        amp = QtWidgets.QInputDialog.getDouble(self, 'Amperage', 'Enter conductor amperage: ', decimals = 5)
         self.conductor = Conductor('conductor', d[0], GMR[0], r[0], amp[0])
 
         # get bundle
@@ -196,12 +196,12 @@ class MainWindow(QMainWindow):
         self.bundle = Bundle('bundle', num[0], spacing[0], self.conductor)
 
         # get geometry
-        xa = QtWidgets.QInputDialog.getDouble(self, 'XA', 'Enter phase A x position: ')
-        xb = QtWidgets.QInputDialog.getDouble(self, 'XB', 'Enter phase B x position: ')
-        xc = QtWidgets.QInputDialog.getDouble(self, 'XC', 'Enter phase C x position: ')
-        ya = QtWidgets.QInputDialog.getDouble(self, 'YA', 'Enter phase A y position: ')
-        yb = QtWidgets.QInputDialog.getDouble(self, 'YB', 'Enter phase B y position: ')
-        yc = QtWidgets.QInputDialog.getDouble(self, 'YC', 'Enter phase C y position: ')
+        xa = QtWidgets.QInputDialog.getDouble(self, 'XA', 'Enter phase A x position: ', decimals = 5)
+        xb = QtWidgets.QInputDialog.getDouble(self, 'XB', 'Enter phase B x position: ', decimals = 5)
+        xc = QtWidgets.QInputDialog.getDouble(self, 'XC', 'Enter phase C x position: ', decimals = 5)
+        ya = QtWidgets.QInputDialog.getDouble(self, 'YA', 'Enter phase A y position: ', decimals = 5)
+        yb = QtWidgets.QInputDialog.getDouble(self, 'YB', 'Enter phase B y position: ', decimals = 5)
+        yc = QtWidgets.QInputDialog.getDouble(self, 'YC', 'Enter phase C y position: ', decimals = 5)
 
         #set setup bool as true
         self.line_setup_done = True
@@ -387,7 +387,7 @@ class MainWindow(QMainWindow):
 
     def solve_button_e(self):
         # check button
-        #self.solve_button.setChecked(True)
+        self.solve_button.setChecked(True)
 
         # solve circuit
         # set up solution
@@ -399,6 +399,7 @@ class MainWindow(QMainWindow):
             voltage_matrix = self.solution.calc_solution()
         except Exception as e:
             self.errorLabel.setText(e)
+            voltage_matrix = None
 
         #print voltages to label
         v_label = ("Solution found\nVpu        Angle(degrees)\n", voltage_matrix)
