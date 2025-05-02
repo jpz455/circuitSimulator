@@ -1,7 +1,7 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QMenu, QLabel, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QMenu, QLabel, QVBoxLayout, QWidget, QTabWidget
 from numpy.ma.core import power
 
 from GUI import GUI
@@ -20,69 +20,21 @@ from Settings import Settings, current_settings
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        title = QLabel("Circuit")
-        font = title.font()
-        font.setPointSize(30)
-        title.setFont(font)
-        title.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
-        self.setCentralWidget(title)
         self.setWindowTitle("Circuit Simulator")
 
-        #buttons
-        self.bus_button = QPushButton("Add Bus")
-        self.line_button =QPushButton("Add Line")
-        self.trans_button = QPushButton("Add Transformer")
-        self.gen_button = QPushButton("Add Generator")
-        self.load_button = QPushButton("Load")
+        #create tab widget
+        self.tabs = QTabWidget()
+        self.setCentralWidget(self.tabs)
+        self.create_add_components_tab()
+        self.create_solve_circuit_tab()
+        self.create_solve_faults_tab()
 
-        #labels
-        self.bus_label = QLabel("Buses")
-        self.line_label = QLabel("Transmission Lines")
-        self.trans_label = QLabel("Transformers")
-        self.gen_label = QLabel("Generators")
-        self.load_label = QLabel("Loads")
-
-        #lists
-        self.buttons = [self.bus_button, self.line_button, self.trans_button, self.gen_button, self.load_button]
-        self.labels = [self.bus_label, self.line_label, self.trans_label, self.gen_label, self.load_label]
-
-        #layout, add to layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.bus_button)
-        layout.addWidget(self.line_button)
-        layout.addWidget(self.trans_button)
-        layout.addWidget(self.gen_button)
-        layout.addWidget(self.load_button)
-        layout.addWidget(self.bus_label)
-        layout.addWidget(self.line_label)
-        layout.addWidget(self.trans_label)
-        layout.addWidget(self.gen_label)
-        layout.addWidget(self.load_label)
-
-        container = QWidget()
-        container.setLayout(layout)
-
-        #set up buttons
-        #set checkable
-        for button in self.buttons:
-            button.setCheckable(True)
-
-        #connect signals
-        self.bus_button.clicked.connect(self.bus_button_e)
-        self.line_button.clicked.connect(self.line_button_e)
-        self.trans_button.clicked.connect(self.trans_button_e)
-        self.gen_button.clicked.connect(self.gen_button_e)
-        self.load_button.clicked.connect(self.load_button_e)
-
-        #basic setup
-        self.setCentralWidget(container)
-
-        #initialize circuit
+        # initialize circuit
         self.circuit = Circuit("circuit", current_settings)
         self.conductor: Conductor
         self.bundle: Bundle
         self.geometry: Geometry
-        self.line_setup_done: bool = False #tracks if line setup is initialized
+        self.line_setup_done: bool = False  # tracks if line setup is initialized
 
     def bus_button_e(self):
 
@@ -205,7 +157,7 @@ class MainWindow(QMainWindow):
         self.set_checked_buttons(self.load_button)
 
         # get inputs
-        name = QtWidgets.QInputDialog.getText(self, 'Name', 'Enter generator name: ')
+        name = QtWidgets.QInputDialog.getText(self, 'Name', 'Enter load name: ')
         bus_name = QtWidgets.QInputDialog.getText(self, 'Bus 1', 'Enter bus name: ')
         q = QtWidgets.QInputDialog.getDouble(self, 'Reactive Power', 'Enter reactive power (MVAR): ')
         p = QtWidgets.QInputDialog.getDouble(self, 'Real Power', 'Enter real power (MW): ')
@@ -244,6 +196,9 @@ class MainWindow(QMainWindow):
         ya = QtWidgets.QInputDialog.getDouble(self, 'YA', 'Enter phase A y position: ')
         yb = QtWidgets.QInputDialog.getDouble(self, 'YB', 'Enter phase B y position: ')
         yc = QtWidgets.QInputDialog.getDouble(self, 'YC', 'Enter phase C y position: ')
+
+        #set setup bool as true
+        self.line_setup_done = True
 
         # create geometry
         self.geometry = Geometry("geometry", xa[0], ya[0], xb[0], yb[0], xc[0], yc[0])
@@ -311,3 +266,92 @@ class MainWindow(QMainWindow):
                 load_details.append(details)
             load_label = "\n".join(load_details)
             self.load_label.setText(load_label)
+
+    def create_add_components_tab(self):
+        add_components_tab = QWidget()
+        layout = QVBoxLayout()
+
+        # buttons
+        self.bus_button = QPushButton("Add Bus")
+        self.line_button = QPushButton("Add Line")
+        self.trans_button = QPushButton("Add Transformer")
+        self.gen_button = QPushButton("Add Generator")
+        self.load_button = QPushButton("Add Load")
+
+        # labels
+        self.bus_label = QLabel("Buses")
+        self.line_label = QLabel("Transmission Lines")
+        self.trans_label = QLabel("Transformers")
+        self.gen_label = QLabel("Generators")
+        self.load_label = QLabel("Loads")
+
+        # lists
+        self.buttons = [self.bus_button, self.line_button, self.trans_button, self.gen_button, self.load_button]
+        self.labels = [self.bus_label, self.line_label, self.trans_label, self.gen_label, self.load_label]
+
+        #add to layout
+        layout.addWidget(self.bus_button)
+        layout.addWidget(self.line_button)
+        layout.addWidget(self.trans_button)
+        layout.addWidget(self.gen_button)
+        layout.addWidget(self.load_button)
+        layout.addWidget(self.bus_label)
+        layout.addWidget(self.line_label)
+        layout.addWidget(self.trans_label)
+        layout.addWidget(self.gen_label)
+        layout.addWidget(self.load_label)
+
+        # set up buttons
+        # set checkable
+        for button in self.buttons:
+            button.setCheckable(True)
+
+        # connect signals
+        self.bus_button.clicked.connect(self.bus_button_e)
+        self.line_button.clicked.connect(self.line_button_e)
+        self.trans_button.clicked.connect(self.trans_button_e)
+        self.gen_button.clicked.connect(self.gen_button_e)
+        self.load_button.clicked.connect(self.load_button_e)
+
+        add_components_tab.setLayout(layout)
+        self.tabs.addTab(add_components_tab, "Add Components")
+
+    def create_solve_circuit_tab(self):
+        solve_circuit_tab = QWidget()
+        layout = QVBoxLayout()
+
+        solve_button = QPushButton("Solve Power Flow")
+        solution_current_label = QLabel("Solution Current")
+        solution_voltage_label = QLabel("Solution Voltage")
+
+        layout.addWidget(solve_button)
+        layout.addWidget(solution_current_label)
+        layout.addWidget(solution_voltage_label)
+
+        solve_circuit_tab.setLayout(layout)
+        self.tabs.addTab(solve_circuit_tab, "Solve Power Flow")
+
+    def create_solve_faults_tab(self):
+        fault_study_tab = QWidget()
+        layout = QVBoxLayout()
+
+        fault_bus_button = QPushButton("Fault Bus")
+        balanced_fault_button = QPushButton("3 Phase Balanced Fault")
+        line_to_line_fault_button = QPushButton("Line Fault")
+        single_line_fault_button = QPushButton("Single Line to Ground Fault")
+        double_line_fault_button = QPushButton("Double Line to Ground Fault")
+
+        fault_current_label = QLabel("Fault Current")
+        fault_voltage_label = QLabel("Fault Voltage")
+
+        layout.addWidget(fault_bus_button)
+        layout.addWidget(balanced_fault_button)
+        layout.addWidget(line_to_line_fault_button)
+        layout.addWidget(single_line_fault_button)
+        layout.addWidget(double_line_fault_button)
+        layout.addWidget(fault_current_label)
+        layout.addWidget(fault_voltage_label)
+
+        fault_study_tab.setLayout(layout)
+        self.tabs.addTab(fault_study_tab, "Fault Study")
+
