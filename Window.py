@@ -337,8 +337,7 @@ class MainWindow(QMainWindow):
         # button
         self.solve_button = QPushButton("Solve Power Flow")
 
-        # labels
-        self.solution_current_label = QLabel("Solution Current")
+        # label
         self.solution_voltage_label = QLabel("Solution Voltage")
 
 
@@ -348,7 +347,6 @@ class MainWindow(QMainWindow):
 
         # add to layout
         layout.addWidget(self.solve_button)
-        layout.addWidget(self.solution_current_label)
         layout.addWidget(self.solution_voltage_label)
 
         # add layout to tab
@@ -404,16 +402,28 @@ class MainWindow(QMainWindow):
         self.solve_button.setChecked(True)
 
         # solve circuit
-        # set up solution
+        self.circuit.calc_y_bus_no_gen()
+        self.circuit.calc_y_bus_zero()
+        self.circuit.calc_y_bus_positive()
+        self.circuit.calc_y_bus_negative()
 
         self.solution = Solution(self.circuit)
         self.solution.calc_jacobian()
         self.solution.calc_known_power()
         self.solution.calc_mismatch()
         self.solution.calc_solutionRef()
-        self.solution.calc_solution()
 
+        # calculate
+        solved_v = self.solution.calc_solution()
 
+        # load labels
+        label_v = ("Solution Voltages:\n"
+                   "Voltage (pu)                Angle(deg)")
+
+        for v in solved_v:
+            label_v += "\n" + str(np.round(v[0], 4)) + "                        " + str(np.round(v[1], 4))
+
+        self.solution_voltage_label.setText(label_v)
 
         # uncheck button
         self.solve_button.setChecked(False)
