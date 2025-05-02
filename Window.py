@@ -449,16 +449,7 @@ class MainWindow(QMainWindow):
         self.fault = Fault(self.circuit)
 
         # call fault method to solve balanced fault
-        V, I = self.fault.calc_3_phase_bal(self.fault_bus_name, self.fault_v)
-
-        # populate labels
-        fault_i_out = "Fault Current Magnitude: ", round(np.real(I), 5)
-        fault_v_out = ""
-
-        for i, v in enumerate(V):
-            fault_v_out += f"Bus {i + 1} voltage magnitude: {v}\n"
-
-        self.fault_voltage_label.setText(str)
+        self.fault.calc_3_phase_bal(self.fault_bus_name, self.fault_v)
 
         # uncheck
         self.uncheck_button(self.balanced_fault_button)
@@ -476,8 +467,8 @@ class MainWindow(QMainWindow):
         for bus in self.circuit.buses:
             for v, phase in enumerate(['A', 'B', 'C']):
                 str = (f"{bus} Phase {phase}: |V| = {np.abs(V[v]):.4f} p.u., ∠ = {np.angle(V[v], deg=True):.2f}°")
+                self.fault_voltage_label.setText(str)
 
-        self.fault_voltage_label.setText(str)
 
         # uncheck
         self.uncheck_button(self.balanced_fault_button)
