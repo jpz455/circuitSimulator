@@ -98,9 +98,11 @@ class Fault:
             # returns in zero,pos,neg
             Vk = self.calc_fault_voltages(Vf=fault_v, Z0=Z0, Z1=Z1, Z2=Z2, I0=I_zero_0, I1=I_pos_1, I2=I_neg_2)
             # Convert sequence voltages to phase voltages
-            Vabc = self.sequence_to_phase(Vk)
+            self.Vabc_single = self.sequence_to_phase(Vk)
             for i, phase in enumerate(['A', 'B', 'C']):
-                print(f"{bus} Phase {phase}: |V| = {np.abs(Vabc[i]):.4f} p.u., ∠ = {np.angle(Vabc[i], deg=True):.2f}°")
+                print(f"{bus} Phase {phase}: |V| = {np.abs(self.Vabc_single[i]):.4f} p.u., ∠ = {np.angle(self.Vabc_single[i], deg=True):.2f}°")
+
+        return self.Vabc_single, I_sltg
 
     def calc_fault_voltages(self, Vf, Z0, Z1, Z2, I0, I1, I2):
         # Assemble impedance and current vectors
@@ -148,9 +150,11 @@ class Fault:
             # returns in zero,pos,neg
             Vk = self.calc_fault_voltages(Vf=fault_v, Z0=Z0, Z1=Z1, Z2=Z2, I0=I_zero_0, I1=I_pos_1, I2=I_neg_2)
             # Convert sequence voltages to phase voltages
-            Vabc = self.sequence_to_phase(Vk)
+            self.Vabc_line = self.sequence_to_phase(Vk)
             for i, phase in enumerate(['A', 'B', 'C']):
-                print(f"{bus} Phase {phase}: |V| = {np.abs(Vabc[i]):.4f} p.u., ∠ = {np.angle(Vabc[i], deg=True):.2f}°")
+                print(f"{bus} Phase {phase}: |V| = {np.abs(self.Vabc_line[i]):.4f} p.u., ∠ = {np.angle(self.Vabc_line[i], deg=True):.2f}°")
+
+        return self.Vabc_line, Ik
 
     def calc_double_line_to_ground(self, fault_bus: str, fault_v: float = 1.0, Zf=0):
         fault_loc = self.circuit.buses[fault_bus].index - 1  # zero-based index
@@ -181,10 +185,10 @@ class Fault:
             # returns in zero,pos,neg
             Vk = self.calc_fault_voltages(Vf=fault_v, Z0=Z0, Z1=Z1, Z2=Z2, I0=I_zero_0, I1=I_pos_1, I2=I_neg_2)
             # Convert sequence voltages to phase voltages
-            Vabc = self.sequence_to_phase(Vk)
+            self.Vabc_double = self.sequence_to_phase(Vk)
             for i, phase in enumerate(['A', 'B', 'C']):
-                print(f"{bus} Phase {phase}: |V| = {np.abs(Vabc[i]):.4f} p.u., ∠ = {np.angle(Vabc[i], deg=True):.2f}°")
-
+                print(f"{bus} Phase {phase}: |V| = {np.abs(self.Vabc_double[i]):.4f} p.u., ∠ = {np.angle(self.Vabc_double[i], deg=True):.2f}°")
+        return self.Vabc_double, Ik
 
 
 
