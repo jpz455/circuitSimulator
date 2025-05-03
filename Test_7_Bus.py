@@ -1,21 +1,18 @@
-from Bundle import Bundle
-from Bus import Bus
-from Test_7_Bus import transformer1
-from Transformer import Transformer
-from Geometry import Geometry
-from Conductor import Conductor
-from TransmissionLine import TransmissionLine
-from Settings import Settings
-from Circuit import Circuit
+from Bundle import Bundle as Bundle
+from Conductor import Conductor as Conductor
+from Bus import Bus as Bus
+from Geometry import Geometry as Geometry
+from Settings import current_settings
+from TransmissionLine import TransmissionLine as TransmissionLine
+from Fault import Fault
+from Solution import Solution
 from Load import Load
 from Generator import Generator
-from Solution import Solution
-
-# ****************** Initialization settings for system *************************
-settings = Settings()
+from Transformer import Transformer
+from Circuit import Circuit as Circuit
 
 # ****************** Create circuit object **************************************
-circuit = Circuit("Power Flow Test Circuit", settings)
+circuit = Circuit("Test Circuit", current_settings)
 
 # ******************System bus initialization************************************
 bus1= Bus("bus1", 20, "slack")
@@ -36,8 +33,8 @@ circuit.add_bus(bus7)
 
 # ****************** Transformer Initialization *************************
 
-T1=Transformer("T1", bus1, bus2, 125, 8.5, 10)
-T2=Transformer("T2", bus6, bus7, 200, 10.5, 12)
+T1=Transformer("T1", bus1, bus2, 125, 8.5, 10,'delta-y',1)
+T2=Transformer("T2", bus6, bus7, 200, 10.5, 12,'delta-y',0)
 
 circuit.add_transformer(T1)
 circuit.add_transformer(T2)
@@ -67,20 +64,40 @@ circuit.add_transmission_line(tLine5)
 circuit.add_transmission_line(tLine6)
 
 # ****************** Load Initialization *************************
-load3 = Load("load3",bus3,-110,-50,settings)
+load3 = Load("load3",bus3,-110,-50, current_settings)
 circuit.add_load(load3)
-load4 = Load("load4",bus4,-100,-70,settings)
+load4 = Load("load4",bus4,-100,-70, current_settings)
 circuit.add_load(load4)
-load5 = Load("load5",bus5,-100,-65,settings)
+load5 = Load("load5",bus5,-100,-65, current_settings)
 circuit.add_load(load5)
 
 # ****************** Generator Initialization *************************
-gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,0,settings)
+gen1 = Generator("Gen 1",bus1,0,100, .12,.14,.05,0,True, current_settings)
 circuit.add_generator(gen1)
-gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,0,settings)
+gen2 = Generator("Gen 2",bus7,0,200, .12,.14,.05,.01,True, current_settings)
 circuit.add_generator(gen2)
 
-# ****************** Test Y_Bus Negative ***************************
-circuit.calc_y_bus_positive()
-circuit.print_y_bus(1)
+#****************** Solution Object Initialization *************************
+solution = Solution(circuit)
+
+#****************** Single Bus Fault Study *******************************
+fault = Fault(circuit)
+voltages, current = fault.calc_3_phase_bal("bus3")
+print()
+fault.print_fault_voltages()
+print()
+#****************** Power Flow ****************************************
+solution.calc_jacobian()
+solution.calc_known_power()
+solution.calc_mismatch()
+solution.calc_solutionRef()
+solution.calc_solution()
+#**************** Unbalanced Faults **********************************
+print("Line to Line fault")
+fault.calc_line_to_line("bus5",1, 0)
+print("Double line to ground fault")
+fault.calc_double_line_to_ground("bus5",1, 0)
+print()
+fault.calc_single_line_to_ground("bus5",1, 0)
+
 

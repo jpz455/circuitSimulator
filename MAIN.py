@@ -3,7 +3,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from Window import MainWindow
 
-# Main function: opens window required to run the PyQt5 UI
+# Main function: opens GUI window
 app = QApplication(sys.argv)
 window = MainWindow()
 window.show()

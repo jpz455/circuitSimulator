@@ -6,8 +6,8 @@ class Jacobian:
 
     def __init__(self, circuit: Circuit):
         self.circuit = circuit
-        self.slackI: int
-        self.pvI: int
+        self.slackI: int = -1
+        self.pvI: int = -1
         self.j_matrix: np.array
         self.j_df: pd.DataFrame
         self.size = circuit.buses.__len__() #number of buses in system
@@ -41,7 +41,8 @@ class Jacobian:
             [j3, j4]
         ]])
 
-        self.j_matrix = self.j_matrix.reshape(11,11)
+        if len(self.circuit.buses) == 7:
+            self.j_matrix = self.j_matrix.reshape(11,11)
         return self.j_matrix
 
     def calc_j1(self):
@@ -124,10 +125,11 @@ class Jacobian:
         j2 = np.delete(j2, self.slackI, axis=1)
 
         # Remove PV bus column
-        if self.slackI>self.pvI:
-            j2 = np.delete(j2, self.pvI, axis=1)
-        else:
-            j2 = np.delete(j2, self.pvI - 1, axis=1)
+        if self.pvI is not None:
+            if self.slackI>self.pvI:
+                j2 = np.delete(j2, self.pvI, axis=1)
+            else:
+                j2 = np.delete(j2, self.pvI - 1, axis=1)
 
         return j2
 

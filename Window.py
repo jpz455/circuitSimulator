@@ -2,8 +2,6 @@ from PyQt5 import QtWidgets
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QTabWidget
 import numpy as np
-
-from GUI import GUI
 from Bus import Bus
 from Generator import Generator
 from Geometry import Geometry
